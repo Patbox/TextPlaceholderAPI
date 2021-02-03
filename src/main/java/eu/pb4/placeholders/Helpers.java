@@ -51,7 +51,7 @@ class Helpers {
                 out = new LiteralText(string.substring(previousStart, start));
                 out.setStyle(text.getStyle());
             } else {
-                out.append(new LiteralText(string.substring(previousEnd, start)));
+                out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
             }
 
             PlaceholderResult result = player != null

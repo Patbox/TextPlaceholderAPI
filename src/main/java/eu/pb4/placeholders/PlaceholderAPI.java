@@ -48,7 +48,6 @@ public class PlaceholderAPI implements ModInitializer {
 
 	@Override
 	public void onInitialize() {
-		Commands.register();
 		ServerPlaceholders.register();
 		PlayerPlaceholders.register();
 	}
