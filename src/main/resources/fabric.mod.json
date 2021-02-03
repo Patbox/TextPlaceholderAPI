@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "placeholder-api",
+  "version": "${version}",
+
+  "name": "Fabric Placeholder API",
+  "description": "Simple api that allows mods to create and use universal placeholders!",
+  "authors": [
+    "Patbox"
+  ],
+  "contact": {
+    "homepage": "https://pb4.eu",
+    "sources": "https://github.com/Patbox/FabricPlaceholderApi"
+  },
+
+  "license": "MIT",
+  "icon": "icon.png",
+
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "eu.pb4.placeholders.PlaceholderAPI"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.7.4",
+    "minecraft": "*"
+  }
+}
