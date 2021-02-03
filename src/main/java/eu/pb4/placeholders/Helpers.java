@@ -75,7 +75,7 @@ class Helpers {
         }
 
         for(Text text1 : text.getSiblings()) {
-            out.append(recursivePlaceholderParsing(text1, object));
+            out.append(recursivePlaceholderParsing(text1, object)).setStyle(text.getStyle());
         }
         return out;
     }
