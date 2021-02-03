@@ -61,7 +61,7 @@ class Helpers {
             if (result.isValid()) {
                 out.append(result.getText());
             } else {
-                out.append(new LiteralText(matcher.group(0)));
+                out.append(new LiteralText(matcher.group(0)).setStyle(text.getStyle()));
             }
 
             previousStart = start;
@@ -71,7 +71,7 @@ class Helpers {
         if (out == null) {
             out = text.copy();
         } else {
-            out.append(new LiteralText(string.substring(previousEnd)));
+            out.append(new LiteralText(string.substring(previousEnd)).setStyle(text.getStyle()));
         }
 
         for(Text text1 : text.getSiblings()) {
