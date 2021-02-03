@@ -1,5 +1,7 @@
 package eu.pb4.placeholders;
 
+import eu.pb4.placeholders.buildin.PlayerPlaceholders;
+import eu.pb4.placeholders.buildin.ServerPlaceholders;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -47,6 +49,7 @@ public class PlaceholderAPI implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		Commands.register();
-		BuildInPlaceholders.register();
+		ServerPlaceholders.register();
+		PlayerPlaceholders.register();
 	}
 }
