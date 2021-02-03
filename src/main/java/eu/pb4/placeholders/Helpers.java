@@ -32,11 +32,10 @@ class Helpers {
         String string = text.asString();
         Matcher matcher = PlaceholderAPI.PLACEHOLDER_PATTERN.matcher(string);
 
-        MutableText out = null;
+        MutableText out = new LiteralText("").setStyle(text.getStyle());
         int start;
         int end;
 
-        int previousStart = 0;
         int previousEnd = 0;
 
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
@@ -47,12 +46,7 @@ class Helpers {
             start = matcher.start();
             end = matcher.end();
 
-            if (out == null) {
-                out = new LiteralText(string.substring(previousStart, start));
-                out.setStyle(text.getStyle());
-            } else {
-                out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
-            }
+            out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
 
             PlaceholderResult result = player != null
                     ? PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, player))
@@ -61,21 +55,16 @@ class Helpers {
             if (result.isValid()) {
                 out.append(result.getText());
             } else {
-                out.append(new LiteralText(matcher.group(0)).setStyle(text.getStyle()));
+                out.append(new LiteralText(matcher.group(0)));
             }
 
-            previousStart = start;
             previousEnd = end;
         }
 
-        if (out == null) {
-            out = text.copy();
-        } else {
-            out.append(new LiteralText(string.substring(previousEnd)).setStyle(text.getStyle()));
-        }
+        out.append(new LiteralText(string.substring(previousEnd)));
 
         for(Text text1 : text.getSiblings()) {
-            out.append(recursivePlaceholderParsing(text1, object)).setStyle(text.getStyle());
+            out.append(recursivePlaceholderParsing(text1, object));
         }
         return out;
     }
