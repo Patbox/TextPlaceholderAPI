@@ -14,15 +14,32 @@ public class ServerPlaceholders {
 
         PlaceholderAPI.register(new Identifier("server", "tps"), (ctx) -> {
             float tps = 1000/Math.max(ctx.getServer().getTickTime(), 50);
-            String format = ctx.hasArgument() ? "%.1f" : "%." + ctx.getArgument() + "f";
+            String format = "%.1f";
+
+            if (ctx.hasArgument()) {
+                try {
+                    int x = Integer.getInteger(ctx.getArgument());
+                    format = "%." + x + "f";
+                } catch (Exception e) {
+
+                }
+            }
 
             return PlaceholderResult.value(String.format(format, tps));
         });
 
         PlaceholderAPI.register(new Identifier("server", "tps_colored"), (ctx) -> {
             float tps = 1000/Math.max(ctx.getServer().getTickTime(), 50);
-            String format = ctx.hasArgument() ? "%.1f" : "%." + ctx.getArgument() + "f";
+            String format = "%.1f";
 
+            if (ctx.hasArgument()) {
+                try {
+                    int x = Integer.getInteger(ctx.getArgument());
+                    format = "%." + x + "f";
+                } catch (Exception e) {
+
+                }
+            }
             return PlaceholderResult.value(new LiteralText(String.format(format, tps)).formatted(tps > 19 ? Formatting.GREEN : tps > 16 ? Formatting.GOLD : Formatting.RED));
         });
 
