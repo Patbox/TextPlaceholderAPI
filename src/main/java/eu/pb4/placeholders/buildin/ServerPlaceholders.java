@@ -30,7 +30,7 @@ public class ServerPlaceholders {
 
         PlaceholderAPI.register(new Identifier("server", "mspt_colored"), (ctx) -> {
             float x = ctx.getServer().getTickTime();
-            return PlaceholderResult.value(new LiteralText(String.valueOf(x)).formatted(x < 45 ? Formatting.GREEN : x > 50 ? Formatting.GOLD : Formatting.RED));
+            return PlaceholderResult.value(new LiteralText(String.valueOf(x)).formatted(x < 45 ? Formatting.GREEN : x < 51 ? Formatting.GOLD : Formatting.RED));
         });
 
 
