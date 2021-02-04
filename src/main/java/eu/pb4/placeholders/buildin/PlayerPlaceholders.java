@@ -66,7 +66,7 @@ public class PlayerPlaceholders {
                 int x = ctx.getPlayer().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_ONE_MINUTE));
                 return PlaceholderResult.value(ctx.hasArgument()
                         ? DurationFormatUtils.formatDuration((long) x * 50, ctx.getArgument(), true)
-                        : Helpers.durationToString((long) x * 50)
+                        : Helpers.durationToString((long) x / 20)
                         );
             } else {
                 return PlaceholderResult.invalid("No player!");
