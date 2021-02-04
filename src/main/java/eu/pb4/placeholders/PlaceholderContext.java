@@ -8,13 +8,20 @@ import org.jetbrains.annotations.NotNull;
 public final class PlaceholderContext {
     private final Identifier identifier;
     private final String argument;
+    private final boolean argumentExist;
     private final ServerPlayerEntity player;
     private final MinecraftServer server;
     private final boolean valid;
 
     private PlaceholderContext(Identifier identifier, String argument, ServerPlayerEntity player, MinecraftServer server, boolean valid) {
         this.identifier = identifier;
-        this.argument = argument;
+        if (argument == null) {
+            this.argument = "";
+            this.argumentExist = false;
+        } else {
+            this.argument = argument;
+            this.argumentExist = true;
+        }
         this.player = player;
         this.server = server;
         this.valid = valid;
@@ -40,6 +47,8 @@ public final class PlaceholderContext {
         return this.argument;
     }
 
+    public boolean hasArgument() { return this.argumentExist; }
+
     public boolean isValid() {
         return this.valid;
     }
@@ -51,13 +60,13 @@ public final class PlaceholderContext {
         Identifier identifier = Identifier.tryParse(args[0]);
 
         if (identifier == null) {
-            return new PlaceholderContext(null, "", player, player.server, false);
+            return new PlaceholderContext(null, null, player, player.server, false);
         } else {
-            return new PlaceholderContext(identifier, args.length == 1 ? "" : args[1], player, player.server, true);
+            return new PlaceholderContext(identifier, args.length == 1 ? null : args[1], player, player.server, true);
         }
     }
 
-    public static PlaceholderContext create(@NotNull Identifier identifier, @NotNull String argument, @NotNull ServerPlayerEntity player) {
+    public static PlaceholderContext create(@NotNull Identifier identifier, String argument, @NotNull ServerPlayerEntity player) {
         return new PlaceholderContext(identifier, argument, player, player.server, true);
     }
 
@@ -67,13 +76,13 @@ public final class PlaceholderContext {
         Identifier identifier = Identifier.tryParse(args[0]);
 
         if (identifier == null) {
-            return new PlaceholderContext(null, "", null, server, false);
+            return new PlaceholderContext(null, null, null, server, false);
         } else {
-            return new PlaceholderContext(identifier, args.length == 1 ? "" : args[1], null, server, true);
+            return new PlaceholderContext(identifier, args.length == 1 ? null : args[1], null, server, true);
         }
     }
 
     public static PlaceholderContext create(@NotNull Identifier identifier, String argument, @NotNull MinecraftServer server) {
-        return new PlaceholderContext(identifier, argument == null ? "" : argument, null, server, true);
+        return new PlaceholderContext(identifier, argument, null, server, true);
     }
 }

@@ -2,6 +2,8 @@
 It's a small, jij-able API that allows creation and parsing placeholders within strings and Minecraft Text Components.
 Placeholders use simple format of `%modid:type%` or `%modid:type/data%`.
 
+For list of currently available placeholders, check [wiki](https://github.com/Patbox/FabricPlaceholderAPI/wiki).
+
 ## Usage:
 You need to add jitpack to your repositories and `com.github.Patbox:FabricPlaceholderAPI:[TAG]` as your dependencies
 
