@@ -60,13 +60,13 @@ public class ServerPlaceholders {
         PlaceholderAPI.register(new Identifier("server", "name"), (ctx) -> PlaceholderResult.value(ctx.getServer().getName()));
 
         PlaceholderAPI.register(new Identifier("server", "used_ram"), (ctx) -> PlaceholderResult.value(ctx.getArgument().equals("gb")
-                    ? String.format("%.1f", (float) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1073741824)
-                    : String.format("%d", (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1048576 ))
+                    ? String.format("%.1f", (float) (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory()) / 1073741824)
+                    : String.format("%d", (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory()) / 1048576 ))
         );
 
         PlaceholderAPI.register(new Identifier("server", "max_ram"), (ctx) -> PlaceholderResult.value(ctx.getArgument().equals("gb")
-                ? String.format("%.1f", (float) Runtime.getRuntime().totalMemory() / 1073741824)
-                : String.format("%d", Runtime.getRuntime().totalMemory() / 1048576 ))
+                ? String.format("%.1f", (float) Runtime.getRuntime().maxMemory() / 1073741824)
+                : String.format("%d", Runtime.getRuntime().maxMemory() / 1048576 ))
         );
 
         PlaceholderAPI.register(new Identifier("server", "online"), (ctx) -> PlaceholderResult.value(String.valueOf(ctx.getServer().getPlayerManager().getCurrentPlayerCount())));
