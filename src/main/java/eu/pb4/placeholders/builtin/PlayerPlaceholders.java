@@ -1,4 +1,4 @@
-package eu.pb4.placeholders.buildin;
+package eu.pb4.placeholders.builtin;
 
 import eu.pb4.placeholders.Helpers;
 import eu.pb4.placeholders.PlaceholderAPI;
@@ -76,10 +76,10 @@ public class PlayerPlaceholders {
         PlaceholderAPI.register(new Identifier("player", "statistic"), (ctx) -> {
             if (ctx.playerExist()) {
                 Identifier identifier = Identifier.tryParse(ctx.getArgument());
-                if (identifier == null || ctx.hasArgument()) {
-                    return PlaceholderResult.invalid("Invalid statistic!");
+                if (identifier != null && ctx.hasArgument()) {
+                    return PlaceholderResult.value(String.valueOf(ctx.getPlayer().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(identifier))));
                 }
-                return PlaceholderResult.value(String.valueOf(ctx.getPlayer().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(identifier))));
+                return PlaceholderResult.invalid("Invalid statistic!");
             } else {
                 return PlaceholderResult.invalid("No player!");
             }

@@ -1,4 +1,4 @@
-package eu.pb4.placeholders.buildin;
+package eu.pb4.placeholders.builtin;
 
 import eu.pb4.placeholders.PlaceholderAPI;
 import eu.pb4.placeholders.PlaceholderResult;
@@ -21,7 +21,7 @@ public class ServerPlaceholders {
                     int x = Integer.getInteger(ctx.getArgument());
                     format = "%." + x + "f";
                 } catch (Exception e) {
-
+                    format = "%.1f";
                 }
             }
 
@@ -37,7 +37,7 @@ public class ServerPlaceholders {
                     int x = Integer.getInteger(ctx.getArgument());
                     format = "%." + x + "f";
                 } catch (Exception e) {
-
+                    format = "%.1f";
                 }
             }
             return PlaceholderResult.value(new LiteralText(String.format(format, tps)).formatted(tps > 19 ? Formatting.GREEN : tps > 16 ? Formatting.GOLD : Formatting.RED));

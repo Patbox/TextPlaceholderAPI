@@ -1,7 +1,7 @@
 package eu.pb4.placeholders;
 
-import eu.pb4.placeholders.buildin.PlayerPlaceholders;
-import eu.pb4.placeholders.buildin.ServerPlaceholders;
+import eu.pb4.placeholders.builtin.PlayerPlaceholders;
+import eu.pb4.placeholders.builtin.ServerPlaceholders;
 import net.fabricmc.api.ModInitializer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 
 public class PlaceholderAPI implements ModInitializer {
 	public static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("[%]([^%]+:[^%]+)[%]");
+	public static final Pattern ALT_PLACEHOLDER_PATTERN = Pattern.compile("[{]([^{}]+:[^{}]+)[}]");
 
 	private static final HashMap<Identifier, PlaceholderHandler> PLACEHOLDERS = new HashMap<>();
 
@@ -26,20 +27,36 @@ public class PlaceholderAPI implements ModInitializer {
 	}
 
 	public static String parseString(String text, ServerPlayerEntity player) {
-		return Helpers.parseString(text, player);
+		return Helpers.parseString(text, player, PLACEHOLDER_PATTERN);
 	}
 
 	public static String parseString(String text, MinecraftServer server) {
-		return Helpers.parseString(text, server);
+		return Helpers.parseString(text, server, PLACEHOLDER_PATTERN);
 
 	}
 
 	public static Text parseText(Text text, ServerPlayerEntity player) {
-		return Helpers.recursivePlaceholderParsing(text, player);
+		return Helpers.recursivePlaceholderParsing(text, player, PLACEHOLDER_PATTERN);
 	}
 
 	public static Text parseText(Text text, MinecraftServer server) {
-		return Helpers.recursivePlaceholderParsing(text, server);
+		return Helpers.recursivePlaceholderParsing(text, server, ALT_PLACEHOLDER_PATTERN);
+	}
+
+	public static String parseStringAlt(String text, ServerPlayerEntity player) {
+		return Helpers.parseString(text, player, ALT_PLACEHOLDER_PATTERN);
+	}
+
+	public static String parseStringAlt(String text, MinecraftServer server) {
+		return Helpers.parseString(text, server, ALT_PLACEHOLDER_PATTERN);
+	}
+
+	public static Text parseTextAlt(Text text, ServerPlayerEntity player) {
+		return Helpers.recursivePlaceholderParsing(text, player, ALT_PLACEHOLDER_PATTERN);
+	}
+
+	public static Text parseTextAlt(Text text, MinecraftServer server) {
+		return Helpers.recursivePlaceholderParsing(text, server, ALT_PLACEHOLDER_PATTERN);
 	}
 
 	public static void register(Identifier identifier, PlaceholderHandler handler) {

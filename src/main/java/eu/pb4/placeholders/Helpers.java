@@ -6,9 +6,9 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Helpers {
     public static String textToString(Text text) {
@@ -48,9 +48,9 @@ public class Helpers {
         }
     }
 
-    protected static Text recursivePlaceholderParsing(Text text, Object object) {
+    protected static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern) {
         String string = text.asString();
-        Matcher matcher = PlaceholderAPI.PLACEHOLDER_PATTERN.matcher(string);
+        Matcher matcher = pattern.matcher(string);
 
         MutableText out = new LiteralText("").setStyle(text.getStyle());
         int start;
@@ -84,13 +84,13 @@ public class Helpers {
         out.append(new LiteralText(string.substring(previousEnd)));
 
         for(Text text1 : text.getSiblings()) {
-            out.append(recursivePlaceholderParsing(text1, object));
+            out.append(recursivePlaceholderParsing(text1, object, pattern));
         }
         return out;
     }
 
-    public static String parseString(String text, Object object) {
-        Matcher matcher = PlaceholderAPI.PLACEHOLDER_PATTERN.matcher(text);
+    public static String parseString(String text, Object object, Pattern pattern) {
+        Matcher matcher = pattern.matcher(text);
         StringBuffer out = new StringBuffer(text.length());
 
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
