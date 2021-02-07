@@ -32,7 +32,6 @@ public class PlaceholderAPI implements ModInitializer {
 
 	public static String parseString(String text, MinecraftServer server) {
 		return Helpers.parseString(text, server, PLACEHOLDER_PATTERN);
-
 	}
 
 	public static Text parseText(Text text, ServerPlayerEntity player) {
@@ -40,7 +39,7 @@ public class PlaceholderAPI implements ModInitializer {
 	}
 
 	public static Text parseText(Text text, MinecraftServer server) {
-		return Helpers.recursivePlaceholderParsing(text, server, ALT_PLACEHOLDER_PATTERN);
+		return Helpers.recursivePlaceholderParsing(text, server, PLACEHOLDER_PATTERN);
 	}
 
 	public static String parseStringAlt(String text, ServerPlayerEntity player) {

@@ -5,7 +5,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,43 +51,61 @@ public class Helpers {
     }
 
     protected static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern) {
-        String string = text.asString();
-        Matcher matcher = pattern.matcher(string);
-
-        MutableText out = new LiteralText("").setStyle(text.getStyle());
-        int start;
-        int end;
-
-        int previousEnd = 0;
+        MutableText out;
 
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
         MinecraftServer server = !(object instanceof ServerPlayerEntity) ? (MinecraftServer) object : player.server;
 
-        while (matcher.find()) {
-            String placeholder = matcher.group(1);
-            start = matcher.start();
-            end = matcher.end();
+        if (text instanceof TranslatableText) {
+            TranslatableText translatableText = (TranslatableText) text;
+            ArrayList<Object> list = new ArrayList<>();
 
-            out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
-
-            PlaceholderResult result = player != null
-                    ? PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, player))
-                    : PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, server));
-
-            if (result.isValid()) {
-                out.append(result.getText());
-            } else {
-                out.append(new LiteralText(matcher.group(0)));
+            for(Object arg : translatableText.getArgs()) {
+                if (arg instanceof Text) {
+                    list.add(recursivePlaceholderParsing((Text) arg, object, pattern));
+                } else {
+                    list.add(arg);
+                }
             }
 
-            previousEnd = end;
-        }
+            out = new TranslatableText(translatableText.getKey(), list.toArray());
+        } else {
+            String string = text.asString();
+            Matcher matcher = pattern.matcher(string);
+            int start;
+            int end;
 
-        out.append(new LiteralText(string.substring(previousEnd)));
+            int previousEnd = 0;
+
+            out = new LiteralText("").setStyle(text.getStyle());
+
+            while (matcher.find()) {
+                String placeholder = matcher.group(1);
+                start = matcher.start();
+                end = matcher.end();
+
+                out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
+
+                PlaceholderResult result = player != null
+                        ? PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, player))
+                        : PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, server));
+
+                if (result.isValid()) {
+                    out.append(result.getText());
+                } else {
+                    out.append(new LiteralText(matcher.group(0)));
+                }
+
+                previousEnd = end;
+            }
+
+            out.append(new LiteralText(string.substring(previousEnd)));
+        }
 
         for(Text text1 : text.getSiblings()) {
             out.append(recursivePlaceholderParsing(text1, object, pattern));
         }
+
         return out;
     }
 
