@@ -6,6 +6,9 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -59,15 +62,23 @@ public class ServerPlaceholders {
         PlaceholderAPI.register(new Identifier("server", "version"), (ctx) -> PlaceholderResult.value(ctx.getServer().getVersion()));
         PlaceholderAPI.register(new Identifier("server", "name"), (ctx) -> PlaceholderResult.value(ctx.getServer().getName()));
 
-        PlaceholderAPI.register(new Identifier("server", "used_ram"), (ctx) -> PlaceholderResult.value(ctx.getArgument().equals("gb")
-                    ? String.format("%.1f", (float) (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory()) / 1073741824)
-                    : String.format("%d", (Runtime.getRuntime().maxMemory() - Runtime.getRuntime().freeMemory()) / 1048576 ))
-        );
+        PlaceholderAPI.register(new Identifier("server", "used_ram"), (ctx) -> {
+            MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+            MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
 
-        PlaceholderAPI.register(new Identifier("server", "max_ram"), (ctx) -> PlaceholderResult.value(ctx.getArgument().equals("gb")
-                ? String.format("%.1f", (float) Runtime.getRuntime().maxMemory() / 1073741824)
-                : String.format("%d", Runtime.getRuntime().maxMemory() / 1048576 ))
-        );
+            return PlaceholderResult.value(ctx.getArgument().equals("gb")
+                    ? String.format("%.1f", (float) heapUsage.getUsed() / 1073741824)
+                    : String.format("%d", heapUsage.getUsed() / 1048576));
+            });
+
+        PlaceholderAPI.register(new Identifier("server", "max_ram"), (ctx) -> {
+                    MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+                    MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
+
+                    return PlaceholderResult.value(ctx.getArgument().equals("gb")
+                            ? String.format("%.1f", (float) heapUsage.getMax() / 1073741824)
+                            : String.format("%d", heapUsage.getMax() / 1048576));
+                });
 
         PlaceholderAPI.register(new Identifier("server", "online"), (ctx) -> PlaceholderResult.value(String.valueOf(ctx.getServer().getPlayerManager().getCurrentPlayerCount())));
         PlaceholderAPI.register(new Identifier("server", "max_players"), (ctx) -> PlaceholderResult.value(String.valueOf(ctx.getServer().getPlayerManager().getMaxPlayerCount())));

@@ -19,30 +19,65 @@ public final class PlaceholderResult {
         this.string = Helpers.textToString(this.text);
     }
 
+    /**
+     * Returns text component from placeholder
+     *
+     * @return Text
+     */
     public Text getText() {
         return this.text;
     }
 
+    /**
+     * Returns text component as String (without formatting) from placeholder
+     *
+     * @return String
+     */
     public String getString() {
         return this.string;
     }
 
+    /**
+     * Checks if placeholder was valid
+     *
+     * @return boolean
+     */
     public boolean isValid() {
         return this.valid;
     }
 
+    /**
+     * Create result for invalid placeholder
+     *
+     * @return PlaceholderResult
+     */
     public static PlaceholderResult invalid(String reason) {
         return new PlaceholderResult(null, reason);
     }
 
+    /**
+     * Create result for invalid placeholder
+     *
+     * @return PlaceholderResult
+     */
     public static PlaceholderResult invalid() {
         return new PlaceholderResult(null, null);
     }
 
+    /**
+     * Create result for placeholder with formatting
+     *
+     * @return PlaceholderResult
+     */
     public static PlaceholderResult value(Text text) {
         return new PlaceholderResult(text, null);
     }
 
+    /**
+     * Create result for placeholder
+     *
+     * @return PlaceholderResult
+     */
     public static PlaceholderResult value(String text) {
         return new PlaceholderResult(new LiteralText(text), null);
     }

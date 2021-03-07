@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "eu.pb4.placeholders.PlaceholderAPI"
+      "eu.pb4.placeholders.PlaceholderAPIMod"
     ]
   },
   "depends": {

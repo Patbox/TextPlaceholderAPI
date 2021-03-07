@@ -6,9 +6,11 @@ import net.minecraft.text.LiteralText;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
+import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -50,7 +52,7 @@ public class Helpers {
         }
     }
 
-    protected static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern) {
+    protected static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
         MutableText out;
 
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
@@ -62,7 +64,7 @@ public class Helpers {
 
             for(Object arg : translatableText.getArgs()) {
                 if (arg instanceof Text) {
-                    list.add(recursivePlaceholderParsing((Text) arg, object, pattern));
+                    list.add(recursivePlaceholderParsing((Text) arg, object, pattern, placeholders));
                 } else {
                     list.add(arg);
                 }
@@ -80,15 +82,15 @@ public class Helpers {
             out = new LiteralText("").setStyle(text.getStyle());
 
             while (matcher.find()) {
-                String placeholder = matcher.group(1);
+                String placeholder = matcher.group("id");
                 start = matcher.start();
                 end = matcher.end();
 
                 out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
 
                 PlaceholderResult result = player != null
-                        ? PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, player))
-                        : PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, server));
+                        ? parsePlaceholderFromMap(PlaceholderContext.create(placeholder, player), placeholders)
+                        : parsePlaceholderFromMap(PlaceholderContext.create(placeholder, server), placeholders);
 
                 if (result.isValid()) {
                     out.append(result.getText());
@@ -103,13 +105,13 @@ public class Helpers {
         }
 
         for(Text text1 : text.getSiblings()) {
-            out.append(recursivePlaceholderParsing(text1, object, pattern));
+            out.append(recursivePlaceholderParsing(text1, object, pattern, placeholders));
         }
 
         return out;
     }
 
-    public static String parseString(String text, Object object, Pattern pattern) {
+    protected static String parseString(String text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
         Matcher matcher = pattern.matcher(text);
         StringBuffer out = new StringBuffer(text.length());
 
@@ -118,9 +120,9 @@ public class Helpers {
 
         while (matcher.find()) {
             String placeholder = matcher.group(1);
-            PlaceholderResult result =player != null
-                    ? PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, player))
-                    : PlaceholderAPI.parsePlaceholder(PlaceholderContext.create(placeholder, server));
+            PlaceholderResult result = player != null
+                    ? parsePlaceholderFromMap(PlaceholderContext.create(placeholder, player), placeholders)
+                    : parsePlaceholderFromMap(PlaceholderContext.create(placeholder, server), placeholders);
 
             if (result.isValid()) {
                 matcher.appendReplacement(out, Matcher.quoteReplacement(result.getString()));
@@ -130,5 +132,13 @@ public class Helpers {
         matcher.appendTail(out);
 
         return out.toString();
+    }
+
+    private static PlaceholderResult parsePlaceholderFromMap(PlaceholderContext context, Map<Identifier, PlaceholderHandler> placeholders) {
+        if (placeholders.containsKey(context.getIdentifier())) {
+            return placeholders.get(context.getIdentifier()).PlaceholderHandler(context);
+        } else {
+            return PlaceholderResult.invalid("Placeholder doesn't exist!");
+        }
     }
 }
