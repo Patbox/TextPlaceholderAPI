@@ -5,15 +5,15 @@ Placeholders use simple format of `%modid:type%` or `%modid:type/data%`.
 For list of currently available placeholders, check [wiki](https://github.com/Patbox/FabricPlaceholderAPI/wiki).
 
 ## Usage:
-You need to add jitpack to your repositories and `com.github.Patbox:FabricPlaceholderAPI:[TAG]` as your dependencies
+Add it to your dependencies like this:
 
 ```
 repositories {
-	maven { url 'https://jitpack.io' }
+	maven { url 'https://maven.nucleoid.xyz' }
 }
 
 dependencies {
-	modImplementation include("com.github.Patbox:FabricPlaceholderAPI:[TAG]").
+	modImplementation include("eu.pb4.placeholder-api:[TAG]").
 }
 ```
 ## Creating placeholders:

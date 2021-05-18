@@ -50,6 +50,7 @@ java {
 	// If you remove this line, sources will not be generated.
 	withSourcesJar()
 }
+def env = System.getenv()
 
 // configure the maven publication
 publishing {
@@ -68,6 +69,16 @@ publishing {
 	// Select the repositories you want to publish to
 	// To publish to maven local, no extra repositories are necessary. Just use the task `publishToMavenLocal`.
 	repositories {
-		// See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
+		if (env.MAVEN_URL) {
+			maven {
+				credentials {
+					username env.MAVEN_USERNAME
+					password env.MAVEN_PASSWORD
+				}
+				url env.MAVEN_URL
+			}
+		} else {
+			mavenLocal()
+		}
 	}
 }
