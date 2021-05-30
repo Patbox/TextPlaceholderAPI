@@ -1,8 +1,9 @@
 package eu.pb4.placeholders.builtin;
 
-import eu.pb4.placeholders.Helpers;
 import eu.pb4.placeholders.PlaceholderAPI;
 import eu.pb4.placeholders.PlaceholderResult;
+import eu.pb4.placeholders.util.GeneralUtils;
+import eu.pb4.placeholders.util.PlaceholderUtils;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
@@ -22,7 +23,7 @@ public class PlayerPlaceholders {
 
         PlaceholderAPI.register(new Identifier("player", "name_unformatted"), (ctx) -> {
             if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(Helpers.textToString(ctx.getPlayer().getName()));
+                return PlaceholderResult.value(GeneralUtils.textToString(ctx.getPlayer().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -55,7 +56,7 @@ public class PlayerPlaceholders {
 
         PlaceholderAPI.register(new Identifier("player", "displayname_unformatted"), (ctx) -> {
             if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(Helpers.textToString(ctx.getPlayer().getDisplayName()));
+                return PlaceholderResult.value(GeneralUtils.textToString(ctx.getPlayer().getDisplayName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -63,10 +64,10 @@ public class PlayerPlaceholders {
 
         PlaceholderAPI.register(new Identifier("player", "playtime"), (ctx) -> {
             if (ctx.hasPlayer()) {
-                int x = ctx.getPlayer().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_ONE_MINUTE));
+                int x = ctx.getPlayer().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME));
                 return PlaceholderResult.value(ctx.hasArgument()
                         ? DurationFormatUtils.formatDuration((long) x * 50, ctx.getArgument(), true)
-                        : Helpers.durationToString((long) x / 20)
+                        : GeneralUtils.durationToString((long) x / 20)
                         );
             } else {
                 return PlaceholderResult.invalid("No player!");

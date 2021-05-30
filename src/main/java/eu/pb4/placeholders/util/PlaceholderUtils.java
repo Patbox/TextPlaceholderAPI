@@ -1,5 +1,8 @@
-package eu.pb4.placeholders;
+package eu.pb4.placeholders.util;
 
+import eu.pb4.placeholders.PlaceholderContext;
+import eu.pb4.placeholders.PlaceholderHandler;
+import eu.pb4.placeholders.PlaceholderResult;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.LiteralText;
@@ -14,45 +17,9 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Helpers {
-    public static String textToString(Text text) {
-        StringBuffer string = new StringBuffer(text.asString());
-        recursiveParsing(string, text.getSiblings());
-        return string.toString();
-    }
+public class PlaceholderUtils {
 
-    public static String durationToString(long x) {
-        long seconds = x % 60;
-        long minutes = (x / 60) % 60;
-        long hours = (x / (60 * 60)) % 24;
-        long days = x / (60 * 60 * 24);
-
-        if (days > 0) {
-            return String.format("%dd%dh%dm%ds", days, hours, minutes, seconds);
-        } else if (hours > 0) {
-            return String.format("%dh%dm%ds", hours, minutes, seconds);
-        } else if (minutes > 0) {
-            return String.format("%dm%ds", minutes, seconds);
-        } else if (seconds > 0) {
-            return String.format("%ds", seconds);
-        } else {
-            return "---";
-        }
-    }
-
-
-    private static void recursiveParsing(StringBuffer string, List<Text> textList) {
-        for (Text text : textList) {
-            string.append(text.asString());
-
-            List<Text> siblings = text.getSiblings();
-            if (siblings.size() != 0) {
-                recursiveParsing(string, siblings);
-            }
-        }
-    }
-
-    protected static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
+    public static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
         MutableText out;
 
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
@@ -111,7 +78,8 @@ public class Helpers {
         return out;
     }
 
-    protected static String parseString(String text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
+    @Deprecated
+    public static String parseString(String text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
         Matcher matcher = pattern.matcher(text);
         StringBuffer out = new StringBuffer(text.length());
 

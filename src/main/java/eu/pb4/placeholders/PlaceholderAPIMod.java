@@ -2,6 +2,7 @@ package eu.pb4.placeholders;
 
 import eu.pb4.placeholders.builtin.PlayerPlaceholders;
 import eu.pb4.placeholders.builtin.ServerPlaceholders;
+import eu.pb4.placeholders.util.TextParserUtils;
 import net.fabricmc.api.ModInitializer;
 
 public class PlaceholderAPIMod implements ModInitializer {
@@ -9,5 +10,6 @@ public class PlaceholderAPIMod implements ModInitializer {
     public void onInitialize() {
         ServerPlaceholders.register();
         PlayerPlaceholders.register();
+        TextParserUtils.register();
     }
 }
