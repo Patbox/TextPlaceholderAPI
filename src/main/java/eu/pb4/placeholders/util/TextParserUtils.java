@@ -5,6 +5,7 @@ import eu.pb4.placeholders.TextParser;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.*;
 import java.util.regex.Matcher;
@@ -84,9 +85,8 @@ public class TextParserUtils {
             String end = "</" + tag + ">";
 
             TextParser.TextFormatterHandler handler = handlers.get(tag);
-            currentPos = matcher.end();
-
             if (handler != null) {
+                currentPos = matcher.end();
                 try {
                     int toIgnore = handler.parse(tag, data, text, input.substring(currentPos), handlers, end);
                     currentPos += toIgnore;
@@ -137,11 +137,16 @@ public class TextParserUtils {
             });
         }
 
-        TextParser.register("color", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-            MutableText out = new LiteralText("").fillStyle(Style.EMPTY.withColor(TextColor.parse(cleanArgument(data))));
-            text.append(out);
-            return recursiveParsing(out, input, handlers, endAt);
-        });
+        {
+            TextParser.TextFormatterHandler color = (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+                MutableText out = new LiteralText("").fillStyle(Style.EMPTY.withColor(TextColor.parse(cleanArgument(data))));
+                text.append(out);
+                return recursiveParsing(out, input, handlers, endAt);
+            };
+
+            TextParser.register("color", color);
+            TextParser.register("c", color);
+        }
 
         TextParser.register("font", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
             MutableText out = new LiteralText("").fillStyle(Style.EMPTY.withFont(Identifier.tryParse(cleanArgument(data))));
@@ -209,88 +214,122 @@ public class TextParserUtils {
             return recursiveParsing(out, input, handlers, endAt);
         });
 
-        TextParser.register("rainbow", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-            MutableText out = new LiteralText("");
-            String[] val = data.split(":");
-            float freq = 1;
-            float saturation = 1;
-            float offset = 0;
+        {
+            TextParser.TextFormatterHandler rainbow = (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+                MutableText out = new LiteralText("");
+                String[] val = data.split(":");
+                float freq = 1;
+                float saturation = 1;
+                float offset = 0;
 
-            if (val.length >= 1) {
-                try {
-                    freq = Float.parseFloat(val[0]);
-                } catch (Exception e) {
+                if (val.length >= 1) {
+                    try {
+                        freq = Float.parseFloat(val[0]);
+                    } catch (Exception e) {
+                    }
                 }
-            }
-            if (val.length >= 2) {
-                try {
-                    saturation = Float.parseFloat(val[1]);
-                } catch (Exception e) {
+                if (val.length >= 2) {
+                    try {
+                        saturation = Float.parseFloat(val[1]);
+                    } catch (Exception e) {
+                    }
                 }
-            }
-            if (val.length >= 3) {
-                try {
-                    offset = Float.parseFloat(val[2]);
-                } catch (Exception e) {
+                if (val.length >= 3) {
+                    try {
+                        offset = Float.parseFloat(val[2]);
+                    } catch (Exception e) {
+                    }
                 }
-            }
 
-            int toIgnore = recursiveParsing(out, input, handlers, endAt);
-            String flatString = GeneralUtils.textToString(out);
+                int toIgnore = recursiveParsing(out, input, handlers, endAt);
+                String flatString = GeneralUtils.textToString(out);
 
-            final float finalFreq = freq;
-            final float finalOffset = offset;
-            final float finalSaturation = saturation;
+                final float finalFreq = freq;
+                final float finalOffset = offset;
+                final float finalSaturation = saturation;
 
-            text.append(GeneralUtils.toGradient(out, (pos) -> TextColor.fromRgb(GeneralUtils.hvsToRgb(((pos * finalFreq) / (flatString.length() + 1) + finalOffset) % 1, finalSaturation, 1))));
+                text.append(GeneralUtils.toGradient(out, (pos) -> TextColor.fromRgb(GeneralUtils.hvsToRgb(((pos * finalFreq) / (flatString.length() + 1) + finalOffset) % 1, finalSaturation, 1))));
 
-            return toIgnore;
-        });
+                return toIgnore;
+            };
 
-        TextParser.register("gradient", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-            MutableText out = new LiteralText("");
-            String[] val = data.split(":");
+            TextParser.register("rainbow", rainbow);
+            TextParser.register("rb", rainbow);
+        }
 
-            int toIgnore = recursiveParsing(out, input, handlers, endAt);
-            String flatString = GeneralUtils.textToString(out);
-            List<TextColor> textColors = new ArrayList<>();
-            for (String string : val) {
-                TextColor color = TextColor.parse(string);
-                if (color != null) {
-                    textColors.add(color);
+        {
+            TextParser.TextFormatterHandler gradient = (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+                MutableText out = new LiteralText("");
+                String[] val = data.split(":");
+
+                int toIgnore = recursiveParsing(out, input, handlers, endAt);
+                String flatString = GeneralUtils.textToString(out);
+                List<TextColor> textColors = new ArrayList<>();
+                for (String string : val) {
+                    TextColor color = TextColor.parse(string);
+                    if (color != null) {
+                        textColors.add(color);
+                    }
                 }
-            }
-
-            final double step = ((double) textColors.size() - 1) / flatString.length();
-            final int sectionSize = (textColors.size() - 1) / (flatString.length() + 1);
-
-            GeneralUtils.HSV hsv = GeneralUtils.rgbToHsv(textColors.get(0).getRgb());
-            AtomicDouble hue = new AtomicDouble(hsv.h());
-            AtomicDouble saturation = new AtomicDouble(hsv.s());
-            AtomicDouble value = new AtomicDouble(hsv.v());
-
-            text.append(GeneralUtils.toGradient(out, (pos) -> {
-                GeneralUtils.HSV colorA = GeneralUtils.rgbToHsv(textColors.get(pos * sectionSize).getRgb());
-                GeneralUtils.HSV colorB = GeneralUtils.rgbToHsv(textColors.get(pos * sectionSize + 1).getRgb());
-                float sym = Math.abs(colorB.h() - colorA.h()) > Math.abs(colorA.h() - colorB.h()) ? -1 : 1;
-                float h = colorB.h() - colorA.h();
-                float delta = (h + ((Math.abs(h) > 0.5) ? ((h < 0) ? 1 : -1) : 0));
-
-                float localHue = (float) hue.get();
-                float futureHue = (float) (localHue + delta * step);
-                if (futureHue < 0) {
-                    futureHue += 1;
+                if (textColors.size() == 0) {
+                    textColors.add(TextColor.fromFormatting(Formatting.WHITE));
+                    textColors.add(TextColor.fromFormatting(Formatting.WHITE));
+                } else if (textColors.size() == 1) {
+                    textColors.add(textColors.get(0));
                 }
-                hue.set(futureHue);
 
-                return TextColor.fromRgb(GeneralUtils.hvsToRgb(
-                        localHue,
-                        (float) saturation.getAndAdd((colorB.s() - colorA.s()) * step),
-                        (float) value.getAndAdd((colorB.v() - colorA.v()) * step)));
-            }));
+                final double step = ((double) textColors.size() - 1) / flatString.length();
+                final float sectionSize = ((float) textColors.size() - 1) / (flatString.length() + 1);
 
-            return toIgnore;
-        });
+                GeneralUtils.HSV hsv = GeneralUtils.rgbToHsv(textColors.get(0).getRgb());
+                AtomicDouble hue = new AtomicDouble(hsv.h());
+                AtomicDouble saturation = new AtomicDouble(hsv.s());
+                AtomicDouble value = new AtomicDouble(hsv.v());
+
+                text.append(GeneralUtils.toGradient(out, (pos) -> {
+                    GeneralUtils.HSV colorA = GeneralUtils.rgbToHsv(textColors.get((int) (pos * sectionSize)).getRgb());
+                    GeneralUtils.HSV colorB = GeneralUtils.rgbToHsv(textColors.get((int) (pos * sectionSize) + 1).getRgb());
+
+                    float localHue = (float) hue.get();
+                    {
+                        float h = colorB.h() - colorA.h();
+                        float delta = (h + ((Math.abs(h) > 0.50001) ? ((h < 0) ? 1 : -1) : 0));
+
+                        float futureHue = (float) (localHue + delta * step);
+                        if (futureHue < 0) {
+                            futureHue += 1;
+                        } else if (futureHue > 1) {
+                            futureHue -= 1;
+                        }
+                        hue.set(futureHue);
+                    }
+
+                    float localSat = (float) saturation.get();
+                    {
+                        float s = colorB.s() - colorA.s();
+                        float futureSat = MathHelper.clamp((float) (localSat + s * step), 0, 1);
+                        saturation.set(futureSat);
+                    }
+
+                    float localVal = (float) value.get();
+                    {
+                        float v = colorB.v() - colorA.v();
+                        float futureVal = MathHelper.clamp((float) (localVal + v * step), 0, 1);
+                        value.set(futureVal);
+                    }
+
+                    return TextColor.fromRgb(GeneralUtils.hvsToRgb(
+                            localHue,
+                            localSat,
+                            localVal));
+                }));
+
+                return toIgnore;
+            };
+
+            TextParser.register("gradient", gradient);
+            TextParser.register("gr", gradient);
+        }
 
         ESCAPED_CHARS.put("\\\\", "&slsh;");
         ESCAPED_CHARS.put("\\<", "&lt;");

@@ -1,5 +1,6 @@
 package eu.pb4.placeholders;
 
+import com.google.common.collect.ImmutableMap;
 import eu.pb4.placeholders.util.TextParserUtils;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -25,6 +26,13 @@ public final class TextParser {
      */
     public static void register(String identifier, TextFormatterHandler handler) {
         TAGS.put(identifier, handler);
+    }
+
+    /**
+     * Returns map of registered tags
+     */
+    public static ImmutableMap<String, TextFormatterHandler> getRegisteredTags() {
+        return ImmutableMap.copyOf(TAGS);
     }
 
     @FunctionalInterface
