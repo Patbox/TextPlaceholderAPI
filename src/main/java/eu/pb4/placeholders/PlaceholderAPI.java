@@ -17,6 +17,8 @@ public final class PlaceholderAPI {
 	public static final Pattern PLACEHOLDER_PATTERN_CUSTOM = Pattern.compile("[%](?<id>[^%]+)[%]");
 	public static final Pattern ALT_PLACEHOLDER_PATTERN_CUSTOM = Pattern.compile("[{](?<id>[^{}]+)[}]");
 
+	public static final Pattern PREDEFINED_PLACEHOLDER_PATTERN = Pattern.compile("\\$[{](?<id>[^}]+)}");
+
 	private static final HashMap<Identifier, PlaceholderHandler> PLACEHOLDERS = new HashMap<>();
 
 	/**
@@ -92,6 +94,16 @@ public final class PlaceholderAPI {
 		return PlaceholderUtils.recursivePlaceholderParsing(text, server, pattern, placeholders);
 	}
 
+	/**
+	 * Parses predefined placeholders for player
+	 * Placeholders can use any format
+	 * Pattern requires a \<id\> group
+	 *
+	 * @return Text
+	 */
+	public static Text parsePredefinedText(Text text, Pattern pattern, Map<String, Text> placeholders) {
+		return PlaceholderUtils.recursivePredefinedPlaceholderParsing(text, pattern, placeholders);
+	}
 
 	/**
 	 * Registers new placeholder for identifier

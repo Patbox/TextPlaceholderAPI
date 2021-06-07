@@ -11,21 +11,17 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TextParserUtils {
-    //public static final Pattern STARTING_PATTERN = Pattern.compile("<(?<id>[^>]+)>");
-    //public static final Pattern STARTING_PATTERN = Pattern.compile("<(?<id>[^>\\/]+)>");
+import static eu.pb4.placeholders.util.GeneralUtils.TextLengthPair;
 
+public class TextParserUtils {
     // Based on minimessage's regex
-    public static final Pattern STARTING_PATTERN = Pattern.compile("<(?<id>[^<>\\/]+)(?<data>(:(['\\\"]?([^'\\\"](\\\\\\\\['\\\"])?)+['\\\"]?))*)>");
+    public static final Pattern STARTING_PATTERN = Pattern.compile("<(?<id>[^<>/]+)(?<data>(:([']?([^'](\\\\\\\\['])?)+[']?))*)>");
 
     public static final HashMap<String, String> ESCAPED_CHARS = new HashMap();
     public static final HashMap<String, String> UNESCAPED_CHARS = new HashMap();
 
     public static Text parse(String string, Map<String, TextParser.TextFormatterHandler> handlers) {
-        LiteralText text = new LiteralText("");
-        recursiveParsing(text, escapeCharacters(string), handlers, null);
-
-        return text;
+        return recursiveParsing(escapeCharacters(string), handlers, null).text();
     }
 
     public static String escapeCharacters(String string) {
@@ -53,10 +49,12 @@ public class TextParserUtils {
         }
     }
 
-    public static int recursiveParsing(MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) {
+    public static TextLengthPair recursiveParsing(String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) {
         if (input.isEmpty()) {
-            return 0;
+            return new TextLengthPair(new LiteralText(""), 0);
         }
+
+        MutableText text = null;
 
         Matcher matcher = STARTING_PATTERN.matcher(input);
         Matcher matcherEnd = endAt != null ? Pattern.compile(endAt).matcher(input) : null;
@@ -70,12 +68,6 @@ public class TextParserUtils {
                 break;
             }
 
-            String betweenText = input.substring(currentPos, matcher.start());
-
-            if (betweenText.length() != 0) {
-                text.append(removeEscaping(betweenText));
-            }
-
             String[] entireTag = (matcher.group("id").toLowerCase(Locale.ROOT) + matcher.group("data")).split(":", 2);
             String tag = entireTag[0];
             String data = "";
@@ -86,10 +78,25 @@ public class TextParserUtils {
 
             TextParser.TextFormatterHandler handler = handlers.get(tag);
             if (handler != null) {
+                String betweenText = input.substring(currentPos, matcher.start());
+
+                if (betweenText.length() != 0) {
+                    if (text == null) {
+                        text = new LiteralText(removeEscaping(betweenText));
+                    } else {
+                        text.append(removeEscaping(betweenText));
+                    }
+                }
                 currentPos = matcher.end();
                 try {
-                    int toIgnore = handler.parse(tag, data, text, input.substring(currentPos), handlers, end);
-                    currentPos += toIgnore;
+                    TextLengthPair pair = handler.parse(tag, data, input.substring(currentPos), handlers, end);
+                    if (pair.text() != null) {
+                        if (text == null) {
+                            text = new LiteralText("");
+                        }
+                        text.append(pair.text());
+                    }
+                    currentPos += pair.length();
 
                     if (currentPos >= input.length()) {
                         currentEnd = input.length();
@@ -113,9 +120,13 @@ public class TextParserUtils {
         }
 
         if (currentPos < currentEnd) {
-            String restOfText = input.substring(currentPos, currentEnd);
+            String restOfText = removeEscaping(input.substring(currentPos, currentEnd));
             if (restOfText.length() != 0) {
-                text.append(removeEscaping(restOfText));
+                if (text == null) {
+                    text = new LiteralText(restOfText);
+                } else {
+                    text.append(restOfText);
+                }
             }
         }
 
@@ -124,37 +135,36 @@ public class TextParserUtils {
         } else {
             currentEnd = input.length();
         }
-
-        return currentEnd;
+        return new TextLengthPair(text, currentEnd);
     }
 
     public static void register() {
         for (Formatting formatting : Formatting.values()) {
-            TextParser.register(formatting.getName(), (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-                MutableText out = new LiteralText("").formatted(formatting);
-                text.append(out);
-                return recursiveParsing(out, input, handlers, endAt);
+            TextParser.register(formatting.getName(), (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+                TextLengthPair out = recursiveParsing(input, handlers, endAt);
+                out.text().formatted(formatting);
+                return out;
             });
         }
 
         {
-            TextParser.TextFormatterHandler color = (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-                MutableText out = new LiteralText("").fillStyle(Style.EMPTY.withColor(TextColor.parse(cleanArgument(data))));
-                text.append(out);
-                return recursiveParsing(out, input, handlers, endAt);
+            TextParser.TextFormatterHandler color = (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+                TextLengthPair out = recursiveParsing(input, handlers, endAt);
+                out.text().fillStyle(Style.EMPTY.withColor(TextColor.parse(cleanArgument(data))));
+                return out;
             };
 
             TextParser.register("color", color);
             TextParser.register("c", color);
         }
 
-        TextParser.register("font", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-            MutableText out = new LiteralText("").fillStyle(Style.EMPTY.withFont(Identifier.tryParse(cleanArgument(data))));
-            text.append(out);
-            return recursiveParsing(out, input, handlers, endAt);
+        TextParser.register("font", (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+            TextLengthPair out = recursiveParsing(input, handlers, endAt);
+            out.text().fillStyle(Style.EMPTY.withFont(Identifier.tryParse(cleanArgument(data))));
+            return out;
         });
 
-        TextParser.register("lang", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+        TextParser.register("lang", (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
             String[] lines = data.split(":");
             if (lines.length > 0) {
                 List<Text> textList = new ArrayList<>();
@@ -168,55 +178,52 @@ public class TextParserUtils {
                 }
 
                 MutableText out = new TranslatableText(cleanArgument(lines[0]), textList.toArray());
-                text.append(out);
+                return new TextLengthPair(out, 0);
             }
-            return 0;
+            return TextLengthPair.EMPTY;
         });
 
-        TextParser.register("key", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+        TextParser.register("key", (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
             if (!data.isEmpty()) {
                 MutableText out = new KeybindText(cleanArgument(data));
-                text.append(out);
+                return new TextLengthPair(out, 0);
             }
-            return 0;
+            return TextLengthPair.EMPTY;
         });
 
-        TextParser.register("click", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+        TextParser.register("click", (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
             String[] lines = data.split(":", 2);
-            MutableText out = new LiteralText("");
-            text.append(out);
+            TextLengthPair out = recursiveParsing(input, handlers, endAt);
             if (lines.length > 1) {
                 ClickEvent.Action action = ClickEvent.Action.byName(cleanArgument(lines[0]));
                 if (action != null) {
-                    out.setStyle(Style.EMPTY.withClickEvent(new ClickEvent(action, cleanArgument(lines[1]))));
+                    out.text().setStyle(Style.EMPTY.withClickEvent(new ClickEvent(action, removeEscaping(cleanArgument(lines[1])))));
                 }
             }
-            return recursiveParsing(out, input, handlers, endAt);
+            return out;
         });
 
-        TextParser.register("hover", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+        TextParser.register("hover", (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
             String[] lines = data.split(":", 2);
-            MutableText out = new LiteralText("");
+            TextLengthPair out = recursiveParsing(input, handlers, endAt);
+
             if (lines.length > 1) {
                 HoverEvent.Action action = HoverEvent.Action.byName(cleanArgument(lines[0]));
                 if (action == HoverEvent.Action.SHOW_TEXT) {
-                    out.setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(action, parse(removeEscaping(cleanArgument(lines[1])), handlers))));
+                    out.text().setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(action, parse(removeEscaping(cleanArgument(lines[1])), handlers))));
                 }
             }
-            text.append(out);
-            return recursiveParsing(out, input, handlers, endAt);
+            return out;
         });
 
-        TextParser.register("insert", (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-            MutableText out = new LiteralText("");
-            out.setStyle(Style.EMPTY.withInsertion(cleanArgument(data)));
-            text.append(out);
-            return recursiveParsing(out, input, handlers, endAt);
+        TextParser.register("insert", (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
+            TextLengthPair out = recursiveParsing(input, handlers, endAt);
+            out.text().setStyle(Style.EMPTY.withInsertion(removeEscaping(cleanArgument(data))));
+            return out;
         });
 
         {
-            TextParser.TextFormatterHandler rainbow = (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-                MutableText out = new LiteralText("");
+            TextParser.TextFormatterHandler rainbow = (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
                 String[] val = data.split(":");
                 float freq = 1;
                 float saturation = 1;
@@ -241,16 +248,16 @@ public class TextParserUtils {
                     }
                 }
 
-                int toIgnore = recursiveParsing(out, input, handlers, endAt);
-                String flatString = GeneralUtils.textToString(out);
+                TextLengthPair out = recursiveParsing(input, handlers, endAt);
+                String flatString = GeneralUtils.textToString(out.text());
 
                 final float finalFreq = freq;
                 final float finalOffset = offset;
                 final float finalSaturation = saturation;
 
-                text.append(GeneralUtils.toGradient(out, (pos) -> TextColor.fromRgb(GeneralUtils.hvsToRgb(((pos * finalFreq) / (flatString.length() + 1) + finalOffset) % 1, finalSaturation, 1))));
-
-                return toIgnore;
+                return new TextLengthPair(
+                        GeneralUtils.toGradient(out.text(), (pos) -> TextColor.fromRgb(GeneralUtils.hvsToRgb(((pos * finalFreq) / (flatString.length() + 1) + finalOffset) % 1, finalSaturation, 1))),
+                        out.length());
             };
 
             TextParser.register("rainbow", rainbow);
@@ -258,12 +265,11 @@ public class TextParserUtils {
         }
 
         {
-            TextParser.TextFormatterHandler gradient = (String tag, String data, MutableText text, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
-                MutableText out = new LiteralText("");
+            TextParser.TextFormatterHandler gradient = (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
                 String[] val = data.split(":");
 
-                int toIgnore = recursiveParsing(out, input, handlers, endAt);
-                String flatString = GeneralUtils.textToString(out);
+                TextLengthPair out = recursiveParsing(input, handlers, endAt);
+                String flatString = GeneralUtils.textToString(out.text());
                 List<TextColor> textColors = new ArrayList<>();
                 for (String string : val) {
                     TextColor color = TextColor.parse(string);
@@ -286,7 +292,7 @@ public class TextParserUtils {
                 AtomicDouble saturation = new AtomicDouble(hsv.s());
                 AtomicDouble value = new AtomicDouble(hsv.v());
 
-                text.append(GeneralUtils.toGradient(out, (pos) -> {
+                return new TextLengthPair(GeneralUtils.toGradient(out.text(), (pos) -> {
                     GeneralUtils.HSV colorA = GeneralUtils.rgbToHsv(textColors.get((int) (pos * sectionSize)).getRgb());
                     GeneralUtils.HSV colorB = GeneralUtils.rgbToHsv(textColors.get((int) (pos * sectionSize) + 1).getRgb());
 
@@ -322,9 +328,7 @@ public class TextParserUtils {
                             localHue,
                             localSat,
                             localVal));
-                }));
-
-                return toIgnore;
+                }), out.length());
             };
 
             TextParser.register("gradient", gradient);

@@ -1,6 +1,7 @@
 package eu.pb4.placeholders;
 
 import com.google.common.collect.ImmutableMap;
+import eu.pb4.placeholders.util.GeneralUtils;
 import eu.pb4.placeholders.util.TextParserUtils;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -22,7 +23,18 @@ public final class TextParser {
     }
 
     /**
-     * Registers new text element
+     * Parses input string with it's own handler map (ideal for limiting formatting)
+     *
+     * @param input with formatting
+     * @param handlerMap Map of handlers
+     * @return Text
+     */
+    public static Text parse(String input, Map<String, TextFormatterHandler> handlerMap) {
+        return TextParserUtils.parse(input, handlerMap);
+    }
+
+    /**
+     * Registers new text tag handler
      */
     public static void register(String identifier, TextFormatterHandler handler) {
         TAGS.put(identifier, handler);
@@ -37,6 +49,6 @@ public final class TextParser {
 
     @FunctionalInterface
     public interface TextFormatterHandler {
-        int parse(String tag, String data, MutableText text, String input, Map<String, TextFormatterHandler> handlers, String endAt);
+        GeneralUtils.TextLengthPair parse(String tag, String data, String input, Map<String, TextFormatterHandler> handlers, String endAt);
     }
 }

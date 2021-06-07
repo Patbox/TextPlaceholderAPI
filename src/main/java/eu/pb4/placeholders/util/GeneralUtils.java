@@ -43,11 +43,11 @@ public class GeneralUtils {
         }
     }
 
-    public static Text toGradient(Text base, Int2ObjectFunction<TextColor> posToColor) {
-        return recursiveGradient(base, posToColor, 0).getLeft();
+    public static MutableText toGradient(Text base, Int2ObjectFunction<TextColor> posToColor) {
+        return recursiveGradient(base, posToColor, 0).text();
     }
 
-    private static Pair<Text, Integer> recursiveGradient(Text base, Int2ObjectFunction<TextColor> posToColor, int pos) {
+    private static TextLengthPair recursiveGradient(Text base, Int2ObjectFunction<TextColor> posToColor, int pos) {
         MutableText out = new LiteralText("").setStyle(base.getStyle());
         for (String letter : base.asString().split("")) {
             if (!letter.isEmpty()) {
@@ -57,12 +57,12 @@ public class GeneralUtils {
         }
 
         for (Text sibling : base.getSiblings()) {
-            Pair<Text, Integer> pair = recursiveGradient(sibling, posToColor, pos);
-            pos = pair.getRight();
-            out.append(pair.getLeft());
+            TextLengthPair pair = recursiveGradient(sibling, posToColor, pos);
+            pos = pair.length;
+            out.append(pair.text);
         }
 
-        return new Pair(out, pos);
+        return new TextLengthPair(out, pos);
     }
 
     public static int hvsToRgb(float hue, float saturation, float value) {
@@ -125,5 +125,9 @@ public class GeneralUtils {
     }
 
     public static record HSV(float h, float s, float v) {
+    }
+
+    public static record TextLengthPair(MutableText text, int length) {
+        public static final TextLengthPair EMPTY = new TextLengthPair(null, 0);
     }
 }

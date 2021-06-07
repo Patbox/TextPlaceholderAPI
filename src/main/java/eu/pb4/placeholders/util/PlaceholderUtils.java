@@ -20,7 +20,7 @@ import java.util.regex.Pattern;
 public class PlaceholderUtils {
 
     public static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
-        MutableText out;
+        MutableText out = null;
 
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
         MinecraftServer server = !(object instanceof ServerPlayerEntity) ? (MinecraftServer) object : player.server;
@@ -46,14 +46,16 @@ public class PlaceholderUtils {
 
             int previousEnd = 0;
 
-            out = new LiteralText("").setStyle(text.getStyle());
-
             while (matcher.find()) {
                 String placeholder = matcher.group("id");
                 start = matcher.start();
                 end = matcher.end();
 
-                out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
+                if (out == null) {
+                    out = new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle());
+                } else {
+                    out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
+                }
 
                 PlaceholderResult result = player != null
                         ? parsePlaceholderFromMap(PlaceholderContext.create(placeholder, player), placeholders)
@@ -68,11 +70,75 @@ public class PlaceholderUtils {
                 previousEnd = end;
             }
 
-            out.append(new LiteralText(string.substring(previousEnd)));
+            if (out == null) {
+                out = new LiteralText(string.substring(previousEnd)).setStyle(text.getStyle());
+            } else {
+                out.append(new LiteralText(string.substring(previousEnd)));
+            }
         }
 
         for(Text text1 : text.getSiblings()) {
             out.append(recursivePlaceholderParsing(text1, object, pattern, placeholders));
+        }
+
+        return out;
+    }
+
+    public static Text recursivePredefinedPlaceholderParsing(Text text, Pattern pattern, Map<String, Text> placeholders) {
+        MutableText out = null;
+
+        if (text instanceof TranslatableText) {
+            TranslatableText translatableText = (TranslatableText) text;
+            ArrayList<Object> list = new ArrayList<>();
+
+            for(Object arg : translatableText.getArgs()) {
+                if (arg instanceof Text) {
+                    list.add(recursivePredefinedPlaceholderParsing((Text) arg, pattern, placeholders));
+                } else {
+                    list.add(arg);
+                }
+            }
+
+            out = new TranslatableText(translatableText.getKey(), list.toArray());
+        } else {
+            String string = text.asString();
+            Matcher matcher = pattern.matcher(string);
+            int start;
+            int end;
+
+            int previousEnd = 0;
+
+            while (matcher.find()) {
+                String placeholder = matcher.group("id");
+                start = matcher.start();
+                end = matcher.end();
+
+                if (out == null) {
+                    out = new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle());
+                } else {
+                    out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
+                }
+
+                Text result = placeholders.get(placeholder);
+
+                if (result != null) {
+                    out.append(result.shallowCopy());
+                } else {
+                    out.append(new LiteralText(matcher.group(0)));
+                }
+
+                previousEnd = end;
+            }
+
+            if (out == null) {
+                out = new LiteralText(string.substring(previousEnd)).setStyle(text.getStyle());
+            } else {
+                out.append(new LiteralText(string.substring(previousEnd)));
+            }
+        }
+
+        for(Text text1 : text.getSiblings()) {
+            out.append(recursivePredefinedPlaceholderParsing(text1, pattern, placeholders));
         }
 
         return out;
