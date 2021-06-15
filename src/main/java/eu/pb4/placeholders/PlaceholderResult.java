@@ -81,7 +81,7 @@ public final class PlaceholderResult {
      * @return PlaceholderResult
      */
     public static PlaceholderResult value(String text) {
-        return new PlaceholderResult(new LiteralText(text), null);
+        return new PlaceholderResult(TextParser.parse(text), null);
     }
 }
 

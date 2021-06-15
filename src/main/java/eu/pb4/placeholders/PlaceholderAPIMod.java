@@ -8,8 +8,8 @@ import net.fabricmc.api.ModInitializer;
 public class PlaceholderAPIMod implements ModInitializer {
     @Override
     public void onInitialize() {
+        TextParserUtils.register();
         ServerPlaceholders.register();
         PlayerPlaceholders.register();
-        TextParserUtils.register();
     }
 }

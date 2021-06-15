@@ -2,7 +2,6 @@ package eu.pb4.placeholders.util;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import net.minecraft.text.*;
-import net.minecraft.util.Pair;
 
 import java.util.List;
 
@@ -72,22 +71,15 @@ public class GeneralUtils {
         float q = value * (1 - f * saturation);
         float t = value * (1 - (1 - f) * saturation);
 
-        switch (h) {
-            case 0:
-                return rgbToInt(value, t, p);
-            case 1:
-                return rgbToInt(q, value, p);
-            case 2:
-                return rgbToInt(p, value, t);
-            case 3:
-                return rgbToInt(p, q, value);
-            case 4:
-                return rgbToInt(t, p, value);
-            case 5:
-                return rgbToInt(value, p, q);
-            default:
-                return 0;
-        }
+        return switch (h) {
+            case 0 -> rgbToInt(value, t, p);
+            case 1 -> rgbToInt(q, value, p);
+            case 2 -> rgbToInt(p, value, t);
+            case 3 -> rgbToInt(p, q, value);
+            case 4 -> rgbToInt(t, p, value);
+            case 5 -> rgbToInt(value, p, q);
+            default -> 0;
+        };
     }
 
     public static int rgbToInt(float r, float g, float b) {
@@ -130,4 +122,6 @@ public class GeneralUtils {
     public static record TextLengthPair(MutableText text, int length) {
         public static final TextLengthPair EMPTY = new TextLengthPair(null, 0);
     }
+
+    public static record Pair<L, R>(L left, R right) {}
 }

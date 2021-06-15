@@ -2,6 +2,9 @@ package eu.pb4.placeholders.util;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import eu.pb4.placeholders.TextParser;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -12,29 +15,33 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static eu.pb4.placeholders.util.GeneralUtils.TextLengthPair;
+import static eu.pb4.placeholders.util.GeneralUtils.Pair;
 
 public class TextParserUtils {
-    // Based on minimessage's regex
+    // Based on minimessage's regex, modified to fit more parsers needs
     public static final Pattern STARTING_PATTERN = Pattern.compile("<(?<id>[^<>/]+)(?<data>(:([']?([^'](\\\\\\\\['])?)+[']?))*)>");
-
-    public static final HashMap<String, String> ESCAPED_CHARS = new HashMap();
-    public static final HashMap<String, String> UNESCAPED_CHARS = new HashMap();
+    public static final List<Pair<String, String>> ESCAPED_CHARS = new ArrayList<>();
+    public static final List<Pair<String, String>> UNESCAPED_CHARS = new ArrayList<>();
+    private static boolean IS_REGISTERED = false;
 
     public static Text parse(String string, Map<String, TextParser.TextFormatterHandler> handlers) {
+        if (!IS_REGISTERED) {
+            register();
+        }
         return recursiveParsing(escapeCharacters(string), handlers, null).text();
     }
 
     public static String escapeCharacters(String string) {
-        for (Map.Entry<String, String> entry : ESCAPED_CHARS.entrySet()) {
-            string = string.replaceAll(Matcher.quoteReplacement(entry.getKey()), entry.getValue());
+        for (Pair<String, String> entry : ESCAPED_CHARS) {
+            string = string.replaceAll(Matcher.quoteReplacement(entry.left()), entry.right());
         }
         return string;
     }
 
     public static String removeEscaping(String string) {
-        for (Map.Entry<String, String> entry : UNESCAPED_CHARS.entrySet()) {
+        for (Pair<String, String> entry : UNESCAPED_CHARS) {
             try {
-                string = string.replaceAll(entry.getValue(), entry.getKey());
+                string = string.replaceAll(entry.right(), entry.left());
             } catch (Exception e) {
             }
         }
@@ -68,53 +75,84 @@ public class TextParserUtils {
                 break;
             }
 
-            String[] entireTag = (matcher.group("id").toLowerCase(Locale.ROOT) + matcher.group("data")).split(":", 2);
-            String tag = entireTag[0];
+            String[] entireTag = (matcher.group("id") + matcher.group("data")).split(":", 2);
+            String tag = entireTag[0].toLowerCase(Locale.ROOT);
             String data = "";
             if (entireTag.length == 2) {
                 data = entireTag[1];
             }
-            String end = "</" + tag + ">";
 
-            TextParser.TextFormatterHandler handler = handlers.get(tag);
-            if (handler != null) {
-                String betweenText = input.substring(currentPos, matcher.start());
-
-                if (betweenText.length() != 0) {
-                    if (text == null) {
-                        text = new LiteralText(removeEscaping(betweenText));
-                    } else {
-                        text.append(removeEscaping(betweenText));
+            // Special reset handling for <reset> tag
+            if (tag.equals("reset")) {
+                if (endAt != null) {
+                    currentEnd = matcher.start();
+                    if (currentPos < currentEnd) {
+                        String restOfText = removeEscaping(input.substring(currentPos, currentEnd));
+                        if (restOfText.length() != 0) {
+                            if (text == null) {
+                                text = new LiteralText(restOfText);
+                            } else {
+                                text.append(restOfText);
+                            }
+                        }
                     }
-                }
-                currentPos = matcher.end();
-                try {
-                    TextLengthPair pair = handler.parse(tag, data, input.substring(currentPos), handlers, end);
-                    if (pair.text() != null) {
+
+                    return new TextLengthPair(text, currentEnd);
+                } else {
+                    String betweenText = input.substring(currentPos, matcher.start());
+
+                    if (betweenText.length() != 0) {
                         if (text == null) {
-                            text = new LiteralText("");
-                        }
-                        text.append(pair.text());
-                    }
-                    currentPos += pair.length();
-
-                    if (currentPos >= input.length()) {
-                        currentEnd = input.length();
-                        break;
-                    }
-                    matcher.region(currentPos, input.length());
-                    if (matcherEnd != null) {
-                        matcherEnd.region(currentPos, input.length());
-                        if (matcherEnd.find()) {
-                            hasEndTag = true;
-                            currentEnd = matcherEnd.start();
+                            text = new LiteralText(removeEscaping(betweenText));
                         } else {
-                            hasEndTag = false;
-                            currentEnd = input.length();
+                            text.append(removeEscaping(betweenText));
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    currentPos = matcher.end();
+                }
+            } else {
+                String end = "</" + tag + ">";
+
+                TextParser.TextFormatterHandler handler = handlers.get(tag);
+                if (handler != null) {
+                    String betweenText = input.substring(currentPos, matcher.start());
+
+                    if (betweenText.length() != 0) {
+                        if (text == null) {
+                            text = new LiteralText(removeEscaping(betweenText));
+                        } else {
+                            text.append(removeEscaping(betweenText));
+                        }
+                    }
+                    currentPos = matcher.end();
+                    try {
+                        TextLengthPair pair = handler.parse(tag, data, input.substring(currentPos), handlers, end);
+                        if (pair.text() != null) {
+                            if (text == null) {
+                                text = new LiteralText("");
+                            }
+                            text.append(pair.text());
+                        }
+                        currentPos += pair.length();
+
+                        if (currentPos >= input.length()) {
+                            currentEnd = input.length();
+                            break;
+                        }
+                        matcher.region(currentPos, input.length());
+                        if (matcherEnd != null) {
+                            matcherEnd.region(currentPos, input.length());
+                            if (matcherEnd.find()) {
+                                hasEndTag = true;
+                                currentEnd = matcherEnd.start();
+                            } else {
+                                hasEndTag = false;
+                                currentEnd = input.length();
+                            }
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -139,6 +177,12 @@ public class TextParserUtils {
     }
 
     public static void register() {
+        if (IS_REGISTERED) {
+            return;
+        } else {
+            IS_REGISTERED = true;
+        }
+
         for (Formatting formatting : Formatting.values()) {
             TextParser.register(formatting.getName(), (String tag, String data, String input, Map<String, TextParser.TextFormatterHandler> handlers, String endAt) -> {
                 TextLengthPair out = recursiveParsing(input, handlers, endAt);
@@ -207,11 +251,28 @@ public class TextParserUtils {
             String[] lines = data.split(":", 2);
             TextLengthPair out = recursiveParsing(input, handlers, endAt);
 
-            if (lines.length > 1) {
-                HoverEvent.Action action = HoverEvent.Action.byName(cleanArgument(lines[0]));
-                if (action == HoverEvent.Action.SHOW_TEXT) {
-                    out.text().setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(action, parse(removeEscaping(cleanArgument(lines[1])), handlers))));
+            try {
+                if (lines.length > 1) {
+                    HoverEvent.Action<?> action = HoverEvent.Action.byName(cleanArgument(lines[0].toLowerCase(Locale.ROOT)));
+                    if (action == HoverEvent.Action.SHOW_TEXT) {
+                        out.text().setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, parse(removeEscaping(cleanArgument(lines[1])), handlers))));
+                    } else if (action == HoverEvent.Action.SHOW_ENTITY) {
+                        lines = lines[1].split(":", 3);
+                        if (lines.length == 3) {
+                            out.text().setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ENTITY,
+                                    new HoverEvent.EntityContent(
+                                            EntityType.get(removeEscaping(removeEscaping(cleanArgument(lines[0])))).orElse(EntityType.PIG),
+                                            UUID.fromString(cleanArgument(lines[1])),
+                                            parse(removeEscaping(removeEscaping(cleanArgument(lines[2]))), handlers))
+                            )));
+                        }
+                    } else if (action == HoverEvent.Action.SHOW_ITEM) {
+                        out.text().setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM,
+                                new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(removeEscaping(cleanArgument(lines[1])))))
+                        )));
+                    }
                 }
+            } catch (Exception e) {
             }
             return out;
         });
@@ -335,19 +396,19 @@ public class TextParserUtils {
             TextParser.register("gr", gradient);
         }
 
-        ESCAPED_CHARS.put("\\\\", "&slsh;");
-        ESCAPED_CHARS.put("\\<", "&lt;");
-        ESCAPED_CHARS.put("\\>", "&gt;");
-        ESCAPED_CHARS.put("\\\"", "&quot;");
-        ESCAPED_CHARS.put("\\'", "&pos;");
-        ESCAPED_CHARS.put("\\:", "&colon;");
+        ESCAPED_CHARS.add(new Pair<>("\\\\", "&slsh;"));
+        ESCAPED_CHARS.add(new Pair<>("\\<", "&lt;"));
+        ESCAPED_CHARS.add(new Pair<>("\\>", "&gt;"));
+        ESCAPED_CHARS.add(new Pair<>("\\\"", "&quot;"));
+        ESCAPED_CHARS.add(new Pair<>("\\'", "&pos;"));
+        ESCAPED_CHARS.add(new Pair<>("\\:", "&colon;"));
 
-        UNESCAPED_CHARS.put("\\", "&slsh;");
-        UNESCAPED_CHARS.put("<", "&lt;");
-        UNESCAPED_CHARS.put(">", "&gt;");
-        UNESCAPED_CHARS.put("\"", "&quot;");
-        UNESCAPED_CHARS.put("'", "&pos;");
-        UNESCAPED_CHARS.put(":", "&colon;");
+        UNESCAPED_CHARS.add(new Pair<>("\\", "&slsh;"));
+        UNESCAPED_CHARS.add(new Pair<>("<", "&lt;"));
+        UNESCAPED_CHARS.add(new Pair<>(">", "&gt;"));
+        UNESCAPED_CHARS.add(new Pair<>("\"", "&quot;"));
+        UNESCAPED_CHARS.add(new Pair<>("'", "&pos;"));
+        UNESCAPED_CHARS.add(new Pair<>(":", "&colon;"));
     }
 
 }
