@@ -133,7 +133,7 @@ public final class PlaceholderContext {
      * @return PlaceholderContext
      */
     public static PlaceholderContext create(@NotNull String placeholder, @NotNull MinecraftServer server) {
-        String[] args = placeholder.split("/", 1);
+        String[] args = placeholder.split("/", 2);
 
         Identifier identifier = Identifier.tryParse(args[0]);
 
