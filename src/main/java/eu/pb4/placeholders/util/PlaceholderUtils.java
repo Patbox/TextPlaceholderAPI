@@ -5,10 +5,7 @@ import eu.pb4.placeholders.PlaceholderHandler;
 import eu.pb4.placeholders.PlaceholderResult;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.LiteralText;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TranslatableText;
+import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
@@ -38,6 +35,7 @@ public class PlaceholderUtils {
             }
 
             out = new TranslatableText(translatableText.getKey(), list.toArray());
+            out.setStyle(parsePlaceholdersInStyle(text.getStyle(), object, pattern, placeholders));
         } else {
             String string = text.asString();
             Matcher matcher = pattern.matcher(string);
@@ -52,9 +50,9 @@ public class PlaceholderUtils {
                 end = matcher.end();
 
                 if (out == null) {
-                    out = new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle());
+                    out = new LiteralText(string.substring(previousEnd, start)).setStyle(parsePlaceholdersInStyle(text.getStyle(), object, pattern, placeholders));
                 } else {
-                    out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
+                    out.append(new LiteralText(string.substring(previousEnd, start)));
                 }
 
                 PlaceholderResult result = player != null
@@ -71,7 +69,7 @@ public class PlaceholderUtils {
             }
 
             if (out == null) {
-                out = new LiteralText(string.substring(previousEnd)).setStyle(text.getStyle());
+                out = new LiteralText(string.substring(previousEnd)).setStyle(parsePlaceholdersInStyle(text.getStyle(), object, pattern, placeholders));
             } else {
                 out.append(new LiteralText(string.substring(previousEnd)));
             }
@@ -80,6 +78,25 @@ public class PlaceholderUtils {
         for(Text text1 : text.getSiblings()) {
             out.append(recursivePlaceholderParsing(text1, object, pattern, placeholders));
         }
+
+        return out;
+    }
+
+    private static Style parsePlaceholdersInStyle(Style style, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
+        Style out = style;
+
+        if (style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
+            out = out.withHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    recursivePlaceholderParsing(style.getHoverEvent().getValue(HoverEvent.Action.SHOW_TEXT), object, pattern, placeholders))
+            );
+        }
+
+        if (style.getClickEvent() != null) {
+            out = out.withClickEvent(new ClickEvent(style.getClickEvent().getAction(),
+                    parseString(style.getClickEvent().getValue(), object, pattern, placeholders)));
+        }
+
 
         return out;
     }
@@ -100,6 +117,7 @@ public class PlaceholderUtils {
             }
 
             out = new TranslatableText(translatableText.getKey(), list.toArray());
+            out.setStyle(parsePredefinedPlaceholdersInStyle(text.getStyle(), pattern, placeholders));
         } else {
             String string = text.asString();
             Matcher matcher = pattern.matcher(string);
@@ -114,9 +132,9 @@ public class PlaceholderUtils {
                 end = matcher.end();
 
                 if (out == null) {
-                    out = new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle());
+                    out = new LiteralText(string.substring(previousEnd, start)).setStyle(parsePredefinedPlaceholdersInStyle(text.getStyle(), pattern, placeholders));
                 } else {
-                    out.append(new LiteralText(string.substring(previousEnd, start)).setStyle(text.getStyle()));
+                    out.append(new LiteralText(string.substring(previousEnd, start)));
                 }
 
                 Text result = placeholders.get(placeholder);
@@ -131,7 +149,7 @@ public class PlaceholderUtils {
             }
 
             if (out == null) {
-                out = new LiteralText(string.substring(previousEnd)).setStyle(text.getStyle());
+                out = new LiteralText(string.substring(previousEnd)).setStyle(parsePredefinedPlaceholdersInStyle(text.getStyle(), pattern, placeholders));
             } else {
                 out.append(new LiteralText(string.substring(previousEnd)));
             }
@@ -144,7 +162,25 @@ public class PlaceholderUtils {
         return out;
     }
 
-    @Deprecated
+    private static Style parsePredefinedPlaceholdersInStyle(Style style, Pattern pattern, Map<String, Text> placeholders) {
+        Style out = style;
+
+        if (style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
+            out = out.withHoverEvent(new HoverEvent(
+                    HoverEvent.Action.SHOW_TEXT,
+                    recursivePredefinedPlaceholderParsing(style.getHoverEvent().getValue(HoverEvent.Action.SHOW_TEXT), pattern, placeholders))
+            );
+        }
+
+        if (style.getClickEvent() != null) {
+            out = out.withClickEvent(new ClickEvent(style.getClickEvent().getAction(),
+                    parseStringPredefined(style.getClickEvent().getValue(), pattern, placeholders)));
+        }
+
+
+        return out;
+    }
+
     public static String parseString(String text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
         Matcher matcher = pattern.matcher(text);
         StringBuffer out = new StringBuffer(text.length());
@@ -159,6 +195,24 @@ public class PlaceholderUtils {
                     : parsePlaceholderFromMap(PlaceholderContext.create(placeholder, server), placeholders);
 
             if (result.isValid()) {
+                matcher.appendReplacement(out, Matcher.quoteReplacement(result.getString()));
+            }
+        }
+
+        matcher.appendTail(out);
+
+        return out.toString();
+    }
+
+    public static String parseStringPredefined(String text, Pattern pattern, Map<String, Text> placeholders) {
+        Matcher matcher = pattern.matcher(text);
+        StringBuffer out = new StringBuffer(text.length());
+
+        while (matcher.find()) {
+            String placeholder = matcher.group(1);
+            Text result = placeholders.get(placeholder);
+
+            if (result != null) {
                 matcher.appendReplacement(out, Matcher.quoteReplacement(result.getString()));
             }
         }

@@ -11,6 +11,8 @@ import eu.pb4.placeholders.*;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
+import java.util.Map;
+
 import static net.minecraft.server.command.CommandManager.literal;
 import static net.minecraft.server.command.CommandManager.argument;
 
@@ -42,7 +44,25 @@ public class TestMod implements ModInitializer {
     private static int test3(CommandContext<ServerCommandSource> context) {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
-            player.sendMessage(PlaceholderAPI.parseText(TextParser.parse(context.getArgument("text", String.class)), player), false);
+            Text text = PlaceholderAPI.parseText(TextParser.parse(context.getArgument("text", String.class)), player);
+            player.sendMessage(new LiteralText(Text.Serializer.toJson(text)), false);
+            player.sendMessage(text, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private static int test4(CommandContext<ServerCommandSource> context) {
+        try {
+            ServerPlayerEntity player = context.getSource().getPlayer();
+            Text text = PlaceholderAPI.parsePredefinedText(
+                    PlaceholderAPI.parseText(TextParser.parse(context.getArgument("text", String.class)), player),
+                    PlaceholderAPI.PREDEFINED_PLACEHOLDER_PATTERN,
+                    Map.of("player", player.getName())
+                    );
+            player.sendMessage(new LiteralText(Text.Serializer.toJson(text)), false);
+            player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -61,6 +81,9 @@ public class TestMod implements ModInitializer {
 
             dispatcher.register(
                     literal("test3").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test3))
+            );
+            dispatcher.register(
+                    literal("test4").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test4))
             );
         });
     }
