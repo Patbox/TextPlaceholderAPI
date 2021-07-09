@@ -65,7 +65,7 @@ public class PlayerPlaceholders {
 
         PlaceholderAPI.register(new Identifier("player", "playtime"), (ctx) -> {
             if (ctx.hasPlayer()) {
-                int x = ctx.getPlayer().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME));
+                int x = ctx.getPlayer().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_ONE_MINUTE));
                 return PlaceholderResult.value(ctx.hasArgument()
                         ? DurationFormatUtils.formatDuration((long) x * 50, ctx.getArgument(), true)
                         : GeneralUtils.durationToString((long) x / 20)
@@ -171,14 +171,6 @@ public class PlayerPlaceholders {
         PlaceholderAPI.register(new Identifier("player", "max_health"), (ctx) -> {
             if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(String.format("%.0f", ctx.getPlayer().getMaxHealth()));
-            } else {
-                return PlaceholderResult.invalid("No player!");
-            }
-        });
-
-        PlaceholderAPI.register(new Identifier("player", "hunger"), (ctx) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(String.format("%.0f", ctx.getPlayer().getHungerManager().getExhaustion()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
