@@ -14,7 +14,6 @@ import java.util.Date;
 
 public class ServerPlaceholders {
     public static void register() {
-
         PlaceholderAPI.register(new Identifier("server", "tps"), (ctx) -> {
             float tps = 1000/Math.max(ctx.getServer().getTickTime(), 50);
             String format = "%.1f";
@@ -55,7 +54,7 @@ public class ServerPlaceholders {
 
 
         PlaceholderAPI.register(new Identifier("server", "time"), (ctx) -> {
-            SimpleDateFormat format = new SimpleDateFormat(ctx.getArgument());
+            SimpleDateFormat format = new SimpleDateFormat(ctx.hasArgument() ? ctx.getArgument() : "HH:mm:ss");
             return PlaceholderResult.value(format.format(new Date(System.currentTimeMillis())));
         });
 

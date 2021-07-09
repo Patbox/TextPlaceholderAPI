@@ -1,5 +1,7 @@
 package eu.pb4.placeholders;
 
+import eu.pb4.placeholders.util.GeneralUtils;
+import eu.pb4.placeholders.util.PlaceholderUtils;
 import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 
@@ -16,7 +18,7 @@ public final class PlaceholderResult {
             this.text = new LiteralText(reason != null ? reason : "Invalid!");
             this.valid = false;
         }
-        this.string = Helpers.textToString(this.text);
+        this.string = GeneralUtils.textToString(this.text);
     }
 
     /**
@@ -79,7 +81,7 @@ public final class PlaceholderResult {
      * @return PlaceholderResult
      */
     public static PlaceholderResult value(String text) {
-        return new PlaceholderResult(new LiteralText(text), null);
+        return new PlaceholderResult(TextParser.parse(text), null);
     }
 }
 
