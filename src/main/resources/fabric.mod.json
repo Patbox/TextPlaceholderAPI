@@ -3,16 +3,17 @@
   "id": "placeholder-api",
   "version": "${version}",
 
-  "name": "Fabric Placeholder API",
-  "description": "Simple api that allows mods to create and use universal placeholders!",
+  "name": "Placeholder API",
+  "description": "Simple api that allows mods to create and use universal text placeholders!",
   "authors": [
     "Patbox"
   ],
   "contact": {
     "homepage": "https://pb4.eu",
-    "sources": "https://github.com/Patbox/FabricPlaceholderAPI"
+    "sources": "https://github.com/Patbox/TextPlaceholderAPI"
   },
   "license": "LGPLv3",
+  "icon": "assets/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
@@ -22,5 +23,10 @@
   "depends": {
     "fabricloader": ">=0.7.4",
     "minecraft": ">=1.17-beta.1"
+  },
+  "custom": {
+    "modmenu": {
+      "badges": [ "library" ]
+    }
   }
 }

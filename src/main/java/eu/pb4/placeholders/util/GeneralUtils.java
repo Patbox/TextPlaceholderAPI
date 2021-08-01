@@ -2,9 +2,11 @@ package eu.pb4.placeholders.util;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import net.minecraft.text.*;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.List;
 
+@ApiStatus.Internal
 public class GeneralUtils {
     public static String textToString(Text text) {
         StringBuffer string = new StringBuffer(text.asString());
@@ -48,7 +50,7 @@ public class GeneralUtils {
 
     private static TextLengthPair recursiveGradient(Text base, Int2ObjectFunction<TextColor> posToColor, int pos) {
         MutableText out = new LiteralText("").setStyle(base.getStyle());
-        for (String letter : base.asString().split("")) {
+        for (String letter : base.asString().replaceAll("\\p{So}|.", "$0\0").split("\0+")) {
             if (!letter.isEmpty()) {
                 out.append(new LiteralText(letter).setStyle(Style.EMPTY.withColor(posToColor.apply(pos))));
                 pos++;

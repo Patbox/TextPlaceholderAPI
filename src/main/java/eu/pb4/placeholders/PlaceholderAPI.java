@@ -1,10 +1,12 @@
 package eu.pb4.placeholders;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import eu.pb4.placeholders.util.PlaceholderUtils;
+import net.minecraft.util.InvalidIdentifierException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -109,7 +111,15 @@ public final class PlaceholderAPI {
 	 * Registers new placeholder for identifier
 	 */
 	public static void register(Identifier identifier, PlaceholderHandler handler) {
+		if (identifier.getPath().contains("/")) {
+			throw new InvalidIdentifierException("You can't use \"/\" in path!");
+		}
+
 		PLACEHOLDERS.put(identifier, handler);
+	}
+
+	public static ImmutableMap<Identifier, PlaceholderHandler> getPlaceholders() {
+		return ImmutableMap.copyOf(PLACEHOLDERS);
 	}
 
 	@Deprecated

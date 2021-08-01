@@ -1,0 +1,51 @@
+site_name: Placeholder API
+
+repo_url: https://github.com/Patbox/TextPlaceholderAPI
+repo_name: Patbox/TextPlaceholderAPI
+
+nav:
+  - index.md
+  - For Users:
+      - user/general.md
+      - user/default-placeholders.md
+      - user/mod-placeholders.md
+      - user/text-format.md
+  - For Developers:
+      - dev/getting-started.md
+      - dev/adding-placeholders.md
+      - dev/parsing-placeholders.md
+      - dev/text-format.md
+
+
+theme:
+  name: material
+  logo: assets/logo.png
+  favicon: images/favicon.png
+
+  palette:
+    - scheme: slate
+      primary: teal
+      accent: teal
+      features:
+        - navigation.expand
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+    - scheme: default
+      primary: teal
+      accent: teal
+      features:
+        - navigation.expand
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+
+extra_css:
+   - assets/style.css
+
+plugins:
+  - search
+extra:
+  version:
+    provider: mike
+    default: latest

@@ -1,0 +1,37 @@
+# Using placeholders
+
+Usage of placeholder mostly depends on implementation of mod itself. If mod uses simple, one/multiline text 
+(for example with Simple Text Format) you just need to add it by just writing `%placeholder%` 
+(or in some cases`{placeholder}`, `${placeholder}` or other format which should be provided on mods page).
+
+Inner part of placeholder can take shape of either `category:placeholder` or `category:placeholder/argument`, 
+where `category` is replaced by type (`player`, `world`, etc) or ID of the mod and `placeholder` is the placeholder itself.
+Additionally, some placeholders might have additional or required argument provided after first `/` symbol. It's format
+fully depend on mod providing it.
+
+You can check list of [build in placeholders here](/users/default-placeholders) 
+and [placeholders from mods here](/users/mod-placeholders).
+
+### List of mods supporting displaying Placeholder API's placeholders:
+
+- Styled Player List - 
+  [CurseForge](https://www.curseforge.com/minecraft/mc-mods/styled-player-list), 
+  [Modrinth](https://modrinth.com/mod/styledplayerlist), 
+  [Github](https://github.com/Patbox/StyledPlayerList)
+
+- Styled Chat -
+  [CurseForge](https://www.curseforge.com/minecraft/mc-mods/styled-chat),
+  [Modrinth](https://modrinth.com/mod/styled-chat),
+  [Github](https://github.com/Patbox/StyledChat)
+
+- Holograms -
+  [CurseForge](https://www.curseforge.com/minecraft/mc-mods/server-holograms),
+  [Modrinth](https://modrinth.com/mod/holograms),
+  [Github](https://github.com/Patbox/Holograms)
+
+- Player Events -
+  [CurseForge](https://www.curseforge.com/minecraft/mc-mods/player-events),
+  [Github](https://github.com/ByMartrixx/player-events)
+  
+
+*Are you a mod dev, and your mod is missing? Feel free to create an issue!*

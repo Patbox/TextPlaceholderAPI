@@ -7,6 +7,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@ApiStatus.Internal
 public class PlaceholderUtils {
 
     public static Text recursivePlaceholderParsing(Text text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
@@ -22,8 +24,7 @@ public class PlaceholderUtils {
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
         MinecraftServer server = !(object instanceof ServerPlayerEntity) ? (MinecraftServer) object : player.server;
 
-        if (text instanceof TranslatableText) {
-            TranslatableText translatableText = (TranslatableText) text;
+        if (text instanceof TranslatableText translatableText) {
             ArrayList<Object> list = new ArrayList<>();
 
             for(Object arg : translatableText.getArgs()) {
@@ -104,8 +105,7 @@ public class PlaceholderUtils {
     public static Text recursivePredefinedPlaceholderParsing(Text text, Pattern pattern, Map<String, Text> placeholders) {
         MutableText out = null;
 
-        if (text instanceof TranslatableText) {
-            TranslatableText translatableText = (TranslatableText) text;
+        if (text instanceof TranslatableText translatableText) {
             ArrayList<Object> list = new ArrayList<>();
 
             for(Object arg : translatableText.getArgs()) {
@@ -183,7 +183,7 @@ public class PlaceholderUtils {
 
     public static String parseString(String text, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
         Matcher matcher = pattern.matcher(text);
-        StringBuffer out = new StringBuffer(text.length());
+        StringBuilder out = new StringBuilder(text.length());
 
         ServerPlayerEntity player = object instanceof ServerPlayerEntity ? (ServerPlayerEntity) object : null;
         MinecraftServer server = !(object instanceof ServerPlayerEntity) ? (MinecraftServer) object : player.server;
@@ -206,7 +206,7 @@ public class PlaceholderUtils {
 
     public static String parseStringPredefined(String text, Pattern pattern, Map<String, Text> placeholders) {
         Matcher matcher = pattern.matcher(text);
-        StringBuffer out = new StringBuffer(text.length());
+        StringBuilder out = new StringBuilder(text.length());
 
         while (matcher.find()) {
             String placeholder = matcher.group(1);
