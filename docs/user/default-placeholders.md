@@ -15,7 +15,7 @@ These placeholders are provided by default and are available for every mod using
 - `%server:online%` - number of online players
 - `%server:max_players%` - maximal player count
 
-### Server
+### World
 - `%world:time%` - world's time
 - `%world:time_alt%` - world's time (alternative formatting)
 - `%world:day%` - world's day
@@ -37,8 +37,8 @@ These placeholders are provided by default and are available for every mod using
 - `%player:pos_z%` - player's z coordinate
 - `%player:health%` - player's health
 - `%player:max_health%` - player's max health
-- `%player:hunger%` - player's health
-- `%player:saturation%` - player's health
+- `%player:hunger%` - player's hunger
+- `%player:saturation%` - player's saturation
 - `%player:playtime%`/`%player:playtime/[formatting]%` - player's playtime
 - `%player:statistic/[statistic]%` - value of player's statistic
 

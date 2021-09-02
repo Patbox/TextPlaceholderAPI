@@ -13,7 +13,7 @@ Most of them come in pairs of a starting (`<tag>`) and closing one (`</tag>`).
 While closing ones are technically optional, without them formatting will continue until end of
 an input text or special `<reset>` tag. Some tags support arguments, which can be passed by adding `:`
 after tag name in starting one (for example `<color:#FF3333> </color>`). Arguments containing symbols like 
-`:`, `<`, `>`, `%` and spaces should be wrapped in a `'` symbols (for example `<click:show_text:'<red>Hello!'>...`).
+`:`, `<`, `>`, `%` and spaces should be wrapped in a `'` symbols (for example `<hover:show_text:'<red>Hello!'>...`).
 In case you want to type `<tag>` as plain text, you need to prefix it with `\ ` symbol .
 
 Few examples:
@@ -91,7 +91,7 @@ This tag should be closed.
 
 
 ### Inserting
-This tag inserts text into players chat message after being clicked.
+This tag creates a clickable text, that inserts its value at the end of player's chat message.
 
 You can use it by writing `<insert:[value]>`, where `[value]` inserted text (should be wrapped in `'`).
 
