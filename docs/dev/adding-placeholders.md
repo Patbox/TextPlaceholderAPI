@@ -28,7 +28,9 @@ PlaceholderAPI.register(new Identifier("player", "displayname"), (ctx) -> {
 });
 ```
 
-And one for usage of argument
+You can also add an argument to your placeholder, which removes requirement 
+of mostly repeated placeholders and allows degree of customisation.
+Argument itself is a string, so you can parse it in any way.
 ```
 PlaceholderAPI.register(new Identifier("server", "name_from_uuid"), (ctx) -> {
     if (ctx.hasArgument()) {

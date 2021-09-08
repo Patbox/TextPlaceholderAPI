@@ -35,10 +35,19 @@ Requires [Box of Placeholders addon](https://www.curseforge.com/minecraft/mc-mod
 - `%luckperms:group_expiry_time/[group]%` - Time after which player's group is removed
 - `%luckperms:permission_expiry_time/[permission]%` - Time after which player's permission is removed
 
+### [PlayerEx](https://www.curseforge.com/minecraft/mc-mods/playerex)
+- `%playerex:level%` - Shows current player level
+- `%playerex:level_top_X%` - Shows player at X place (from 1 to 10, for example `%playerex:level_top_1%`)
+
 ### [Player Pronouns](https://modrinth.com/mod/player-pronouns)
-- `%playerpronouns:pronouns%` - Displays players pronouns
+- `%playerpronouns:pronouns%` / `%playerpronouns:pronouns/[default value]%` - Displays formatted player's pronouns
+- `%playerpronouns:raw_pronouns%` / `%playerpronouns:raw_pronouns/[default value]%` - Displays formatted player's pronouns
+
+### [Styled Nicknames](https://www.curseforge.com/minecraft/mc-mods/styled-nicknames)
+- `%styled-nicknames:display_name%` - Either nickname or default player name (skips other formatting mods)
 
 ### [Vanish](https://www.curseforge.com/minecraft/mc-mods/vanish)
 Requires [Box of Placeholders addon](https://www.curseforge.com/minecraft/mc-mods/box-of-placeholders)
+
 - `%vanish:safe_online%` - Returns (safe) number of player's online
 - `%vanish:invisible_player_count%` - Number of player's using vanish
