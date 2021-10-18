@@ -84,6 +84,10 @@ public class PlaceholderUtils {
     }
 
     private static Style parsePlaceholdersInStyle(Style style, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
+        if (style == null) {
+            return null;
+        }
+
         Style out = style;
 
         if (style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
