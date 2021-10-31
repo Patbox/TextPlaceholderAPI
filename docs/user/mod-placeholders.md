@@ -43,6 +43,12 @@ Requires [Box of Placeholders addon](https://www.curseforge.com/minecraft/mc-mod
 - `%playerpronouns:pronouns%` / `%playerpronouns:pronouns/[default value]%` - Displays formatted player's pronouns
 - `%playerpronouns:raw_pronouns%` / `%playerpronouns:raw_pronouns/[default value]%` - Displays formatted player's pronouns
 
+### [Spark](https://spark.lucko.me/download)
+- `%spark:tps%` / `%spark:tps/duration%` - Shows server TPS. `duration` can be `5s, 10s, 1m, 5m, 15m`. Shows all durations if left out
+- `%spark:tickduration%` / `%spark:tickduration/duration%` - Shows the average tick durations. `duration` can be `10s, 1m`. Shows all durations if left out
+- `%spark:cpu_system%` / `%spark:cpu_system/duration%` - Shows the average CPU usage for the whole system. `duration` can be `10s, 1m, 15m`. Shows all durations if left out
+- `%spark:cpu_process%` / `%spark:cpu_process/duration%` - Shows the average CPU usage for the server process. `duration` can be `10s, 1m, 15m`. Shows all durations if left out
+
 ### [Styled Nicknames](https://www.curseforge.com/minecraft/mc-mods/styled-nicknames)
 - `%styled-nicknames:display_name%` - Either nickname or default player name (skips other formatting mods)
 
