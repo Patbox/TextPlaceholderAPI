@@ -51,3 +51,9 @@ Requires [Box of Placeholders addon](https://www.curseforge.com/minecraft/mc-mod
 
 - `%vanish:safe_online%` - Returns (safe) number of player's online
 - `%vanish:invisible_player_count%` - Number of player's using vanish
+
+### [Spark](https://spark.lucko.me/download)
+- `%spark:tps%` / `%spark:tps/duration%` - Shows server TPS. `duration` can be `5s, 10s, 1m, 5m, 15m`. Shows all durations if left out
+- `%spark:tickduration%` / `%spark:tickduration/duration%` - Shows the average tick durations. `duration` can be `10s, 1m`. Shows all durations if left out
+- `%spark:cpu_system%` / `%spark:cpu_system/duration%` - Shows the average CPU usage for the whole system. `duration` can be `10s, 1m, 15m`. Shows all durations if left out
+- `%spark:cpu_process%` / `%spark:cpu_process/duration%` - Shows the average CPU usage for the server process. `duration` can be `10s, 1m, 15m`. Shows all durations if left out
