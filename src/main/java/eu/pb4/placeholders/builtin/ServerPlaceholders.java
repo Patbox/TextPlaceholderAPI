@@ -2,6 +2,8 @@ package eu.pb4.placeholders.builtin;
 
 import eu.pb4.placeholders.PlaceholderAPI;
 import eu.pb4.placeholders.PlaceholderResult;
+import eu.pb4.placeholders.util.GeneralUtils;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -59,6 +61,40 @@ public class ServerPlaceholders {
         });
 
         PlaceholderAPI.register(new Identifier("server", "version"), (ctx) -> PlaceholderResult.value(ctx.getServer().getVersion()));
+
+        PlaceholderAPI.register(new Identifier("server", "mod_version"), (ctx) -> {
+            if (ctx.hasArgument()) {
+                var container = FabricLoader.getInstance().getModContainer(ctx.getArgument());
+
+                if (container.isPresent()) {
+                    return PlaceholderResult.value(new LiteralText(container.get().getMetadata().getVersion().getFriendlyString()));
+                }
+            }
+            return PlaceholderResult.invalid("Invalid argument");
+        });
+
+        PlaceholderAPI.register(new Identifier("server", "mod_name"), (ctx) -> {
+            if (ctx.hasArgument()) {
+                var container = FabricLoader.getInstance().getModContainer(ctx.getArgument());
+
+                if (container.isPresent()) {
+                    return PlaceholderResult.value(new LiteralText(container.get().getMetadata().getName()));
+                }
+            }
+            return PlaceholderResult.invalid("Invalid argument");
+        });
+
+        PlaceholderAPI.register(new Identifier("server", "mod_description"), (ctx) -> {
+            if (ctx.hasArgument()) {
+                var container = FabricLoader.getInstance().getModContainer(ctx.getArgument());
+
+                if (container.isPresent()) {
+                    return PlaceholderResult.value(new LiteralText(container.get().getMetadata().getDescription()));
+                }
+            }
+            return PlaceholderResult.invalid("Invalid argument");
+        });
+
         PlaceholderAPI.register(new Identifier("server", "name"), (ctx) -> PlaceholderResult.value(ctx.getServer().getName()));
 
         PlaceholderAPI.register(new Identifier("server", "used_ram"), (ctx) -> {

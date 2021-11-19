@@ -1,9 +1,12 @@
 package eu.pb4.placeholders.util;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.*;
+import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @ApiStatus.Internal
@@ -116,6 +119,75 @@ public class GeneralUtils {
         }
 
         return new HSV(h, s, cmax);
+    }
+
+    public static Text removeHoverAndClick(Text input) {
+        var output = cloneText(input);
+        removeHoverAndClick(output);
+        return output;
+    }
+
+    private static void removeHoverAndClick(MutableText input) {
+        if (input.getStyle() != null) {
+            input.setStyle(input.getStyle().withHoverEvent(null).withClickEvent(null));
+        }
+
+        if (input instanceof TranslatableText text) {
+            for (int i = 0; i < text.getArgs().length; i++) {
+                var arg = text.getArgs()[i];
+                if (arg instanceof MutableText argText) {
+                    removeHoverAndClick(argText);
+                }
+            }
+        }
+
+        for (var sibling : input.getSiblings()) {
+            removeHoverAndClick((MutableText) sibling);
+        }
+
+    }
+
+    public static MutableText cloneText(Text input) {
+        MutableText baseText;
+        if (input instanceof TranslatableText translatable) {
+            var obj = new ArrayList<>();
+
+            for (var arg : translatable.getArgs()) {
+                if (arg instanceof Text argText) {
+                    obj.add(cloneText(argText));
+                } else {
+                    obj.add(arg);
+                }
+            }
+
+            baseText = new TranslatableText(translatable.getKey(), obj.toArray());
+        } else {
+           baseText = input.copy();
+        }
+
+        for (var sibling : input.getSiblings()) {
+            baseText.append(cloneText(sibling));
+        }
+
+        baseText.setStyle(input.getStyle());
+        return baseText;
+    }
+
+    public static Text getItemText(ItemStack stack) {
+        if (!stack.isEmpty()) {
+            MutableText mutableText = (new LiteralText("")).append(stack.getName());
+            if (stack.hasCustomName()) {
+                mutableText.formatted(Formatting.ITALIC);
+            }
+
+            mutableText.formatted(stack.getRarity().formatting).styled((style) -> {
+                return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(stack)));
+            });
+
+            return mutableText;
+        }
+
+        return (new LiteralText("")).append(ItemStack.EMPTY.getName());
     }
 
     public static record HSV(float h, float s, float v) {

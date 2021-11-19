@@ -3,8 +3,8 @@ package eu.pb4.placeholders.builtin;
 import eu.pb4.placeholders.PlaceholderAPI;
 import eu.pb4.placeholders.PlaceholderResult;
 import eu.pb4.placeholders.util.GeneralUtils;
-import eu.pb4.placeholders.util.PlaceholderUtils;
-import net.minecraft.stat.Stat;
+import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.LiteralText;
 import net.minecraft.util.Formatting;
@@ -17,6 +17,14 @@ public class PlayerPlaceholders {
         PlaceholderAPI.register(new Identifier("player", "name"), (ctx) -> {
             if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(ctx.getPlayer().getName());
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        PlaceholderAPI.register(new Identifier("player", "name_visual"), (ctx) -> {
+            if (ctx.hasPlayer()) {
+                return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.getPlayer().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -55,9 +63,55 @@ public class PlayerPlaceholders {
             }
         });
 
+        PlaceholderAPI.register(new Identifier("player", "displayname_visual"), (ctx) -> {
+            if (ctx.hasPlayer()) {
+                return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.getPlayer().getDisplayName()));
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
         PlaceholderAPI.register(new Identifier("player", "displayname_unformatted"), (ctx) -> {
             if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(GeneralUtils.textToString(ctx.getPlayer().getDisplayName()));
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        PlaceholderAPI.register(new Identifier("player", "inventory_slot"), (ctx) -> {
+            if (ctx.hasPlayer() && ctx.hasArgument()) {
+                try {
+                    int slot = Integer.parseInt(ctx.getArgument());
+
+                    var inventory = ctx.getPlayer().getInventory();
+
+                    if (slot >= 0 && slot < inventory.size()) {
+                        var stack = inventory.getStack(slot);
+
+                        return PlaceholderResult.value(GeneralUtils.getItemText(stack));
+                    }
+
+                } catch (Exception e) {
+                    // noop
+                }
+                return PlaceholderResult.invalid("Invalid argument");
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        PlaceholderAPI.register(new Identifier("player", "equipment_slot"), (ctx) -> {
+            if (ctx.hasPlayer() && ctx.hasArgument()) {
+                try {
+                    var slot = EquipmentSlot.byName(ctx.getArgument());
+
+                    var stack = ctx.getPlayer().getEquippedStack(slot);
+                    return PlaceholderResult.value(GeneralUtils.getItemText(stack));
+                } catch (Exception e) {
+                    // noop
+                }
+                return PlaceholderResult.invalid("Invalid argument");
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -69,7 +123,7 @@ public class PlayerPlaceholders {
                 return PlaceholderResult.value(ctx.hasArgument()
                         ? DurationFormatUtils.formatDuration((long) x * 50, ctx.getArgument(), true)
                         : GeneralUtils.durationToString((long) x / 20)
-                        );
+                );
             } else {
                 return PlaceholderResult.invalid("No player!");
             }

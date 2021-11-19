@@ -1,5 +1,7 @@
 # Default placeholder list
 These placeholders are provided by default and are available for every mod using Placeholder API.
+If placeholder isn't parsed, make sure it is used in correct context, with valid arguments and 
+that you are using the latest version.
 
 ## List of placeholders
 ### Server
@@ -14,6 +16,9 @@ These placeholders are provided by default and are available for every mod using
 - `%server:max_ram%`/`%server:max_ram/gb%` - maximal amount of ram, that can be used by server
 - `%server:online%` - number of online players
 - `%server:max_players%` - maximal player count
+- `%server:mod_version/[modid]%` - returns version of the mod
+- `%server:mod_name/[modid]%` - returns name of the mod
+- `%server:mod_description/[modid]%` - returns description of the mod
 
 ### World
 - `%world:time%` - world's time
@@ -27,9 +32,11 @@ These placeholders are provided by default and are available for every mod using
 
 ### Player
 - `%player:name%` - player's name
+- `%player:name_visual%` - player's name (without hover and click action)
 - `%player:name_unformatted%` - player's name (without formatting)
-- `%player:displayname%` - player's displayname (used on chat)
-- `%player:displayname_unformatted%` - player's displayname (without formatting)
+- `%player:displayname%` - player's display name (used on chat)
+- `%player:displayname_visual%` - player's display name (without hover and click action)
+- `%player:displayname_unformatted%` - player's display name (without formatting)
 - `%player:ping%` - player's ping
 - `%player:ping_colored%` - colored player's ping
 - `%player:pos_x%` - player's x coordinate
@@ -39,6 +46,8 @@ These placeholders are provided by default and are available for every mod using
 - `%player:max_health%` - player's max health
 - `%player:hunger%` - player's hunger
 - `%player:saturation%` - player's saturation
+- `%player:inventory_slot/[slot number]%` - item in player's inventory at slot
+- `%player:equipment_slot/[name]%` - player's equipment at selected slot. Valid values for `[name]` are `mainhand`, `offhand`, `head`, `chest`, `legs` and `feet`  
 - `%player:playtime%`/`%player:playtime/[formatting]%` - player's playtime
 - `%player:statistic/[statistic]%` - value of player's statistic
 
