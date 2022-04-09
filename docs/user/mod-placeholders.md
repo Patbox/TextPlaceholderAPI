@@ -5,18 +5,8 @@ Box Of Placeholders is a mod that adds placeholder for other mods.
 You can download it from https://github.com/Patbox/BoxOfPlaceholders/releases
 
 ## List of placeholders
-### [Box of Placeholders](https://www.curseforge.com/minecraft/mc-mods/box-of-placeholders)
-- `%bop:ram_max%` / `%bop:ram_max/gb%` - Shows maximal amount of ram
-- `%bop:ram_used%` / `%bop:ram_used/gb%` - Shows amount of used ram
-- `%bop:ram_free%` / `%bop:ram_free/gb%` - Shows amount of free ram
-- `%bop:ram_used_percent%` - Shows amount of used ram (as percent)
-- `%bop:ram_free_percent%` - Shows amount of free ram (as percent)
-- `%bop:animation/[id]%` - Shows animation based on id
-- `%bop:mob_count%`/`%bop:mob_count/[group]%` - Shows amount of spawned mobs
-- `%bop:mob_cap%`/`%bop:mob_cap/[group]%` - Shows maximum amount of mobs that can spawn is player's world
 
-### [Get Off My Lawn](https://www.curseforge.com/minecraft/mc-mods/get-off-my-lawn)
-Requires [Box of Placeholders addon](https://www.curseforge.com/minecraft/mc-mods/box-of-placeholders)
+### [Get Off My Lawn ReServed](https://pb4.eu/#get-off-my-lawn)
 
 - `%goml:claim_owners%`/`%goml:claim_owners/[No owners text]%` - Returns list of claim owners
 - `%goml:claim_owners_uuid%`/`%goml:claim_owners_uuid/[No owners text]%` - Returns list of claim owners (as uuids)
@@ -74,9 +64,3 @@ Requires [LuckPerms Fabric PlaceholderAPI addon](https://ci.lucko.me/job/LuckPer
 
 ### [Styled Nicknames](https://www.curseforge.com/minecraft/mc-mods/styled-nicknames)
 - `%styled-nicknames:display_name%` - Either nickname or default player name (skips other formatting mods)
-
-### [Vanish](https://www.curseforge.com/minecraft/mc-mods/vanish)
-Requires [Box of Placeholders addon](https://www.curseforge.com/minecraft/mc-mods/box-of-placeholders)
-
-- `%vanish:safe_online%` - Returns (safe) number of player's online
-- `%vanish:invisible_player_count%` - Number of player's using vanish
