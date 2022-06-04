@@ -1,6 +1,6 @@
 # About Placeholder API
 It's a small, jij-able API that allows creation and parsing placeholders within strings and Minecraft Text Components.
-Placeholders use simple format of `%modid:type%` or `%modid:type/data%`.
+Placeholders use simple format of `%modid:type%` or `%modid:type data%` (`%modid:type/data%` before 1.19).
 It also includes simple, general usage text format indented for simplifying user input in configs/chats/etc.
 
 ## For users

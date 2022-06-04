@@ -4,9 +4,9 @@ Usage of placeholder mostly depends on implementation of mod itself. If mod uses
 (for example with Simple Text Format) you just need to add it by just writing `%placeholder%` 
 (or in some cases`{placeholder}`, `${placeholder}` or other format which should be provided on mods page).
 
-Inner part of placeholder can take shape of either `category:placeholder` or `category:placeholder/argument`, 
+Inner part of placeholder can take shape of either `category:placeholder` or `category:placeholder argument` (`category:placeholder/argument` before 1.19), 
 where `category` is replaced by type (`player`, `world`, etc) or ID of the mod and `placeholder` is the placeholder itself.
-Additionally, some placeholders might have additional or required argument provided after first `/` symbol. It's format
+Additionally, some placeholders might have additional or required argument provided after first space. It's format
 fully depend on mod providing it.
 
 You can check list of [build in placeholders here](/users/default-placeholders) 

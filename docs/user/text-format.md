@@ -109,7 +109,7 @@ This tag is self containing, so it doesn't contain a closing tag.
 ### Control keys
 This tag allows you to add information about player control keys, with respecting of theirs configuration.
 
-You can use it with `<key:[value]>`, where `[value]` is a control key used, which you can hind [here](https://minecraft.fandom.com/wiki/Controls#Configurable_controls).
+You can use it with `<keybind:[value]>`, where `[value]` is a control key used, which you can hind [here](https://minecraft.fandom.com/wiki/Controls#Configurable_controls).
 
 This tag is self containing, so it doesn't contain a closing tag.
 
@@ -121,6 +121,7 @@ within them, as they require static text.
 There 2 types of gradients:
 
 * `<gradient:[color 1]:[color 2]:...>`/`<gr:[color 1]:[color 2]:...>` - I can take multiple colors to move between them smoothly. 
+* `<hard_gradient:[color 1]:[color 2]:...>`/`<hgr:[color 1]:[color 2]:...>` - I can take multiple colors to move between them without mixing them. 
 * `<rainbow:[frequency]:[saturation]:[offset]>`/`<rb:[...]>` - It's simple rainbow gradient. All arguments are optional (`<ranbow>` is still valid) and they take numbers between 0 and 1 (`0.3` for example)
 
 

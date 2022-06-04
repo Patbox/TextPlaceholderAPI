@@ -1,9 +1,8 @@
-package eu.pb4.placeholders;
+package eu.pb4.placeholders.api;
 
-import eu.pb4.placeholders.util.GeneralUtils;
-import eu.pb4.placeholders.util.PlaceholderUtils;
-import net.minecraft.text.LiteralText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 public final class PlaceholderResult {
     private final Text text;
@@ -15,10 +14,10 @@ public final class PlaceholderResult {
             this.text = text;
             this.valid = true;
         } else {
-            this.text = new LiteralText(reason != null ? reason : "Invalid!");
+            this.text = Text.literal("[" + (reason != null ? reason : "Invalid placeholder!") + "]").setStyle(Style.EMPTY.withColor(Formatting.GRAY).withItalic(true));
             this.valid = false;
         }
-        this.string = GeneralUtils.textToString(this.text);
+        this.string = this.text.getString();
     }
 
     /**
@@ -26,7 +25,7 @@ public final class PlaceholderResult {
      *
      * @return Text
      */
-    public Text getText() {
+    public Text text() {
         return this.text;
     }
 
@@ -35,7 +34,7 @@ public final class PlaceholderResult {
      *
      * @return String
      */
-    public String getString() {
+    public String string() {
         return this.string;
     }
 
@@ -81,7 +80,7 @@ public final class PlaceholderResult {
      * @return PlaceholderResult
      */
     public static PlaceholderResult value(String text) {
-        return new PlaceholderResult(TextParser.parse(text), null);
+        return new PlaceholderResult(TextParserUtils.formatText(text), null);
     }
 }
 

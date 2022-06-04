@@ -1,10 +1,9 @@
-package eu.pb4.placeholders.builtin;
+package eu.pb4.placeholders.impl.placeholder.builtin;
 
-import eu.pb4.placeholders.PlaceholderAPI;
-import eu.pb4.placeholders.PlaceholderResult;
+import eu.pb4.placeholders.api.PlaceholderResult;
+import eu.pb4.placeholders.api.Placeholders;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.LiteralText;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.SpawnHelper;
 
@@ -16,12 +15,12 @@ public class WorldPlaceholders {
     static final int CHUNK_AREA = (int)Math.pow(17.0D, 2.0D);
 
     public static void register() {
-        PlaceholderAPI.register(new Identifier("world", "time"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "time"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
 
             long dayTime = (long) (world.getTimeOfDay() * 3.6 / 60);
@@ -29,12 +28,12 @@ public class WorldPlaceholders {
             return PlaceholderResult.value(String.format("%02d:%02d", (dayTime / 60 + 6) % 24, dayTime % 60));
         });
 
-        PlaceholderAPI.register(new Identifier("world", "time_alt"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "time_alt"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
 
             long dayTime = (long) (world.getTimeOfDay() * 3.6 / 60);
@@ -46,34 +45,34 @@ public class WorldPlaceholders {
             return PlaceholderResult.value(String.format("%02d:%02d %s", y, dayTime % 60, x > 11 ? "PM" : "AM" ));
         });
 
-        PlaceholderAPI.register(new Identifier("world", "day"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "day"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
 
             return PlaceholderResult.value("" + world.getTime() / 24000);
         });
 
-        PlaceholderAPI.register(new Identifier("world", "id"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "id"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
 
             return PlaceholderResult.value(world.getRegistryKey().getValue().toString());
         });
 
-        PlaceholderAPI.register(new Identifier("world", "name"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "name"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
             List<String> parts = new ArrayList<>();
             {
@@ -89,30 +88,30 @@ public class WorldPlaceholders {
 
 
 
-        PlaceholderAPI.register(new Identifier("world", "player_count"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "player_count"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
 
             return PlaceholderResult.value("" + world.getPlayers().size());
         });
 
-        PlaceholderAPI.register(new Identifier("world", "mob_count"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "mob_count"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
 
             SpawnHelper.Info info = world.getChunkManager().getSpawnInfo();
 
             SpawnGroup spawnGroup = null;
-            if (ctx.hasArgument()) {
-                spawnGroup = SpawnGroup.byName(ctx.getArgument());
+            if (arg != null) {
+                spawnGroup = SpawnGroup.valueOf(arg.toUpperCase(Locale.ROOT));
             }
 
             if (spawnGroup != null) {
@@ -127,19 +126,19 @@ public class WorldPlaceholders {
             }
         });
 
-        PlaceholderAPI.register(new Identifier("world", "mob_cap"), (ctx) -> {
+        Placeholders.register(new Identifier("world", "mob_cap"), (ctx, arg) -> {
             ServerWorld world;
-            if (ctx.hasPlayer()) {
-                world = ctx.getPlayer().getServerWorld();
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
             } else {
-                world = ctx.getServer().getOverworld();
+                world = ctx.server().getOverworld();
             }
 
             SpawnHelper.Info info = world.getChunkManager().getSpawnInfo();
 
             SpawnGroup spawnGroup = null;
-            if (ctx.hasArgument()) {
-                spawnGroup = SpawnGroup.byName(ctx.getArgument());
+            if (arg != null) {
+                spawnGroup = SpawnGroup.valueOf(arg.toUpperCase(Locale.ROOT));
             }
 
             if (spawnGroup != null) {

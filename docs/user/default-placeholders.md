@@ -3,30 +3,32 @@ These placeholders are provided by default and are available for every mod using
 If placeholder isn't parsed, make sure it is used in correct context, with valid arguments and 
 that you are using the latest version.
 
+Before 1.19, arguments were split with `/` instead of space 
+
 ## List of placeholders
 ### Server
 - `%server:tps%` - server's tps
 - `%server:tps_colored%` - colored server's tps
 - `%server:mspt%` - server's mspt
 - `%server:mspt_colored%` - colored server's mspt
-- `%server:time%`/`%server:time/[formatting]%` - server's time
+- `%server:time%`/`%server:time [formatting]%` - server's time
 - `%server:version%` - server's version
 - `%server:name%` - server's name
-- `%server:used_ram%`/`%server:used_ram/gb%` - amount of ram used by server
-- `%server:max_ram%`/`%server:max_ram/gb%` - maximal amount of ram, that can be used by server
+- `%server:used_ram%`/`%server:used_ram gb%` - amount of ram used by server
+- `%server:max_ram%`/`%server:max_ram gb%` - maximal amount of ram, that can be used by server
 - `%server:online%` - number of online players
 - `%server:max_players%` - maximal player count
-- `%server:mod_version/[modid]%` - returns version of the mod
-- `%server:mod_name/[modid]%` - returns name of the mod
-- `%server:mod_description/[modid]%` - returns description of the mod
+- `%server:mod_version [modid]%` - returns version of the mod
+- `%server:mod_name [modid]%` - returns name of the mod
+- `%server:mod_description [modid]%` - returns description of the mod
 
 ### World
 - `%world:time%` - world's time
 - `%world:time_alt%` - world's time (alternative formatting)
 - `%world:day%` - world's day
 - `%world:player_count%` - world's player count
-- `%world:mob_count%`/`%world:mob_count/[group]%` - Shows amount of spawned mobs
-- `%world:mob_cap%`/`%world:mob_cap/[group]%` - Shows maximum amount of mobs that can spawn is player's world
+- `%world:mob_count%`/`%world:mob_count [group]%` - Shows amount of spawned mobs
+- `%world:mob_cap%`/`%world:mob_cap [group]%` - Shows maximum amount of mobs that can spawn is player's world
 - `%world:id%` - world's id
 - `%world:name%` - world's name
 
@@ -46,10 +48,10 @@ that you are using the latest version.
 - `%player:max_health%` - player's max health
 - `%player:hunger%` - player's hunger
 - `%player:saturation%` - player's saturation
-- `%player:inventory_slot/[slot number]%` - item in player's inventory at slot
-- `%player:equipment_slot/[name]%` - player's equipment at selected slot. Valid values for `[name]` are `mainhand`, `offhand`, `head`, `chest`, `legs` and `feet`  
-- `%player:playtime%`/`%player:playtime/[formatting]%` - player's playtime
-- `%player:statistic/[statistic]%` - value of player's statistic
+- `%player:inventory_slot [slot number]%` - item in player's inventory at slot
+- `%player:equipment_slot [name]%` - player's equipment at selected slot. Valid values for `[name]` are `mainhand`, `offhand`, `head`, `chest`, `legs` and `feet`  
+- `%player:playtime%`/`%player:playtime [formatting]%` - player's playtime
+- `%player:statistic [statistic]%` - value of player's statistic
 
 Vanilla statistics:
 ```

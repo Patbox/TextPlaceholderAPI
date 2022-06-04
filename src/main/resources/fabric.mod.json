@@ -4,7 +4,7 @@
   "version": "${version}",
 
   "name": "Placeholder API",
-  "description": "Simple api that allows mods to create and use universal text placeholders!",
+  "description": "Simple api for mods allowing for user friendly formatting and universal placeholders!",
   "authors": [
     "Patbox"
   ],
@@ -15,14 +15,9 @@
   "license": "LGPLv3",
   "icon": "assets/icon.png",
   "environment": "*",
-  "entrypoints": {
-    "main": [
-      "eu.pb4.placeholders.PlaceholderAPIMod"
-    ]
-  },
   "depends": {
-    "fabricloader": ">=0.7.4",
-    "minecraft": ">=1.17-beta.1"
+    "fabricloader": ">=0.13.4",
+    "minecraft": ">=1.19-beta.1"
   },
   "custom": {
     "modmenu": {
