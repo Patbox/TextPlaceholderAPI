@@ -16,13 +16,13 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 public final class Placeholders {
-	public static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(?<!\\\\)[%](?<id>[^%]+:[^%]+)[%]");
-	public static final Pattern ALT_PLACEHOLDER_PATTERN = Pattern.compile("(?<!\\\\)[{](?<id>[^{}]+:[^{}]+)[}]");
+	public static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(?<!((?<!(\\\\))\\\\))[%](?<id>[^%]+:[^%]+)[%]");
+	public static final Pattern ALT_PLACEHOLDER_PATTERN = Pattern.compile("(?<!((?<!(\\\\))\\\\))[{](?<id>[^{}]+:[^{}]+)[}]");
 
-	public static final Pattern PLACEHOLDER_PATTERN_CUSTOM = Pattern.compile("(?<!\\\\)[%](?<id>[^%]+)[%]");
-	public static final Pattern ALT_PLACEHOLDER_PATTERN_CUSTOM = Pattern.compile("(?<!\\\\)[{](?<id>[^{}]+)[}]");
+	public static final Pattern PLACEHOLDER_PATTERN_CUSTOM = Pattern.compile("(?<!((?<!(\\\\))\\\\))[%](?<id>[^%]+)[%]");
+	public static final Pattern ALT_PLACEHOLDER_PATTERN_CUSTOM = Pattern.compile("(?<!((?<!(\\\\))\\\\))[{](?<id>[^{}]+)[}]");
 
-	public static final Pattern PREDEFINED_PLACEHOLDER_PATTERN = Pattern.compile("(?<!\\\\)\\$[{](?<id>[^}]+)}");
+	public static final Pattern PREDEFINED_PLACEHOLDER_PATTERN = Pattern.compile("(?<!((?<!(\\\\))\\\\))\\$[{](?<id>[^}]+)}");
 
 	private static final HashMap<Identifier, PlaceholderHandler> PLACEHOLDERS = new HashMap<>();
 

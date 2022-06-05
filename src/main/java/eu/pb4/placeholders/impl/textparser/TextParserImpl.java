@@ -23,12 +23,17 @@ public class TextParserImpl {
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().registerTypeHierarchyAdapter(Style.class, new Style.Serializer()).create();
 
     static {
-        ESCAPED_CHARS.add(new Pair<>("\\", "&slsh;"));
-        ESCAPED_CHARS.add(new Pair<>("<", "&lt;"));
-        ESCAPED_CHARS.add(new Pair<>(">", "&gt;"));
-        ESCAPED_CHARS.add(new Pair<>("\"", "&quot;"));
-        ESCAPED_CHARS.add(new Pair<>("'", "&pos;"));
-        ESCAPED_CHARS.add(new Pair<>(":", "&colon;"));
+        ESCAPED_CHARS.add(new Pair<>("\\", "&slsh;\002"));
+        ESCAPED_CHARS.add(new Pair<>("<", "&lt;\002"));
+        ESCAPED_CHARS.add(new Pair<>(">", "&gt;\002"));
+        ESCAPED_CHARS.add(new Pair<>("\"", "&quot;\002"));
+        ESCAPED_CHARS.add(new Pair<>("'", "&pos;\002"));
+        ESCAPED_CHARS.add(new Pair<>(":", "&colon;\002"));
+        ESCAPED_CHARS.add(new Pair<>("&", "&amps;\002"));
+        ESCAPED_CHARS.add(new Pair<>("{", "&openbrac;\002"));
+        ESCAPED_CHARS.add(new Pair<>("}", "&closebrac;\002"));
+        ESCAPED_CHARS.add(new Pair<>("$", "&dolar;\002"));
+        ESCAPED_CHARS.add(new Pair<>("%", "&perc;\002"));
     }
 
     public static TextNode[] parse(String string, TextParserV1.TagParserGetter handlers) {
