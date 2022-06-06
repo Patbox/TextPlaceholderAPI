@@ -33,5 +33,9 @@ and [placeholders from mods here](/users/mod-placeholders).
   [CurseForge](https://www.curseforge.com/minecraft/mc-mods/player-events),
   [Github](https://github.com/ByMartrixx/player-events)
   
+- Discord4Fabric -
+  [CurseForge](https://www.curseforge.com/minecraft/mc-mods/discord4fabric),
+  [Modrinth](https://modrinth.com/mod/discord4fabric),
+  [Github](https://github.com/Reimnop/Discord4Fabric)
 
 *Are you a mod dev, and your mod is missing? Feel free to create an issue!*
