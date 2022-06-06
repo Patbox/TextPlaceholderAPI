@@ -95,10 +95,10 @@ public final class TextTags {
                                     skipped = true;
                                     continue;
                                 }
-                                textList.add(new ParentNode(parse(restoreOriginalEscaping(cleanArgument(part)), handlers)));
+                                textList.add(new ParentNode(parse(removeEscaping(cleanArgument(part)), handlers)));
                             }
 
-                            var out = new TranslatedNode(cleanArgument(lines[0]), textList.toArray(new TextNode[0]));
+                            var out = new TranslatedNode(removeEscaping(cleanArgument(lines[0])), textList.toArray(new TextNode[0]));
                             return new TextParserV1.TagNodeValue(out, 0);
                         }
                         return TextParserV1.TagNodeValue.EMPTY;
