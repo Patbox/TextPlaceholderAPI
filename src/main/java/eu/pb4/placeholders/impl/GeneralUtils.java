@@ -209,7 +209,7 @@ public class GeneralUtils {
             }
 
 
-            list.add(new TranslatedNode(content.getKey(), list.toArray()));
+            list.add(new TranslatedNode(content.getKey(), args.toArray()));
         } else if (input.getContent() instanceof ScoreTextContent content) {
             list.add(new ScoreNode(content.getName(), content.getObjective()));
         } else if (input.getContent() instanceof KeybindTextContent content) {
