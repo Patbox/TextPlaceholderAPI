@@ -12,6 +12,7 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Objects;
 
 public class ServerPlaceholders {
     public static void register() {
@@ -100,7 +101,7 @@ public class ServerPlaceholders {
             MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
             MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
 
-            return PlaceholderResult.value(arg.equals("gb")
+            return PlaceholderResult.value(Objects.equals(arg, "gb")
                     ? String.format("%.1f", (float) heapUsage.getUsed() / 1073741824)
                     : String.format("%d", heapUsage.getUsed() / 1048576));
             });
@@ -109,7 +110,7 @@ public class ServerPlaceholders {
                     MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
                     MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
 
-                    return PlaceholderResult.value(arg.equals("gb")
+                    return PlaceholderResult.value(Objects.equals(arg, "gb")
                             ? String.format("%.1f", (float) heapUsage.getMax() / 1073741824)
                             : String.format("%d", heapUsage.getMax() / 1048576));
                 });
