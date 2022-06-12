@@ -143,6 +143,18 @@ public class TestMod implements ModInitializer {
         return 0;
     }
 
+    private static int test7(CommandContext<ServerCommandSource> context) {
+        try {
+            ServerPlayerEntity player = context.getSource().getPlayer();
+
+            var text = Placeholders.parseText(Text.translatable("death.attack.outOfWorld", player.getDisplayName()), PlaceholderContext.of(player));
+            player.sendMessage(text);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) -> {
             dispatcher.register(
@@ -168,6 +180,10 @@ public class TestMod implements ModInitializer {
 
             dispatcher.register(
                     literal("test6ohno").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test6x))
+            );
+
+            dispatcher.register(
+                    literal("test7").executes(TestMod::test7)
             );
         });
     }
