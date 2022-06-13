@@ -28,17 +28,19 @@ public class ParentNode implements ParentTextNode {
     public final Text toText(ParserContext context, boolean removeSingleSlash) {
         if (this.children.length == 0) {
             return Text.empty();
-        } else if (this.children.length == 1) {
+        } else if (this.children.length == 1 && this.children[0] != null) {
             var out = this.children[0].toText(context, true);
             return ((MutableText) this.applyFormatting(out.copy(), context)).fillStyle(out.getStyle());
         } else {
             var base =  Text.empty();
 
             for (int i = 0; i < this.children.length; i++) {
-                var child = this.children[i].toText(context, true);
+                if (this.children[i] != null) {
+                    var child = this.children[i].toText(context, true);
 
-                if (child.getContent() != TextContent.EMPTY || child.getSiblings().size() > 0) {
-                    base.append(child);
+                    if (child.getContent() != TextContent.EMPTY || child.getSiblings().size() > 0) {
+                        base.append(child);
+                    }
                 }
             }
 

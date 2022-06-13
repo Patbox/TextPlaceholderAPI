@@ -10,9 +10,11 @@ import eu.pb4.placeholders.impl.placeholder.NodePlaceholderParserImpl;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 public final class Placeholders {
@@ -37,7 +39,6 @@ public final class Placeholders {
 			return false;
 		}
 	};
-	private static final PlaceholderContext EMPTY_CONTEXT = PlaceholderContext.of((MinecraftServer) null);
 
 	/**
 	 * Parses PlaceholderContext, can be used for parsing by hand
@@ -84,6 +85,26 @@ public final class Placeholders {
 		}));
 	}
 
+	public static ParentNode parseNodes(TextNode node, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, new PlaceholderGetter() {
+			@Override
+			public PlaceholderHandler getPlaceholder(String placeholder, ParserContext context) {
+				var get = context.get(key);
+				return get != null ? get.getPlaceholder(placeholder, context) : null;
+			}
+
+			@Override
+			public PlaceholderHandler getPlaceholder(String placeholder) {
+				return placeholders.contains(placeholder) ? PlaceholderHandler.EMPTY : null;
+			}
+
+			@Override
+			public boolean isContextOptional() {
+				return true;
+			}
+		}));
+	}
+
 
 	/**
 	 * Parses placeholders in text
@@ -104,7 +125,11 @@ public final class Placeholders {
 	}
 
 	public static Text parseText(Text text, Pattern pattern, Map<String, Text> placeholders) {
-		return parseNodes(TextNode.convert(text), pattern, placeholders).toText(ParserContext.of(PlaceholderContext.KEY, Placeholders.EMPTY_CONTEXT), true);
+		return parseNodes(TextNode.convert(text), pattern, placeholders).toText(ParserContext.of(), true);
+	}
+
+	public static Text parseText(Text text, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
+		return parseNodes(TextNode.convert(text), pattern, placeholders, key).toText(ParserContext.of(), true);
 	}
 
 	public static Text parseText(TextNode textNode, PlaceholderContext context) {
@@ -124,7 +149,11 @@ public final class Placeholders {
 	}
 
 	public static Text parseText(TextNode textNode, Pattern pattern, Map<String, Text> placeholders) {
-		return parseNodes(textNode, pattern, placeholders).toText(ParserContext.of(PlaceholderContext.KEY, Placeholders.EMPTY_CONTEXT), true);
+		return parseNodes(textNode, pattern, placeholders).toText(ParserContext.of(), true);
+	}
+
+	public static Text parseText(TextNode textNode, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
+		return parseNodes(textNode, pattern, placeholders, key).toText(ParserContext.of(), true);
 	}
 
 	/**
@@ -147,10 +176,20 @@ public final class Placeholders {
 
 
 	public interface PlaceholderGetter {
+		@Nullable
 		PlaceholderHandler getPlaceholder(String placeholder);
+
+		@Nullable
+		default PlaceholderHandler getPlaceholder(String placeholder, ParserContext context) {
+			return getPlaceholder(placeholder);
+		}
 
 		default boolean isContextOptional() {
 			return false;
+		}
+
+		default boolean exists(String placeholder) {
+			return this.getPlaceholder(placeholder) != null;
 		}
 	}
 

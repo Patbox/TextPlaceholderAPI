@@ -53,7 +53,7 @@ public class WorldPlaceholders {
                 world = ctx.server().getOverworld();
             }
 
-            return PlaceholderResult.value("" + world.getTime() / 24000);
+            return PlaceholderResult.value("" + world.getTimeOfDay() / 24000);
         });
 
         Placeholders.register(new Identifier("world", "id"), (ctx, arg) -> {

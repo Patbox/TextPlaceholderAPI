@@ -1,6 +1,5 @@
 package eu.pb4.placeholders.impl.placeholder;
 
-import eu.pb4.placeholders.api.PlaceholderHandler;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
@@ -48,8 +47,8 @@ public class NodePlaceholderParserImpl {
                     out.add(new LiteralNode(string.substring(previousEnd, start)));
                 }
 
-                if (placeholders.getPlaceholder(placeholder[0]) != null) {
-                    out.add(new PlaceholderNode(createRemoteHandler(placeholders, placeholder[0]), placeholders.isContextOptional(), placeholder.length == 2 ? placeholder[1] : null));
+                if (placeholders.exists(placeholder[0])) {
+                    out.add(new PlaceholderNode(placeholder[0], placeholders, placeholders.isContextOptional(), placeholder.length == 2 ? placeholder[1] : null));
                 } else {
                     out.add(new LiteralNode(matcher.group(0)));
                 }
@@ -104,10 +103,6 @@ public class NodePlaceholderParserImpl {
         }
 
         return new TextNode[] { text };
-    }
-
-    private static PlaceholderHandler createRemoteHandler(Placeholders.PlaceholderGetter placeholders, String id) {
-        return (context, argument) -> placeholders.getPlaceholder(id).onPlaceholderRequest(context, argument);
     }
 
     /*private static TemplateStyle parsePlaceholdersInStyle(TemplateStyle style, Object object, Pattern pattern, Map<Identifier, PlaceholderHandler> placeholders) {
