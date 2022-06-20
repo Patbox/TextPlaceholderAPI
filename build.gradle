@@ -18,6 +18,7 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 
+	maven { url "https://maven.nucleoid.xyz" }
 	maven { url "https://jitpack.io" }
 }
 
@@ -55,6 +56,7 @@ dependencies {
 	//modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 	modCompileOnly("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
 	modLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
+	modLocalRuntime("eu.pb4:polymer-reg-sync-manipulator:0.0.1+1.19")
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.

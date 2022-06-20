@@ -337,13 +337,14 @@ public final class TextTags {
                                 var out = recursiveParsing(input, handlers, endAt);
 
                                 final float finalFreq = freq;
+                                final float finalFreqLength = (finalFreq < 0 ? -freq : 0);
                                 final float finalOffset = offset;
                                 final float finalSaturation = saturation;
                                 final int finalOverriddenLength = overriddenLength;
 
                                 return out.value(new GradientNode(out.nodes(), finalOverriddenLength < 0
-                                        ? (pos, length) -> TextColor.fromRgb(GeneralUtils.hvsToRgb(((pos * finalFreq) / (length + 1) + finalOffset) % 1, finalSaturation, 1))
-                                        : (pos, length) -> TextColor.fromRgb(GeneralUtils.hvsToRgb(((pos * finalFreq) / (finalOverriddenLength + 1) + finalOffset) % 1, finalSaturation, 1))
+                                        ? (pos, length) -> TextColor.fromRgb(GeneralUtils.hvsToRgb((((pos * finalFreq) + (finalFreqLength * length)) / (length + 1) + finalOffset) % 1, finalSaturation, 1))
+                                        : (pos, length) -> TextColor.fromRgb(GeneralUtils.hvsToRgb((((pos * finalFreq) + (finalFreqLength * length)) / (finalOverriddenLength + 1) + finalOffset) % 1, finalSaturation, 1))
 
                                 ));
                             }

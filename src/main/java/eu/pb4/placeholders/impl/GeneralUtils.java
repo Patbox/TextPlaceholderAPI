@@ -31,6 +31,13 @@ public class GeneralUtils {
         }
     }
 
+    public static boolean isEmpty(Text text) {
+        return (
+                text.getContent() == TextContent.EMPTY
+                || (text.getContent() instanceof LiteralTextContent l && l.string().isEmpty())
+               ) && text.getSiblings().isEmpty();
+    }
+
     public static MutableText toGradient(Text base, GradientNode.GradientProvider posToColor) {
         return recursiveGradient(base, posToColor, 0, getGradientLength(base)).text();
     }
