@@ -15,31 +15,37 @@ import org.apache.commons.lang3.time.DurationFormatUtils;
 public class PlayerPlaceholders {
     public static void register() {
         Placeholders.register(new Identifier("player", "name"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(ctx.player().getName());
+            } else if (ctx.hasGameProfile()) {
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(new Identifier("player", "name_visual"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.player().getName()));
+            } else if (ctx.hasGameProfile()) {
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(new Identifier("player", "name_unformatted"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(ctx.player().getName().getString());
+            } else if (ctx.hasGameProfile()) {
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(new Identifier("player", "ping"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(String.valueOf(ctx.player().pingMilliseconds));
             } else {
                 return PlaceholderResult.invalid("No player!");
@@ -47,7 +53,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "ping_colored"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 int x = ctx.player().pingMilliseconds;
                 return PlaceholderResult.value(Text.literal(String.valueOf(x)).formatted(x < 100 ? Formatting.GREEN : x < 200 ? Formatting.GOLD : Formatting.RED));
             } else {
@@ -56,31 +62,37 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "displayname"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(ctx.player().getDisplayName());
+            } else if (ctx.hasGameProfile()) {
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(new Identifier("player", "displayname_visual"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.player().getDisplayName()));
+            } else if (ctx.hasGameProfile()) {
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(new Identifier("player", "displayname_unformatted"), (ctx, arg) -> {
-            if (ctx.player() != null) {
-                return PlaceholderResult.value(ctx.player().getDisplayName().getString());
+            if (ctx.hasPlayer()) {
+                return PlaceholderResult.value(Text.literal(ctx.player().getDisplayName().getString()));
+            } else if (ctx.hasGameProfile()) {
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(new Identifier("player", "inventory_slot"), (ctx, arg) -> {
-            if (ctx.player() != null && arg != null) {
+            if (ctx.hasPlayer() && arg != null) {
                 try {
                     int slot = Integer.parseInt(arg);
 
@@ -102,7 +114,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "equipment_slot"), (ctx, arg) -> {
-            if (ctx.player() != null && arg != null) {
+            if (ctx.hasPlayer() && arg != null) {
                 try {
                     var slot = EquipmentSlot.byName(arg);
 
@@ -118,7 +130,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "playtime"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 int x = ctx.player().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Stats.PLAY_TIME));
                 return PlaceholderResult.value(arg != null
                         ? DurationFormatUtils.formatDuration((long) x * 50, arg, true)
@@ -130,7 +142,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "statistic"), (ctx, arg) -> {
-            if (ctx.player() != null && arg != null) {
+            if (ctx.hasPlayer() && arg != null) {
                 try {
                     Identifier identifier = Identifier.tryParse(arg);
                     if (identifier != null) {
@@ -147,7 +159,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "pos_x"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 double value = ctx.player().getX();
                 String format = "%.2f";
 
@@ -167,7 +179,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "pos_y"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 double value = ctx.player().getY();
                 String format = "%.2f";
 
@@ -187,7 +199,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "pos_z"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 double value = ctx.player().getZ();
                 String format = "%.2f";
 
@@ -207,15 +219,17 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "uuid"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(ctx.player().getUuidAsString());
+            } else if (ctx.hasGameProfile()) {
+                return PlaceholderResult.value(Text.of("" + ctx.gameProfile().getId()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(new Identifier("player", "health"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(String.format("%.0f", ctx.player().getHealth()));
             } else {
                 return PlaceholderResult.invalid("No player!");
@@ -223,7 +237,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "max_health"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(String.format("%.0f", ctx.player().getMaxHealth()));
             } else {
                 return PlaceholderResult.invalid("No player!");
@@ -231,7 +245,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "hunger"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(String.format("%.0f", ctx.player().getHungerManager().getFoodLevel()));
             } else {
                 return PlaceholderResult.invalid("No player!");
@@ -239,7 +253,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(new Identifier("player", "saturation"), (ctx, arg) -> {
-            if (ctx.player() != null) {
+            if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(String.format("%.0f", ctx.player().getHungerManager().getSaturationLevel()));
             } else {
                 return PlaceholderResult.invalid("No player!");

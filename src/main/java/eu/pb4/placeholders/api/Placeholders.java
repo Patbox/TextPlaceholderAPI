@@ -7,14 +7,11 @@ import eu.pb4.placeholders.impl.placeholder.builtin.PlayerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.ServerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.WorldPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.NodePlaceholderParserImpl;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public final class Placeholders {
@@ -27,6 +24,8 @@ public final class Placeholders {
 	public static final Pattern PREDEFINED_PLACEHOLDER_PATTERN = Pattern.compile("(?<!((?<!(\\\\))\\\\))\\$[{](?<id>[^}]+)}");
 
 	private static final HashMap<Identifier, PlaceholderHandler> PLACEHOLDERS = new HashMap<>();
+
+	private static final List<PlaceholderListChangedCallback> CHANGED_CALLBACKS = new ArrayList<>();
 
 	private static final PlaceholderGetter PLACEHOLDER_GETTER = new PlaceholderGetter() {
 		@Override
@@ -161,19 +160,33 @@ public final class Placeholders {
 	 */
 	public static void register(Identifier identifier, PlaceholderHandler handler) {
 		PLACEHOLDERS.put(identifier, handler);
+		for (var e : CHANGED_CALLBACKS) {
+			e.onPlaceholderListChange(identifier, false);
+		}
 	}
 
 	/**
 	 * Removes placeholder
 	 */
 	public static void remove(Identifier identifier) {
-		PLACEHOLDERS.remove(identifier);
+		if (PLACEHOLDERS.remove(identifier) != null) {
+			for (var e : CHANGED_CALLBACKS) {
+				e.onPlaceholderListChange(identifier, true);
+			}
+		}
 	}
 
 	public static ImmutableMap<Identifier, PlaceholderHandler> getPlaceholders() {
 		return ImmutableMap.copyOf(PLACEHOLDERS);
 	}
 
+	public static void registerChangeEvent(PlaceholderListChangedCallback callback) {
+		CHANGED_CALLBACKS.add(callback);
+	}
+
+	public interface PlaceholderListChangedCallback {
+		void onPlaceholderListChange(Identifier identifier, boolean removed);
+	}
 
 	public interface PlaceholderGetter {
 		@Nullable
