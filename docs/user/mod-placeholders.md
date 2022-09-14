@@ -64,3 +64,7 @@ Requires [LuckPerms Fabric PlaceholderAPI addon](https://ci.lucko.me/job/LuckPer
 
 ### [Styled Nicknames](https://www.curseforge.com/minecraft/mc-mods/styled-nicknames)
 - `%styled-nicknames:display_name%` - Either nickname or default player name (skips other formatting mods)
+
+### [Vanish](https://modrinth.com/mod/vanish)
+- `%vanish:vanished%` - Displays a text (configurable via config) if a player is vanished
+- `%vanish:online%` - The amount of players that the player viewing the placeholder can see
