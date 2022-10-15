@@ -96,7 +96,7 @@ public class GeneralUtils {
     }
 
     public static int rgbToInt(float r, float g, float b) {
-        return ((int) (r * 0xff)) << 16 | ((int) (g * 0xff)) << 8 | ((int) (b * 0xff));
+        return (((int) (r * 0xff)) & 0xFF) << 16 | (((int) (g * 0xff)) & 0xFF) << 8 | (((int) (b * 0xff) & 0xFF));
     }
 
     public static HSV rgbToHsv(int rgb) {
@@ -170,7 +170,7 @@ public class GeneralUtils {
 
             baseText = Text.translatable(translatable.getKey(), obj.toArray());
         } else {
-            baseText = input.copy();
+            baseText = input.copyContentOnly();
         }
 
         for (var sibling : input.getSiblings()) {

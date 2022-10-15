@@ -2,6 +2,7 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -32,5 +33,10 @@ public final class ClickActionNode extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
         return new ClickActionNode(children, this.action, this.value);
+    }
+
+    @Override
+    public ParentTextNode copyWith(TextNode[] children, NodeParser parser) {
+        return new ClickActionNode(children, this.action, TextNode.asSingle(parser.parseNodes(this.value)));
     }
 }

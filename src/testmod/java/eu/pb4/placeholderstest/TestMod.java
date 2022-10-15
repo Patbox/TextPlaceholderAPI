@@ -7,8 +7,10 @@ import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.placeholders.api.node.LiteralNode;
-import eu.pb4.placeholders.api.node.parent.ParentNode;
+import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.LegacyFormattingParser;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
+import eu.pb4.placeholders.api.parsers.MarkdownLiteParserV1;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.TextArgumentType;
@@ -50,7 +52,17 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var time = System.nanoTime();
-            var tags = new ParentNode(TextParserV1.DEFAULT.parseNodes(new LiteralNode(context.getArgument("text", String.class))));
+            var tags = TextNode.asSingle(
+                    LegacyFormattingParser.ALL.parseNodes(
+                            TextNode.asSingle(
+                                    MarkdownLiteParserV1.ALL.parseNodes(
+                                            TextNode.asSingle(
+                                                    TextParserV1.DEFAULT.parseNodes(new LiteralNode(context.getArgument("text", String.class)))
+                                            )
+                                    )
+                            )
+                    )
+            );
             var tagTime = System.nanoTime() - time;
             time = System.nanoTime();
 

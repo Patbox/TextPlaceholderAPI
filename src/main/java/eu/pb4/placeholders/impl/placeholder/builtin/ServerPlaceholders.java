@@ -17,12 +17,12 @@ import java.util.Objects;
 public class ServerPlaceholders {
     public static void register() {
         Placeholders.register(new Identifier("server", "tps"), (ctx, arg) -> {
-            float tps = 1000/Math.max(ctx.server().getTickTime(), 50);
+            double tps = 1000f / Math.max(ctx.server().getTickTime(), 50);
             String format = "%.1f";
 
             if (arg != null) {
                 try {
-                    int x = Integer.getInteger(arg);
+                    int x = Integer.parseInt(arg);
                     format = "%." + x + "f";
                 } catch (Exception e) {
                     format = "%.1f";
@@ -33,12 +33,12 @@ public class ServerPlaceholders {
         });
 
         Placeholders.register(new Identifier("server", "tps_colored"), (ctx, arg) -> {
-            float tps = 1000/Math.max(ctx.server().getTickTime(), 50);
+            double tps = 1000f / Math.max(ctx.server().getTickTime(), 50);
             String format = "%.1f";
 
             if (arg != null) {
                 try {
-                    int x = Integer.getInteger(arg);
+                    int x = Integer.parseInt(arg);
                     format = "%." + x + "f";
                 } catch (Exception e) {
                     format = "%.1f";

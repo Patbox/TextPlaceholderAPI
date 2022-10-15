@@ -4,6 +4,10 @@ import eu.pb4.placeholders.api.ParserContext;
 import net.minecraft.text.Text;
 
 public record TranslatedNode(String key, Object[] args) implements TextNode {
+    public TranslatedNode(String key) {
+        this(key, new Object[0]);
+    }
+
     @Override
     public Text toText(ParserContext context, boolean removeSingleSlash) {
         var args = new Object[this.args.length];

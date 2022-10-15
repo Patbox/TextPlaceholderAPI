@@ -29,5 +29,7 @@ public final class ParserContext {
     };
 
 
-    public record Key<T>(String key, Class<T> type) {};
+    public record Key<T>(String key, Class<T> type) {
+        public static final Key<Boolean> COMPACT_TEXT = new Key<>("compact_text", Boolean.class);
+    };
 }

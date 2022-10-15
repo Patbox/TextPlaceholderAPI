@@ -8,21 +8,21 @@ import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 
 public final class GradientNode extends ParentNode {
-    private final GradientProvider gradientBuilder;
+    private final GradientProvider gradientProvider;
 
     public GradientNode(TextNode[] children, GradientProvider gradientBuilder) {
         super(children);
-        this.gradientBuilder = gradientBuilder;
+        this.gradientProvider = gradientBuilder;
     }
 
     @Override
     protected Text applyFormatting(MutableText out, ParserContext context) {
-        return GeneralUtils.toGradient(out, this.gradientBuilder);
+        return GeneralUtils.toGradient(out, this.gradientProvider);
     }
 
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
-        return new GradientNode(children, this.gradientBuilder);
+        return new GradientNode(children, this.gradientProvider);
     }
 
     @FunctionalInterface

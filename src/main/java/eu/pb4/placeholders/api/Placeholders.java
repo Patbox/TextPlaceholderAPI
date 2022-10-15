@@ -3,6 +3,8 @@ package eu.pb4.placeholders.api;
 import com.google.common.collect.ImmutableMap;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
+import eu.pb4.placeholders.api.node.parent.ParentTextNode;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.impl.placeholder.builtin.PlayerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.ServerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.WorldPlaceholders;
@@ -59,15 +61,15 @@ public final class Placeholders {
 	 * @return Text
 	 */
 	public static ParentNode parseNodes(TextNode node) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, PLACEHOLDER_PATTERN, PLACEHOLDER_GETTER));
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, PLACEHOLDER_PATTERN, PLACEHOLDER_GETTER, NodeParser.NOOP));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, PLACEHOLDER_GETTER));
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, PLACEHOLDER_GETTER, NodeParser.NOOP));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, PlaceholderGetter placeholderGetter) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, placeholderGetter));
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, placeholderGetter, NodeParser.NOOP));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, Map<String, Text> placeholders) {
@@ -81,7 +83,7 @@ public final class Placeholders {
 			public boolean isContextOptional() {
 				return true;
 			}
-		}));
+		}, NodeParser.NOOP));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
@@ -101,7 +103,7 @@ public final class Placeholders {
 			public boolean isContextOptional() {
 				return true;
 			}
-		}));
+		}, NodeParser.NOOP));
 	}
 
 

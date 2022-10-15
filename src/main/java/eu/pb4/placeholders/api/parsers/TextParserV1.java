@@ -1,6 +1,7 @@
 package eu.pb4.placeholders.api.parsers;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.serialization.Codec;
 import eu.pb4.placeholders.api.node.EmptyNode;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
@@ -27,6 +28,14 @@ public class TextParserV1 implements NodeParser {
     private final Map<String, TextTag> byName = new HashMap<>();
     private final Map<String, TextTag> byNameAlias = new HashMap<>();
 
+    public static TextParserV1 createDefault() {
+        return DEFAULT.copy();
+    }
+
+    public static TextParserV1 createSafe() {
+        return SAFE.copy();
+    }
+
     public static void registerDefault(TextTag tag) {
         DEFAULT.register(tag);
 
@@ -34,7 +43,6 @@ public class TextParserV1 implements NodeParser {
             SAFE.register(tag);
         }
     }
-
 
     public void register(TextTag tag) {
         if (this.byName.containsKey(tag.name())) {
@@ -68,6 +76,14 @@ public class TextParserV1 implements NodeParser {
     @Override
     public TextNode[] parseNodes(TextNode input) {
         return parseNodesWith(input, this::getTagParser);
+    }
+
+    public TextParserV1 copy() {
+        var parser = new TextParserV1();
+        for (var tag : this.tags) {
+            parser.register(tag);
+        }
+        return parser;
     }
 
     public static TextNode[] parseNodesWith(TextNode input, TagParserGetter getter) {

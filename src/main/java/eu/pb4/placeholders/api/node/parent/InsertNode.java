@@ -2,6 +2,7 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
@@ -25,5 +26,10 @@ public final class InsertNode extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
         return new InsertNode(children, this.value);
+    }
+
+    @Override
+    public ParentTextNode copyWith(TextNode[] children, NodeParser parser) {
+        return new InsertNode(children, TextNode.asSingle(parser.parseNodes(this.value)));
     }
 }

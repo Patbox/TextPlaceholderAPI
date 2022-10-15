@@ -5,6 +5,7 @@ import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.*;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -14,13 +15,13 @@ import java.util.regex.Pattern;
 @ApiStatus.Internal
 public class NodePlaceholderParserImpl {
 
-    public static TextNode[] recursivePlaceholderParsing(TextNode text, Pattern pattern, Placeholders.PlaceholderGetter placeholders) {
+    public static TextNode[] recursivePlaceholderParsing(TextNode text, Pattern pattern, Placeholders.PlaceholderGetter placeholders, NodeParser parser) {
         if (text instanceof TranslatedNode translatedNode) {
             var list = new ArrayList<>();
 
             for(var arg : translatedNode.args()) {
                 if (arg instanceof TextNode textNode) {
-                    list.add(new ParentNode(recursivePlaceholderParsing(textNode, pattern, placeholders)));
+                    list.add(new ParentNode(recursivePlaceholderParsing(textNode, pattern, placeholders, parser)));
                 } else {
                     list.add(arg);
                 }
@@ -68,15 +69,15 @@ public class NodePlaceholderParserImpl {
             var out = new ArrayList<TextNode>();
 
             for(var text1 : parentNode.getChildren()) {
-                out.add(new ParentNode(recursivePlaceholderParsing(text1, pattern, placeholders)));
+                out.add(new ParentNode(recursivePlaceholderParsing(text1, pattern, placeholders, parser)));
             }
 
             if (text instanceof HoverNode<?,?> hoverNode && hoverNode.action() == HoverNode.Action.TEXT) {
-                return new TextNode[] { new HoverNode<>(out.toArray(new TextNode[0]), HoverNode.Action.TEXT, (ParentNode) recursivePlaceholderParsing((TextNode) hoverNode.value(), pattern, placeholders)[0]) };
+                return new TextNode[] { new HoverNode<>(out.toArray(new TextNode[0]), HoverNode.Action.TEXT, (ParentNode) recursivePlaceholderParsing((TextNode) hoverNode.value(), pattern, placeholders, parser)[0]) };
             } else if (text instanceof ClickActionNode clickActionNode) {
-                return new TextNode[] { new ClickActionNode(out.toArray(new TextNode[0]), clickActionNode.action(), recursivePlaceholderParsing(clickActionNode.value(), pattern, placeholders)[0]) };
+                return new TextNode[] { new ClickActionNode(out.toArray(new TextNode[0]), clickActionNode.action(), TextNode.asSingle(recursivePlaceholderParsing(clickActionNode.value(), pattern, placeholders, parser))) };
             } else if (text instanceof InsertNode insertNode) {
-                return new TextNode[] { new InsertNode(out.toArray(new TextNode[0]), recursivePlaceholderParsing(insertNode.value(), pattern, placeholders)[0]) };
+                return new TextNode[] { new InsertNode(out.toArray(new TextNode[0]), TextNode.asSingle(recursivePlaceholderParsing(insertNode.value(), pattern, placeholders, parser))) };
             } else if (text instanceof StyledNode node) {
                 var style = node.rawStyle();
                 var hoverValue = node.hoverValue();
@@ -84,15 +85,15 @@ public class NodePlaceholderParserImpl {
                 var insertion = node.insertion();
 
                 if (hoverValue != null) {
-                    hoverValue = (ParentNode) recursivePlaceholderParsing(hoverValue, pattern, placeholders)[0];
+                    hoverValue = new ParentNode(recursivePlaceholderParsing(hoverValue, pattern, placeholders, parser));
                 }
 
                 if (clickValue != null) {
-                    clickValue = new ParentNode(recursivePlaceholderParsing(hoverValue, pattern, placeholders));
+                    clickValue = TextNode.asSingle(recursivePlaceholderParsing(hoverValue, pattern, placeholders, parser));
                 }
 
                 if (insertion != null) {
-                    insertion = new ParentNode(recursivePlaceholderParsing(hoverValue, pattern, placeholders));
+                    insertion = TextNode.asSingle(recursivePlaceholderParsing(hoverValue, pattern, placeholders, parser));
                 }
 
 

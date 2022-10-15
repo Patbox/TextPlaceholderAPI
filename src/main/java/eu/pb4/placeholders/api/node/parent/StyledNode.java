@@ -2,6 +2,7 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.ParserContext;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +14,7 @@ public final class StyledNode extends ParentNode {
     private final TextNode clickValue;
     private final TextNode insertion;
 
-    public StyledNode(TextNode[] children, Style style,  @Nullable ParentNode hoverValue, @Nullable TextNode clickValue, @Nullable TextNode insertion) {
+    public StyledNode(TextNode[] children, Style style, @Nullable ParentNode hoverValue, @Nullable TextNode clickValue, @Nullable TextNode insertion) {
         super(children);
         this.style = style;
         this.hoverValue = hoverValue;
@@ -25,15 +26,15 @@ public final class StyledNode extends ParentNode {
         var style = this.style;
 
         if (hoverValue != null && style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
-            style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, this.hoverValue.toText(context, true)));
+            style = style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, this.hoverValue.toText(context, true)));
         }
 
         if (clickValue != null && style.getClickEvent() != null) {
-            style.withClickEvent(new ClickEvent(style.getClickEvent().getAction(), this.clickValue.toText(context, true).getString()));
+            style = style.withClickEvent(new ClickEvent(style.getClickEvent().getAction(), this.clickValue.toText(context, true).getString()));
         }
 
         if (insertion != null) {
-            style.withInsertion(this.insertion.toText(context, true).getString());
+            style = style.withInsertion(this.insertion.toText(context, true).getString());
         }
         return style;
     }
@@ -66,5 +67,13 @@ public final class StyledNode extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
         return new StyledNode(children, this.style, this.hoverValue, this.clickValue, this.insertion);
+    }
+
+    @Override
+    public ParentTextNode copyWith(TextNode[] children, NodeParser parser) {
+        return new StyledNode(children, this.style,
+                this.hoverValue != null ? new ParentNode(parser.parseNodes(this.hoverValue)) : null,
+                this.clickValue != null ? TextNode.asSingle(parser.parseNodes(this.clickValue)) : null,
+                this.insertion != null ? TextNode.asSingle(parser.parseNodes(this.insertion)) : null);
     }
 }

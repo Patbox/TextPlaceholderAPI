@@ -2,6 +2,7 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.entity.EntityType;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.MutableText;
@@ -35,6 +36,14 @@ public final class HoverNode<T, H> extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
         return new HoverNode(children, this.action, this.value);
+    }
+
+    @Override
+    public ParentTextNode copyWith(TextNode[] children, NodeParser parser) {
+        if (this.action == Action.TEXT) {
+            return new HoverNode(children, Action.TEXT, TextNode.asSingle(parser.parseNodes((TextNode) this.value)));
+        }
+        return this.copyWith(children);
     }
 
     public Action<T, H> action() {

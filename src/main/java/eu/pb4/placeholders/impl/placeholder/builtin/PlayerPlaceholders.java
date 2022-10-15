@@ -165,7 +165,7 @@ public class PlayerPlaceholders {
 
                 if (arg != null) {
                     try {
-                        int x = Integer.getInteger(arg);
+                        int x = Integer.parseInt(arg);
                         format = "%." + x + "f";
                     } catch (Exception e) {
                         format = "%.2f";
@@ -185,7 +185,7 @@ public class PlayerPlaceholders {
 
                 if (arg != null) {
                     try {
-                        int x = Integer.getInteger(arg);
+                        int x = Integer.parseInt(arg);
                         format = "%." + x + "f";
                     } catch (Exception e) {
                         format = "%.2f";
@@ -205,7 +205,7 @@ public class PlayerPlaceholders {
 
                 if (arg != null) {
                     try {
-                        int x = Integer.getInteger(arg);
+                        int x = Integer.parseInt(arg);
                         format = "%." + x + "f";
                     } catch (Exception e) {
                         format = "%.2f";
