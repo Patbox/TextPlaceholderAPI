@@ -39,9 +39,9 @@ of existing ones, so not every might work in yours case.
 By default, there are multiple tags representing colors. They use their vanilla name or (additional aliases).
 This tag should be closed.
 
-The current list includes: `<yellow>`, `<dark_blue>`, `<dark_purple>`, `<gold>`, `<red>`, `<aqua>`, 
-`<gray>`, `<light_purple>`, `<white>`, `<dark_gray>`, `<green>`, `<dark_green>`, `<blue>`, `<dark_aqua>`, 
-`<dark_green>`, `<black>`
+The current list includes: `<black>`, `<dark_blue>`, `<dark_green>`, `<dark_aqua>`, `<dark_red>`, `<dark_purple>`, 
+`<gold>`, `<gray>`, `<dark_gray>`, `<blue>`, `<green>`, `<aqua>`, `<red>`, `<light_pruple>`, 
+`<yellow>`, `<white>`
 
 There is also a universal `<color:[value]>` and `<c:[value]>` tags, in which you can replace `[value]` with vanilla color name or
 a rgb color starting with `#` (for example `<color:#AABBCC>`)
