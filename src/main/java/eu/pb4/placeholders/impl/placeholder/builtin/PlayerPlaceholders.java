@@ -4,11 +4,12 @@ import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EquipmentSlot;
+import net.minecraft.registry.Registries;
+import net.minecraft.stat.StatType;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.registry.Registry;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 
@@ -144,10 +145,67 @@ public class PlayerPlaceholders {
         Placeholders.register(new Identifier("player", "statistic"), (ctx, arg) -> {
             if (ctx.hasPlayer() && arg != null) {
                 try {
-                    Identifier identifier = Identifier.tryParse(arg);
-                    if (identifier != null) {
-                        int x = ctx.player().getStatHandler().getStat(Stats.CUSTOM.getOrCreateStat(Registry.CUSTOM_STAT.get(identifier)));
-                        return PlaceholderResult.value(String.valueOf(x));
+                    var args = arg.split(" ");
+
+                    if (args.length == 1) {
+                        var identifier = Identifier.tryParse(args[0]);
+                        if (identifier != null) {
+                            var stat = Stats.CUSTOM.getOrCreateStat(Registries.CUSTOM_STAT.get(identifier));
+                            int x = ctx.player().getStatHandler().getStat(stat);
+                            return PlaceholderResult.value(stat.format(x));
+                        }
+                    } else if (args.length >= 2) {
+                        var type = Identifier.tryParse(args[0]);
+                        var id = Identifier.tryParse(args[1]);
+                        if (type != null) {
+                            var statType = (StatType<Object>) Registries.STAT_TYPE.get(type);
+
+                            if (statType != null) {
+                                var key = statType.getRegistry().get(id);
+                                if (key != null) {
+                                    var stat = statType.getOrCreateStat(key);
+                                    int x = ctx.player().getStatHandler().getStat(stat);
+                                    return PlaceholderResult.value(stat.format(x));
+                                }
+                            }
+                        }
+                    }
+                } catch (Exception e) {
+                    /* Into the void you go! */
+                }
+                return PlaceholderResult.invalid("Invalid statistic!");
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(new Identifier("player", "statistic_raw"), (ctx, arg) -> {
+            if (ctx.hasPlayer() && arg != null) {
+                try {
+                    var args = arg.split(" ");
+
+                    if (args.length == 1) {
+                        var identifier = Identifier.tryParse(args[0]);
+                        if (identifier != null) {
+                            var stat = Stats.CUSTOM.getOrCreateStat(Registries.CUSTOM_STAT.get(identifier));
+                            int x = ctx.player().getStatHandler().getStat(stat);
+                            return PlaceholderResult.value(String.valueOf(x));
+                        }
+                    } else if (args.length >= 2) {
+                        var type = Identifier.tryParse(args[0]);
+                        var id = Identifier.tryParse(args[1]);
+                        if (type != null) {
+                            var statType = (StatType<Object>) Registries.STAT_TYPE.get(type);
+
+                            if (statType != null) {
+                                var key = statType.getRegistry().get(id);
+                                if (key != null) {
+                                    var stat = statType.getOrCreateStat(key);
+                                    int x = ctx.player().getStatHandler().getStat(stat);
+                                    return PlaceholderResult.value(String.valueOf(x));
+                                }
+                            }
+                        }
                     }
                 } catch (Exception e) {
                     /* Into the void you go! */
