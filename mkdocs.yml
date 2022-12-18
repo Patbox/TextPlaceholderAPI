@@ -1,51 +1,107 @@
-site_name: Placeholder API
+site_name:     Placeholder API
+site_url: !ENV SITE_URL
 
-repo_url: https://github.com/Patbox/TextPlaceholderAPI
-repo_name: Patbox/TextPlaceholderAPI
+repo_url:      https://github.com/Patbox/TextPlaceholderAPI
+repo_name:     Patbox/TextPlaceholderAPI
 
 nav:
-  - index.md
-  - For Users:
-      - user/general.md
-      - user/default-placeholders.md
-      - user/mod-placeholders.md
-      - user/text-format.md
-  - For Developers:
-      - dev/getting-started.md
-      - dev/adding-placeholders.md
-      - dev/parsing-placeholders.md
-      - dev/text-format.md
+    - index.md
+    -   For Users:
+            - user/general.md
+            - user/default-placeholders.md
+            - user/mod-placeholders.md
+            - user/text-format.md
+    -   For Developers:
+            - dev/getting-started.md
+            - dev/adding-placeholders.md
+            - dev/parsing-placeholders.md
+            - dev/text-format.md
 
 
 theme:
-  name: material
-  logo: assets/logo.png
-  favicon: images/favicon.png
-
-  palette:
-    - scheme: slate
-      primary: teal
-      accent: teal
-      features:
-        - navigation.expand
-      toggle:
-        icon: material/weather-sunny
-        name: Switch to light mode
-    - scheme: default
-      primary: teal
-      accent: teal
-      features:
-        - navigation.expand
-      toggle:
-        icon: material/weather-night
-        name: Switch to dark mode
+    name:    material
+    logo:    assets/logo.png
+    favicon: images/favicon.png
+    
+    palette:
+        -   scheme:  slate
+            primary: teal
+            accent:  teal
+            features:
+                - navigation.expand
+            toggle:
+                icon: material/weather-sunny
+                name: Switch to light mode
+        -   scheme:  default
+            primary: teal
+            accent:  teal
+            features:
+                - navigation.expand
+            toggle:
+                icon: material/weather-night
+                name: Switch to dark mode
+    
+    font:
+        text: Fira Sans
+        code: Fira Code
+    
+    icon:
+        repo: fontawesome/brands/git-alt
+    
+    features:
+        - content.tabs.link
+        - content.code.annotate
+        - navigation.instant
+        - navigation.tracking
+        - navigation.tabs
+        - navigation.sections
+        - toc.follow
+        - toc.integrate
+        - navigation.top
 
 extra_css:
-   - assets/style.css
+    - assets/style.css
 
 plugins:
-  - search
+    -   search:
+    -   minify:
+            minify_html: true
+            minify_js:   true
+            minify_css:  true
+            htmlmin_opts:
+                remove_comments: true
+    -   social:
+            enabled: !ENV [ SOCIAL_CARDS, false ]
+
+markdown_extensions:
+    -   toc:
+            permalink: true
+    -   admonition:
+    -   abbr:
+    
+    -   pymdownx.inlinehilite:
+    -   pymdownx.superfences:
+    -   pymdownx.details:
+    -   pymdownx.keys:
+    -   pymdownx.inlinehilite:
+    -   pymdownx.snippets:
+    -   pymdownx.smartsymbols:
+    
+    -   pymdownx.tabbed:
+            alternate_style: true
+    
+    -   pymdownx.highlight:
+            use_pygments:    true
+            auto_title:      false
+            linenums:        true
+            linenums_style:  table #table, pymdownx-inline
+            anchor_linenums: true
+    
+    -   pymdownx.emoji:
+            emoji_index: !!python/name:materialx.emoji.twemoji
+            emoji_generator: !!python/name:materialx.emoji.to_svg
+
 extra:
-  version:
-    provider: mike
-    default: latest
+    version:
+        provider: mike
+        default:  latest
