@@ -14,14 +14,14 @@ jobs:
             -   uses: actions/setup-python@v2
                 with:
                     python-version: 3.x
-            
+
             -   uses: actions/cache@v2
                 with:
                     key:  ${{ github.ref }}
                     path: .cache
-            
+
             -   run: pip install mkdocs-material pillow cairosvg
             -   run: mkdocs gh-deploy --force
-    env:
-        SOCIAL_CARDS: true # Enable social cards building
-        SITE_URL:     https://placeholders.pb4.eu # Set the site url for mkdocs
+        env:
+            SOCIAL_CARDS: true # Enable social cards building
+            SITE_URL:     https://placeholders.pb4.eu # Set the site url for mkdocs
