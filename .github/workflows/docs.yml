@@ -20,7 +20,7 @@ jobs:
                     key:  ${{ github.ref }}
                     path: .cache
 
-            -   run: pip install mkdocs-material pillow cairosvg
+            -   run: pip install mkdocs-material mkdocs-minify-plugin pillow cairosvg
             -   run: mkdocs gh-deploy --force
         env:
             SOCIAL_CARDS: true # Enable social cards building
