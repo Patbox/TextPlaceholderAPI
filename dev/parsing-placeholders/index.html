@@ -1,737 +1,365 @@
-
-<!doctype html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      
-      
-      
-      <link rel="icon" href="../../images/favicon.png">
-      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.5.10">
-    
-    
-      
-        <title>Parsing placeholders - Placeholder API</title>
-      
-    
-    
-      <link rel="stylesheet" href="../../assets/stylesheets/main.975780f9.min.css">
-      
-        
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
-        
-      
-      
-
-    
-    
-    
-      
-        
-        
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
-        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
-      
-    
-    
-      <link rel="stylesheet" href="../../assets/style.css">
-    
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
-    
-      
-
-    
-    
-    
-  </head>
-  
-  
-    
-    
-      
-    
-    
-    
-    
-    <body dir="ltr" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal">
-  
-    
-    
-      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
-    
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" for="__drawer"></label>
-    <div data-md-component="skip">
-      
-        
-        <a href="#parsing-placeholders" class="md-skip">
-          Skip to content
-        </a>
-      
-    </div>
-    <div data-md-component="announce">
-      
-    </div>
-    
-      <div data-md-component="outdated" hidden>
-        
-      </div>
-    
-    
-      
-
-<header class="md-header" data-md-component="header">
-  <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Placeholder API" class="md-header__button md-logo" aria-label="Placeholder API" data-md-component="logo">
-      
-  <img src="../../assets/logo.png" alt="logo">
-
-    </a>
-    <label class="md-header__button md-icon" for="__drawer">
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
-    </label>
-    <div class="md-header__title" data-md-component="header-title">
-      <div class="md-header__ellipsis">
-        <div class="md-header__topic">
-          <span class="md-ellipsis">
-            Placeholder API
-          </span>
-        </div>
-        <div class="md-header__topic" data-md-component="header-topic">
-          <span class="md-ellipsis">
-            
-              Parsing placeholders
-            
-          </span>
-        </div>
-      </div>
-    </div>
-    
-      <form class="md-header__option" data-md-component="palette">
-        
-          
-          
-          
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
-          
-            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_2" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg>
-            </label>
-          
-        
-          
-          
-          
-          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="teal" data-md-color-accent="teal"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_2">
-          
-            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg>
-            </label>
-          
-        
-      </form>
-    
-    
-    
-      <label class="md-header__button md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-      </label>
-      <div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
-      <label class="md-search__icon md-icon" for="__search">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-      </label>
-      <nav class="md-search__options" aria-label="Search">
-        
-        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
-        </button>
-      </nav>
-      
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="search-result">
-          <div class="md-search-result__meta">
-            Initializing search
-          </div>
-          <ol class="md-search-result__list"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-    
-    
-      <div class="md-header__source">
-        <a href="https://github.com/Patbox/TextPlaceholderAPI" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
-  </div>
-  <div class="md-source__repository">
-    Patbox/TextPlaceholderAPI
-  </div>
-</a>
-      </div>
-    
-  </nav>
-  
-</header>
-    
-    <div class="md-container" data-md-component="container">
-      
-      
-        
-          
-        
-      
-      <main class="md-main" data-md-component="main">
-        <div class="md-main__inner md-grid">
-          
-            
-              
-              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-
-<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
-  <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Placeholder API" class="md-nav__button md-logo" aria-label="Placeholder API" data-md-component="logo">
-      
-  <img src="../../assets/logo.png" alt="logo">
-
-    </a>
-    Placeholder API
-  </label>
-  
-    <div class="md-nav__source">
-      <a href="https://github.com/Patbox/TextPlaceholderAPI" title="Go to repository" class="md-source" data-md-component="source">
-  <div class="md-source__icon md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
-  </div>
-  <div class="md-source__repository">
-    Patbox/TextPlaceholderAPI
-  </div>
-</a>
-    </div>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-      
-
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
-        About Placeholder API
-      </a>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-  
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_2">
-          For Users
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="For Users" data-md-level="1">
-        <label class="md-nav__title" for="__nav_2">
-          <span class="md-nav__icon md-icon"></span>
-          For Users
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user/general/" class="md-nav__link">
-        Using placeholders
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user/default-placeholders/" class="md-nav__link">
-        Default placeholder list
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user/mod-placeholders/" class="md-nav__link">
-        Mod placeholders list
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../../user/text-format/" class="md-nav__link">
-        Simplified Text Format
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-      
-      
-      
-
-  
-  
-    
-  
-  
-    
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-      
-      
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
-      
-      
-      
-      
-        <label class="md-nav__link" for="__nav_3">
-          For Developers
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <nav class="md-nav" aria-label="For Developers" data-md-level="1">
-        <label class="md-nav__title" for="__nav_3">
-          <span class="md-nav__icon md-icon"></span>
-          For Developers
-        </label>
-        <ul class="md-nav__list" data-md-scrollfix>
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../getting-started/" class="md-nav__link">
-        Getting Started
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../adding-placeholders/" class="md-nav__link">
-        Adding placeholders
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-    
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Parsing placeholders
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
-        Parsing placeholders
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#parsing-global-placeholders" class="md-nav__link">
-    Parsing global placeholders
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parsing-owncustompredefined-placeholders" class="md-nav__link">
-    Parsing own/custom/predefined placeholders
-  </a>
-  
-    <nav class="md-nav" aria-label="Parsing own/custom/predefined placeholders">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#static-placeholders" class="md-nav__link">
-    Static placeholders
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dynamic-placeholders" class="md-nav__link">
-    Dynamic placeholders
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#preferred-patterns-for-static" class="md-nav__link">
-    Preferred Patterns for static
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../text-format/" class="md-nav__link">
-        Using Simplified Text Format/TextParser
-      </a>
-    </li>
-  
-
-            
-          
-        </ul>
-      </nav>
-    </li>
-  
-
-    
-  </ul>
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#parsing-global-placeholders" class="md-nav__link">
-    Parsing global placeholders
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#parsing-owncustompredefined-placeholders" class="md-nav__link">
-    Parsing own/custom/predefined placeholders
-  </a>
-  
-    <nav class="md-nav" aria-label="Parsing own/custom/predefined placeholders">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#static-placeholders" class="md-nav__link">
-    Static placeholders
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#dynamic-placeholders" class="md-nav__link">
-    Dynamic placeholders
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#preferred-patterns-for-static" class="md-nav__link">
-    Preferred Patterns for static
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          
-            <div class="md-content" data-md-component="content">
-              <article class="md-content__inner md-typeset">
-                
-                  
-
-  <a href="https://github.com/Patbox/TextPlaceholderAPI/edit/master/docs/dev/parsing-placeholders.md" title="Edit this page" class="md-content__button md-icon">
-    
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
-  </a>
-
-
-<h1 id="parsing-placeholders">Parsing placeholders</h1>
-<p>There are few ways (and types) of placeholders you can parse with PlaceholderAPI. 
-So depending on your use case some of these will be more useful than others.</p>
-<h2 id="parsing-global-placeholders">Parsing global placeholders</h2>
-<p>Parsing global placeholders is really simple, as long as you have access to ServerPlayerEntity
-or MinecraftServer object. You just need to simply import <code>eu.pb4.placeholders.api.Placeholders</code> and call
-<code>parseText</code>. This method will return fully parsed Text, which can be displayed to the user.</p>
-<p>Example</p>
-<pre><code>Text message = Placeholders.parseText(textInput, PlaceholderContext.of(...));
-</code></pre>
-<p>Placeholders itself will use default formatting of <code>%category:placeholder%</code>. 
-If you want to use other formatting for them (which is recommended), you can use
-<code>parseText(Text, PlaceholderContext)</code> for <code>{category:placeholder}</code>.</p>
-<h2 id="parsing-owncustompredefined-placeholders">Parsing own/custom/predefined placeholders</h2>
-<p>If you want to parse your own placeholders, you can do this in 2 ways.</p>
-<h3 id="static-placeholders">Static placeholders</h3>
-<p>To parse static placeholders you need to create a Map with <code>String</code> as a key and <code>Text</code> as a value.
-You also need a Pattern object (which can be taken from predefined ones). Then it's as simple as calling 
-a <code>parsePredefinedText</code> static method on <code>PlaceholderAPI</code> class.</p>
-<p>Example</p>
-<pre><code>ServerPlayerEntity player = something.getPlayer(); // MinecraftServer server = something.getServer()
-
-Text inputText = Text.literal(&quot;Hello! ${player}&quot;);
-Map&lt;String, Text&gt; placeholders = Map.of(&quot;player&quot;, Text.literal(&quot;You are a player!&quot;));
-Pattern pattern = Placeholders.PREDEFINED_PLACEHOLDER_PATTERN;
-
-Text output = Placeholders.parseText(inputText, pattern, placeholders);
-</code></pre>
-<h3 id="dynamic-placeholders">Dynamic placeholders</h3>
-<p>In case where you want to parse placeholder with a context similar to global one, you need to
-create a Map with <code>Identifier</code> as a key and <code>PlaceholderHandler</code> as a value (same as adding global ones).
-You also will need a pattern object, which is the same as with static ones.</p>
-<p>As opposite to global ones, you don't need to define namespace/category as it can default to minecraft one (for simpler user input).
-Then you just parse it with <code>parseText(Text, PlaceholderContext, Pattern, PlaceholderGetter)</code>.</p>
-<p>Example</p>
-<pre><code>ServerPlayerEntity player = something.getPlayer(); // MinecraftServer server = something.getServer()
-
-Text inputText = new Text.literal(&quot;Hello! ${player blue}&quot;);
-PlaceholderGetter placeholders = (id) -&gt; switch {
-    case &quot;player&quot; -&gt; (ctx) -&gt; {
-                                   if (ctx.hasPlayer()) {
-                                       return PlaceholderResult.value(Text.literal(&quot;You are a player!&quot;)
-                                                   .setStyle(Style.EMPTY.withColor(TextColor.parse(ctx.getArgument()))));
-                                   } else {
-                                       return PlaceholderResult.value(Text.literal(&quot;You are a server!&quot;)
-                                                   .setStyle(Style.EMPTY.withColor(TextColor.parse(ctx.getArgument()))));
-                                   }
-                              });
-}
-Pattern pattern = Placeholders.PREDEFINED_PLACEHOLDER_PATTERN;
-
-Text output = Placeholders.parseText(inputText, PlaceholderContext.of(player), pattern, placeholders);
-</code></pre>
-<h3 id="preferred-patterns-for-static">Preferred Patterns for static</h3>
-<p>PlaceholderAPI has few Patterns you can use, which are accessible as static objects on <code>Placeholders</code> class.</p>
-<ul>
-<li><code>PREDEFINED_PLACEHOLDER_PATTERN</code> (<code>${placeholder}</code>) - works the best in most cases, doesn't collide with other ones.</li>
-<li><code>ALT_PLACEHOLDER_PATTERN_CUSTOM</code> (<code>{placeholder}</code>) - second best, but have more chance of colliding with user formatting.</li>
-</ul>
-<p>There are other ones, which usage is allowed, but they might work worse.</p>
-<ul>
-<li><code>PLACEHOLDER_PATTERN_CUSTOM</code> (<code>%placeholder%</code>) - is the same as default one, but doesn't require <code>:</code>.</li>
-<li><code>PLACEHOLDER_PATTERN</code> (<code>%category:placeholder%</code>) - used by default global placeholders (requires category).</li>
-<li><code>PLACEHOLDER_PATTERN_ALT</code> (<code>{category:placeholder}</code>) - used as alternative formatting for global ones (requires category).</li>
-</ul>
-
-
-
-
-
-                
-              </article>
-            </div>
-          
-          
-        </div>
-        
-      </main>
-      
-        <footer class="md-footer">
-  
-    
-    <nav class="md-footer__inner md-grid" aria-label="Footer" >
-      
-        
-        <a href="../adding-placeholders/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Adding placeholders" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Adding placeholders
-            </div>
-          </div>
-        </a>
-      
-      
-        
-        <a href="../text-format/" class="md-footer__link md-footer__link--next" aria-label="Next: Using Simplified Text Format/TextParser" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Using Simplified Text Format/TextParser
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-copyright">
-  
-  
-    Made with
-    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-      Material for MkDocs
-    </a>
-  
-</div>
-      
-    </div>
-  </div>
-</footer>
-      
-    </div>
-    <div class="md-dialog" data-md-component="dialog">
-      <div class="md-dialog__inner md-typeset"></div>
-    </div>
-    
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script>
-    
-    
-      <script src="../../assets/javascripts/bundle.5a2dcb6a.min.js"></script>
-      
-    
-    
-  </body>
-</html>
+<!doctype html><html lang=en class=no-js> <head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><link href=https://placeholders.pb4.eu/dev/parsing-placeholders/ rel=canonical><link rel=icon href=../../images/favicon.png><meta name=generator content="mkdocs-1.4.2, mkdocs-material-8.5.10"><title>Parsing placeholders - Placeholder API</title><link rel=stylesheet href=../../assets/stylesheets/main.975780f9.min.css><link rel=stylesheet href=../../assets/stylesheets/palette.2505c338.min.css><link rel=preconnect href=https://fonts.gstatic.com crossorigin><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Fira+Sans:300,300i,400,400i,700,700i%7CFira+Code:400,400i,700,700i&display=fallback"><style>:root{--md-text-font:"Fira Sans";--md-code-font:"Fira Code"}</style><link rel=stylesheet href=../../assets/style.css><script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script><meta property=og:type content=website><meta property=og:title content="Parsing placeholders - Placeholder API"><meta property=og:description content=None><meta property=og:image content=https://placeholders.pb4.eu/assets/images/social/dev/parsing-placeholders.png><meta property=og:image:type content=image/png><meta property=og:image:width content=1200><meta property=og:image:height content=630><meta content=https://placeholders.pb4.eu/dev/parsing-placeholders/ property=og:url><meta name=twitter:card content=summary_large_image><meta name=twitter:title content="Parsing placeholders - Placeholder API"><meta name=twitter:description content=None><meta name=twitter:image content=https://placeholders.pb4.eu/assets/images/social/dev/parsing-placeholders.png></head> <body dir=ltr data-md-color-scheme=slate data-md-color-primary=teal data-md-color-accent=teal> <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script> <input class=md-toggle data-md-toggle=drawer type=checkbox id=__drawer autocomplete=off> <input class=md-toggle data-md-toggle=search type=checkbox id=__search autocomplete=off> <label class=md-overlay for=__drawer></label> <div data-md-component=skip> <a href=#parsing-placeholders class=md-skip> Skip to content </a> </div> <div data-md-component=announce> </div> <div data-md-component=outdated hidden> </div> <header class=md-header data-md-component=header> <nav class="md-header__inner md-grid" aria-label=Header> <a href=../.. title="Placeholder API" class="md-header__button md-logo" aria-label="Placeholder API" data-md-component=logo> <img src=../../assets/logo.png alt=logo> </a> <label class="md-header__button md-icon" for=__drawer> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg> </label> <div class=md-header__title data-md-component=header-title> <div class=md-header__ellipsis> <div class=md-header__topic> <span class=md-ellipsis> Placeholder API </span> </div> <div class=md-header__topic data-md-component=header-topic> <span class=md-ellipsis> Parsing placeholders </span> </div> </div> </div> <form class=md-header__option data-md-component=palette> <input class=md-option data-md-color-media data-md-color-scheme=slate data-md-color-primary=teal data-md-color-accent=teal aria-label="Switch to light mode" type=radio name=__palette id=__palette_1> <label class="md-header__button md-icon" title="Switch to light mode" for=__palette_2 hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3m0-7 2.39 3.42C13.65 5.15 12.84 5 12 5c-.84 0-1.65.15-2.39.42L12 2M3.34 7l4.16-.35A7.2 7.2 0 0 0 5.94 8.5c-.44.74-.69 1.5-.83 2.29L3.34 7m.02 10 1.76-3.77a7.131 7.131 0 0 0 2.38 4.14L3.36 17M20.65 7l-1.77 3.79a7.023 7.023 0 0 0-2.38-4.15l4.15.36m-.01 10-4.14.36c.59-.51 1.12-1.14 1.54-1.86.42-.73.69-1.5.83-2.29L20.64 17M12 22l-2.41-3.44c.74.27 1.55.44 2.41.44.82 0 1.63-.17 2.37-.44L12 22Z"/></svg> </label> <input class=md-option data-md-color-media data-md-color-scheme=default data-md-color-primary=teal data-md-color-accent=teal aria-label="Switch to dark mode" type=radio name=__palette id=__palette_2> <label class="md-header__button md-icon" title="Switch to dark mode" for=__palette_1 hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="m17.75 4.09-2.53 1.94.91 3.06-2.63-1.81-2.63 1.81.91-3.06-2.53-1.94L12.44 4l1.06-3 1.06 3 3.19.09m3.5 6.91-1.64 1.25.59 1.98-1.7-1.17-1.7 1.17.59-1.98L15.75 11l2.06-.05L18.5 9l.69 1.95 2.06.05m-2.28 4.95c.83-.08 1.72 1.1 1.19 1.85-.32.45-.66.87-1.08 1.27C15.17 23 8.84 23 4.94 19.07c-3.91-3.9-3.91-10.24 0-14.14.4-.4.82-.76 1.27-1.08.75-.53 1.93.36 1.85 1.19-.27 2.86.69 5.83 2.89 8.02a9.96 9.96 0 0 0 8.02 2.89m-1.64 2.02a12.08 12.08 0 0 1-7.8-3.47c-2.17-2.19-3.33-5-3.49-7.82-2.81 3.14-2.7 7.96.31 10.98 3.02 3.01 7.84 3.12 10.98.31Z"/></svg> </label> </form> <label class="md-header__button md-icon" for=__search> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg> </label> <div class=md-search data-md-component=search role=dialog> <label class=md-search__overlay for=__search></label> <div class=md-search__inner role=search> <form class=md-search__form name=search> <input type=text class=md-search__input name=query aria-label=Search placeholder=Search autocapitalize=off autocorrect=off autocomplete=off spellcheck=false data-md-component=search-query required> <label class="md-search__icon md-icon" for=__search> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg> </label> <nav class=md-search__options aria-label=Search> <button type=reset class="md-search__icon md-icon" title=Clear aria-label=Clear tabindex=-1> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg> </button> </nav> </form> <div class=md-search__output> <div class=md-search__scrollwrap data-md-scrollfix> <div class=md-search-result data-md-component=search-result> <div class=md-search-result__meta> Initializing search </div> <ol class=md-search-result__list></ol> </div> </div> </div> </div> </div> <div class=md-header__source> <a href=https://github.com/Patbox/TextPlaceholderAPI title="Go to repository" class=md-source data-md-component=source> <div class="md-source__icon md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 448 512"><!-- Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg> </div> <div class=md-source__repository> Patbox/TextPlaceholderAPI </div> </a> </div> </nav> </header> <div class=md-container data-md-component=container> <nav class=md-tabs aria-label=Tabs data-md-component=tabs> <div class="md-tabs__inner md-grid"> <ul class=md-tabs__list> <li class=md-tabs__item> <a href=../.. class=md-tabs__link> About Placeholder API </a> </li> <li class=md-tabs__item> <a href=../../user/general/ class=md-tabs__link> For Users </a> </li> <li class=md-tabs__item> <a href=../getting-started/ class="md-tabs__link md-tabs__link--active"> For Developers </a> </li> </ul> </div> </nav> <main class=md-main data-md-component=main> <div class="md-main__inner md-grid"> <div class="md-sidebar md-sidebar--primary" data-md-component=sidebar data-md-type=navigation> <div class=md-sidebar__scrollwrap> <div class=md-sidebar__inner> <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label=Navigation data-md-level=0> <label class=md-nav__title for=__drawer> <a href=../.. title="Placeholder API" class="md-nav__button md-logo" aria-label="Placeholder API" data-md-component=logo> <img src=../../assets/logo.png alt=logo> </a> Placeholder API </label> <div class=md-nav__source> <a href=https://github.com/Patbox/TextPlaceholderAPI title="Go to repository" class=md-source data-md-component=source> <div class="md-source__icon md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 448 512"><!-- Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg> </div> <div class=md-source__repository> Patbox/TextPlaceholderAPI </div> </a> </div> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../.. class=md-nav__link> About Placeholder API </a> </li> <li class="md-nav__item md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_2 type=checkbox id=__nav_2> <label class=md-nav__link for=__nav_2> For Users <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="For Users" data-md-level=1> <label class=md-nav__title for=__nav_2> <span class="md-nav__icon md-icon"></span> For Users </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../../user/general/ class=md-nav__link> Using placeholders </a> </li> <li class=md-nav__item> <a href=../../user/default-placeholders/ class=md-nav__link> Default placeholder list </a> </li> <li class=md-nav__item> <a href=../../user/mod-placeholders/ class=md-nav__link> Mod placeholders list </a> </li> <li class=md-nav__item> <a href=../../user/text-format/ class=md-nav__link> Simplified Text Format </a> </li> </ul> </nav> </li> <li class="md-nav__item md-nav__item--active md-nav__item--nested"> <input class="md-nav__toggle md-toggle" data-md-toggle=__nav_3 type=checkbox id=__nav_3 checked> <label class=md-nav__link for=__nav_3> For Developers <span class="md-nav__icon md-icon"></span> </label> <nav class=md-nav aria-label="For Developers" data-md-level=1> <label class=md-nav__title for=__nav_3> <span class="md-nav__icon md-icon"></span> For Developers </label> <ul class=md-nav__list data-md-scrollfix> <li class=md-nav__item> <a href=../getting-started/ class=md-nav__link> Getting Started </a> </li> <li class=md-nav__item> <a href=../adding-placeholders/ class=md-nav__link> Adding placeholders </a> </li> <li class="md-nav__item md-nav__item--active"> <input class="md-nav__toggle md-toggle" data-md-toggle=toc type=checkbox id=__toc> <label class="md-nav__link md-nav__link--active" for=__toc> Parsing placeholders <span class="md-nav__icon md-icon"></span> </label> <a href=./ class="md-nav__link md-nav__link--active"> Parsing placeholders </a> <nav class="md-nav md-nav--secondary" aria-label="Table of contents"> <label class=md-nav__title for=__toc> <span class="md-nav__icon md-icon"></span> Table of contents </label> <ul class=md-nav__list data-md-component=toc data-md-scrollfix> <li class=md-nav__item> <a href=#placeholder-context class=md-nav__link> Placeholder Context </a> </li> <li class=md-nav__item> <a href=#parsing-global-placeholders class=md-nav__link> Parsing global placeholders </a> </li> <li class=md-nav__item> <a href=#parsing-owncustompredefined-placeholders class=md-nav__link> Parsing own/custom/predefined placeholders </a> <nav class=md-nav aria-label="Parsing own/custom/predefined placeholders"> <ul class=md-nav__list> <li class=md-nav__item> <a href=#static-placeholders class=md-nav__link> Static placeholders </a> </li> <li class=md-nav__item> <a href=#dynamic-placeholders class=md-nav__link> Dynamic placeholders </a> </li> <li class=md-nav__item> <a href=#preferred-patterns-for-static class=md-nav__link> Preferred Patterns for static </a> </li> </ul> </nav> </li> </ul> </nav> </li> <li class=md-nav__item> <a href=../text-format/ class=md-nav__link> Using Simplified Text Format/TextParser </a> </li> </ul> </nav> </li> </ul> </nav> </div> </div> </div> <div class=md-content data-md-component=content> <article class="md-content__inner md-typeset"> <a href=https://github.com/Patbox/TextPlaceholderAPI/edit/master/docs/dev/parsing-placeholders.md title="Edit this page" class="md-content__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg> </a> <h1 id=parsing-placeholders>Parsing placeholders<a class=headerlink href=#parsing-placeholders title="Permanent link">&para;</a></h1> <p>There are few ways (and types) of placeholders you can parse with PlaceholderAPI. So depending on your use case some of these will be more useful than others.</p> <h2 id=placeholder-context>Placeholder Context<a class=headerlink href=#placeholder-context title="Permanent link">&para;</a></h2> <p>Placeholders should be provided with a context at all times. The context allows the placeholder parser to inject placeholders that require an optional context, such as a player.</p> <p>A <code>PlaceholderContext</code> is created using one of the <code>PlaceholderContext.of(...)</code> variants. Depending on the objects passed, different placeholders may be available.</p> <details class=info open=open> <summary><code>PlaceholderContext.of(...)</code> Variants</summary> <ul> <li><code>MinecraftServer</code><ul> <li>May use placeholders that depend on the server</li> <li>May use placeholders that depend on <code>ServerCommandSource</code> (Note: uses the command source from <code>MinecraftServer.getCommandSource()</code>)</li> </ul> </li> <li><code>GameProfile</code><ul> <li>May use placeholders that depend on the server</li> <li>May use placeholders that depend on <code>ServerCommandSource</code> (Note: creates a new dummy command source at <code>(0,0,0)</code>)</li> <li>May use placeholders that depend on <code>GameProfile</code></li> </ul> </li> <li><code>ServerPlayerEntity</code><ul> <li>May use placeholders that depend on the server</li> <li>May use placeholders that depend on <code>ServerCommandSource</code></li> <li>May use placeholders that depend on <code>ServerWorld</code></li> <li>May use placeholders that depend on <code>ServerPlayerEntity</code></li> <li>May use placeholders that depend on <code>Entity</code></li> <li>May use placeholders that depend on <code>GameProfile</code></li> </ul> </li> <li><code>ServerCommandSource</code><ul> <li>May use placeholders that depend on the server</li> <li>May use placeholders that depend on <code>ServerCommandSource</code></li> <li>May use placeholders that depend on <code>ServerWorld</code></li> <li>May use placeholders that depend on <code>ServerPlayerEntity</code> <em>only if the source has a player</em></li> <li>May use placeholders that depend on <code>Entity</code> <em>only if the source has an entity</em></li> <li>May use placeholders that depend on <code>GameProfile</code> <em>only if the source has a player</em></li> </ul> </li> <li><code>Entity</code><ul> <li>May use placeholders that depend on the server</li> <li>May use placeholders that depend on <code>ServerCommandSource</code></li> <li>May use placeholders that depend on <code>ServerWorld</code></li> <li>May use placeholders that depend on <code>ServerPlayerEntity</code> <em>only if the source has a player</em></li> <li>May use placeholders that depend on <code>Entity</code></li> <li>May use placeholders that depend on <code>GameProfile</code> <em>only if the source has a player</em></li> </ul> </li> </ul> </details> <h2 id=parsing-global-placeholders>Parsing global placeholders<a class=headerlink href=#parsing-global-placeholders title="Permanent link">&para;</a></h2> <p>Parsing global placeholders is really simple, as long as you have access to ServerPlayerEntity or MinecraftServer object. You just need to simply import <code>eu.pb4.placeholders.api.Placeholders</code> and call <code>parseText</code>. This method will return fully parsed Text, which can be displayed to the user.</p> <p>Example</p> <div class="tabbed-set tabbed-alternate" data-tabs=1:2><input checked=checked id=__tabbed_1_1 name=__tabbed_1 type=radio><input id=__tabbed_1_2 name=__tabbed_1 type=radio><div class=tabbed-labels><label for=__tabbed_1_1>Java</label><label for=__tabbed_1_2>Kotlin</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal><a href=#__codelineno-0-1>1</a></span></pre></div></td><td class=code><div><pre><span></span><code><a id=__codelineno-0-1 name=__codelineno-0-1></a><span class=n>Text</span><span class=w> </span><span class=n>message</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>parseText</span><span class=p>(</span><span class=n>textInput</span><span class=p>,</span><span class=w> </span><span class=n>PlaceholderContext</span><span class=p>.</span><span class=na>of</span><span class=p>(...));</span><span class=w></span>
+</code></pre></div></td></tr></table></div> </div> <div class=tabbed-block> <div class=highlight><table class=highlighttable><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal><a href=#__codelineno-1-1>1</a></span></pre></div></td><td class=code><div><pre><span></span><code><a id=__codelineno-1-1 name=__codelineno-1-1></a><span class=kd>val</span><span class=w> </span><span class=nv>message</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>parseText</span><span class=p>(</span><span class=n>textInput</span><span class=p>,</span><span class=w> </span><span class=n>PlaceholderContext</span><span class=p>.</span><span class=na>of</span><span class=p>(...))</span><span class=w></span>
+</code></pre></div></td></tr></table></div> </div> </div> </div> <p>Placeholders itself will use default formatting of <code>%category:placeholder%</code>. If you want to use other formatting for them (which is recommended), you can use <code>parseText(Text, PlaceholderContext, Pattern)</code>. Prefer those listed in <a href=#preferred-patterns-for-static>Preferred Patterns for static</a>.</p> <h2 id=parsing-owncustompredefined-placeholders>Parsing own/custom/predefined placeholders<a class=headerlink href=#parsing-owncustompredefined-placeholders title="Permanent link">&para;</a></h2> <p>If you want to parse your own placeholders, you can do this in 2 ways.</p> <h3 id=static-placeholders>Static placeholders<a class=headerlink href=#static-placeholders title="Permanent link">&para;</a></h3> <p>To parse static placeholders you need to create a Map with <code>String</code> as a key and <code>Text</code> as a value. You also need a Pattern object (which can be taken from predefined ones). Then it's as simple as calling a <code>parseText</code> static method on <code>PlaceholderAPI</code> class.</p> <p>Example</p> <div class="tabbed-set tabbed-alternate" data-tabs=2:2><input checked=checked id=__tabbed_2_1 name=__tabbed_2 type=radio><input id=__tabbed_2_2 name=__tabbed_2 type=radio><div class=tabbed-labels><label for=__tabbed_2_1>Java</label><label for=__tabbed_2_2>Kotlin</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><table class=highlighttable><tr><th colspan=2 class=filename><span class=filename>StaticPlaceholders.java</span></th></tr><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal><a href=#__codelineno-2-1> 1</a></span>
+<span class=normal><a href=#__codelineno-2-2> 2</a></span>
+<span class=normal><a href=#__codelineno-2-3> 3</a></span>
+<span class=normal><a href=#__codelineno-2-4> 4</a></span>
+<span class=normal><a href=#__codelineno-2-5> 5</a></span>
+<span class=normal><a href=#__codelineno-2-6> 6</a></span>
+<span class=normal><a href=#__codelineno-2-7> 7</a></span>
+<span class=normal><a href=#__codelineno-2-8> 8</a></span>
+<span class=normal><a href=#__codelineno-2-9> 9</a></span>
+<span class=normal><a href=#__codelineno-2-10>10</a></span>
+<span class=normal><a href=#__codelineno-2-11>11</a></span>
+<span class=normal><a href=#__codelineno-2-12>12</a></span>
+<span class=normal><a href=#__codelineno-2-13>13</a></span>
+<span class=normal><a href=#__codelineno-2-14>14</a></span>
+<span class=normal><a href=#__codelineno-2-15>15</a></span>
+<span class=normal><a href=#__codelineno-2-16>16</a></span>
+<span class=normal><a href=#__codelineno-2-17>17</a></span>
+<span class=normal><a href=#__codelineno-2-18>18</a></span>
+<span class=normal><a href=#__codelineno-2-19>19</a></span>
+<span class=normal><a href=#__codelineno-2-20>20</a></span>
+<span class=normal><a href=#__codelineno-2-21>21</a></span>
+<span class=normal><a href=#__codelineno-2-22>22</a></span>
+<span class=normal><a href=#__codelineno-2-23>23</a></span>
+<span class=normal><a href=#__codelineno-2-24>24</a></span>
+<span class=normal><a href=#__codelineno-2-25>25</a></span>
+<span class=normal><a href=#__codelineno-2-26>26</a></span>
+<span class=normal><a href=#__codelineno-2-27>27</a></span>
+<span class=normal><a href=#__codelineno-2-28>28</a></span>
+<span class=normal><a href=#__codelineno-2-29>29</a></span>
+<span class=normal><a href=#__codelineno-2-30>30</a></span>
+<span class=normal><a href=#__codelineno-2-31>31</a></span>
+<span class=normal><a href=#__codelineno-2-32>32</a></span>
+<span class=normal><a href=#__codelineno-2-33>33</a></span>
+<span class=normal><a href=#__codelineno-2-34>34</a></span></pre></div></td><td class=code><div><pre><span></span><code><a id=__codelineno-2-1 name=__codelineno-2-1></a><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>StaticPlaceholders</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-2-2 name=__codelineno-2-2></a><span class=w>    </span><span class=cm>/**</span>
+<a id=__codelineno-2-3 name=__codelineno-2-3></a><span class=cm>     * Formats a player message according to &lt;code&gt;inputText&lt;/code&gt;</span>
+<a id=__codelineno-2-4 name=__codelineno-2-4></a><span class=cm>     *</span>
+<a id=__codelineno-2-5 name=__codelineno-2-5></a><span class=cm>     * Example input:</span>
+<a id=__codelineno-2-6 name=__codelineno-2-6></a><span class=cm>     * &lt;code&gt;</span>
+<a id=__codelineno-2-7 name=__codelineno-2-7></a><span class=cm>     * ${playerName} says &quot;${message}&quot;</span>
+<a id=__codelineno-2-8 name=__codelineno-2-8></a><span class=cm>     * &lt;/code&gt;</span>
+<a id=__codelineno-2-9 name=__codelineno-2-9></a><span class=cm>     *</span>
+<a id=__codelineno-2-10 name=__codelineno-2-10></a><span class=cm>     * @param inputText   The text that is parsed for placeholders.</span>
+<a id=__codelineno-2-11 name=__codelineno-2-11></a><span class=cm>     *                    Example input:</span>
+<a id=__codelineno-2-12 name=__codelineno-2-12></a><span class=cm>     *                    &lt;code&gt;${playerName} says &quot;${message}&quot;&lt;/code&gt;</span>
+<a id=__codelineno-2-13 name=__codelineno-2-13></a><span class=cm>     * @param player      The player name used to replace the ${playerName}</span>
+<a id=__codelineno-2-14 name=__codelineno-2-14></a><span class=cm>     *                    variable in the input. Example input:</span>
+<a id=__codelineno-2-15 name=__codelineno-2-15></a><span class=cm>     *                    the player who&#39;s name is &#39;ThePlayerUsername&#39;</span>
+<a id=__codelineno-2-16 name=__codelineno-2-16></a><span class=cm>     * @param messageText The message text used to replace the ${message}</span>
+<a id=__codelineno-2-17 name=__codelineno-2-17></a><span class=cm>     *                    variable in the input. Example input:</span>
+<a id=__codelineno-2-18 name=__codelineno-2-18></a><span class=cm>     *                    &lt;code&gt;this is the message&lt;/code&gt;</span>
+<a id=__codelineno-2-19 name=__codelineno-2-19></a><span class=cm>     *</span>
+<a id=__codelineno-2-20 name=__codelineno-2-20></a><span class=cm>     * @return The formatted message. Example return:</span>
+<a id=__codelineno-2-21 name=__codelineno-2-21></a><span class=cm>     *         &lt;code&gt;ThePlayerUsername says &quot;this is the message&quot;&lt;/code&gt;</span>
+<a id=__codelineno-2-22 name=__codelineno-2-22></a><span class=cm>     */</span><span class=w></span>
+<a id=__codelineno-2-23 name=__codelineno-2-23></a><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>Text</span><span class=w> </span><span class=nf>formatPlayerMessage</span><span class=p>(</span><span class=n>Text</span><span class=w> </span><span class=n>inputText</span><span class=p>,</span><span class=w> </span><span class=n>ServerPlayerEntity</span><span class=w> </span><span class=n>player</span><span class=p>,</span><span class=w></span>
+<a id=__codelineno-2-24 name=__codelineno-2-24></a><span class=w>                                           </span><span class=n>Text</span><span class=w> </span><span class=n>messageText</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-2-25 name=__codelineno-2-25></a><span class=w>        </span><span class=n>Map</span><span class=o>&lt;</span><span class=n>String</span><span class=p>,</span><span class=w> </span><span class=n>Text</span><span class=o>&gt;</span><span class=w> </span><span class=n>placeholders</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Map</span><span class=p>.</span><span class=na>of</span><span class=p>(</span><span class=w></span>
+<a id=__codelineno-2-26 name=__codelineno-2-26></a><span class=w>                </span><span class=s>&quot;message&quot;</span><span class=p>,</span><span class=w> </span><span class=n>messageText</span><span class=p>,</span><span class=w>        </span><span class=c1>// replace ${message} with the messageText</span><span class=w></span>
+<a id=__codelineno-2-27 name=__codelineno-2-27></a><span class=w>                </span><span class=s>&quot;playerName&quot;</span><span class=p>,</span><span class=w> </span><span class=n>player</span><span class=p>.</span><span class=na>getName</span><span class=p>()</span><span class=w> </span><span class=c1>// replace ${playerName} with the player&#39;s name</span><span class=w></span>
+<a id=__codelineno-2-28 name=__codelineno-2-28></a><span class=w>                                               </span><span class=p>);</span><span class=w></span>
+<a id=__codelineno-2-29 name=__codelineno-2-29></a>
+<a id=__codelineno-2-30 name=__codelineno-2-30></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>parseText</span><span class=p>(</span><span class=n>inputText</span><span class=p>,</span><span class=w></span>
+<a id=__codelineno-2-31 name=__codelineno-2-31></a><span class=w>                                      </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>PREDEFINED_PLACEHOLDER_PATTERN</span><span class=p>,</span><span class=w></span>
+<a id=__codelineno-2-32 name=__codelineno-2-32></a><span class=w>                                      </span><span class=n>placeholders</span><span class=p>);</span><span class=w> </span><span class=c1>// parse the inputText</span><span class=w></span>
+<a id=__codelineno-2-33 name=__codelineno-2-33></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-2-34 name=__codelineno-2-34></a><span class=p>}</span><span class=w></span>
+</code></pre></div></td></tr></table></div> </div> <div class=tabbed-block> <div class=highlight><table class=highlighttable><tr><th colspan=2 class=filename><span class=filename>StaticPlaceholders.kt</span></th></tr><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal><a href=#__codelineno-3-1> 1</a></span>
+<span class=normal><a href=#__codelineno-3-2> 2</a></span>
+<span class=normal><a href=#__codelineno-3-3> 3</a></span>
+<span class=normal><a href=#__codelineno-3-4> 4</a></span>
+<span class=normal><a href=#__codelineno-3-5> 5</a></span>
+<span class=normal><a href=#__codelineno-3-6> 6</a></span>
+<span class=normal><a href=#__codelineno-3-7> 7</a></span>
+<span class=normal><a href=#__codelineno-3-8> 8</a></span>
+<span class=normal><a href=#__codelineno-3-9> 9</a></span>
+<span class=normal><a href=#__codelineno-3-10>10</a></span>
+<span class=normal><a href=#__codelineno-3-11>11</a></span>
+<span class=normal><a href=#__codelineno-3-12>12</a></span>
+<span class=normal><a href=#__codelineno-3-13>13</a></span>
+<span class=normal><a href=#__codelineno-3-14>14</a></span>
+<span class=normal><a href=#__codelineno-3-15>15</a></span>
+<span class=normal><a href=#__codelineno-3-16>16</a></span>
+<span class=normal><a href=#__codelineno-3-17>17</a></span>
+<span class=normal><a href=#__codelineno-3-18>18</a></span>
+<span class=normal><a href=#__codelineno-3-19>19</a></span>
+<span class=normal><a href=#__codelineno-3-20>20</a></span>
+<span class=normal><a href=#__codelineno-3-21>21</a></span>
+<span class=normal><a href=#__codelineno-3-22>22</a></span>
+<span class=normal><a href=#__codelineno-3-23>23</a></span>
+<span class=normal><a href=#__codelineno-3-24>24</a></span>
+<span class=normal><a href=#__codelineno-3-25>25</a></span>
+<span class=normal><a href=#__codelineno-3-26>26</a></span>
+<span class=normal><a href=#__codelineno-3-27>27</a></span>
+<span class=normal><a href=#__codelineno-3-28>28</a></span>
+<span class=normal><a href=#__codelineno-3-29>29</a></span>
+<span class=normal><a href=#__codelineno-3-30>30</a></span>
+<span class=normal><a href=#__codelineno-3-31>31</a></span>
+<span class=normal><a href=#__codelineno-3-32>32</a></span>
+<span class=normal><a href=#__codelineno-3-33>33</a></span>
+<span class=normal><a href=#__codelineno-3-34>34</a></span>
+<span class=normal><a href=#__codelineno-3-35>35</a></span>
+<span class=normal><a href=#__codelineno-3-36>36</a></span></pre></div></td><td class=code><div><pre><span></span><code><a id=__codelineno-3-1 name=__codelineno-3-1></a><span class=kd>object</span><span class=w> </span><span class=nc>StaticPlaceholders</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-3-2 name=__codelineno-3-2></a><span class=w>    </span><span class=cm>/**</span>
+<a id=__codelineno-3-3 name=__codelineno-3-3></a><span class=cm>     * Formats a player message according to [inputText]</span>
+<a id=__codelineno-3-4 name=__codelineno-3-4></a><span class=cm>     *</span>
+<a id=__codelineno-3-5 name=__codelineno-3-5></a><span class=cm>     * Example input:</span>
+<a id=__codelineno-3-6 name=__codelineno-3-6></a><span class=cm>     * ```</span>
+<a id=__codelineno-3-7 name=__codelineno-3-7></a><span class=cm>     * ${playerName} says &quot;${message}&quot;!</span>
+<a id=__codelineno-3-8 name=__codelineno-3-8></a><span class=cm>     * ```</span>
+<a id=__codelineno-3-9 name=__codelineno-3-9></a><span class=cm>     *</span>
+<a id=__codelineno-3-10 name=__codelineno-3-10></a><span class=cm>     * @param inputText The text that is parsed for placeholders.</span>
+<a id=__codelineno-3-11 name=__codelineno-3-11></a><span class=cm>     *                  Example input:</span>
+<a id=__codelineno-3-12 name=__codelineno-3-12></a><span class=cm>     *                  `${playerName} says &quot;${message}&quot;`</span>
+<a id=__codelineno-3-13 name=__codelineno-3-13></a><span class=cm>     *</span>
+<a id=__codelineno-3-14 name=__codelineno-3-14></a><span class=cm>     * @param player The player name used to replace the `${playerName}` variable in the input.</span>
+<a id=__codelineno-3-15 name=__codelineno-3-15></a><span class=cm>     *               Example input:</span>
+<a id=__codelineno-3-16 name=__codelineno-3-16></a><span class=cm>     *               the player who&#39;s name is `ThePlayerUsername`</span>
+<a id=__codelineno-3-17 name=__codelineno-3-17></a><span class=cm>     *</span>
+<a id=__codelineno-3-18 name=__codelineno-3-18></a><span class=cm>     * @param messageText The text used to replace the `${message}` variable in the input.</span>
+<a id=__codelineno-3-19 name=__codelineno-3-19></a><span class=cm>     *                    Example input:</span>
+<a id=__codelineno-3-20 name=__codelineno-3-20></a><span class=cm>     *                    `this is the message`</span>
+<a id=__codelineno-3-21 name=__codelineno-3-21></a><span class=cm>     *</span>
+<a id=__codelineno-3-22 name=__codelineno-3-22></a><span class=cm>     * @return The formatted message.</span>
+<a id=__codelineno-3-23 name=__codelineno-3-23></a><span class=cm>     *         Example return:</span>
+<a id=__codelineno-3-24 name=__codelineno-3-24></a><span class=cm>     *         ```</span>
+<a id=__codelineno-3-25 name=__codelineno-3-25></a><span class=cm>     *         ThePlayerUsername says &quot;this is the message&quot;!</span>
+<a id=__codelineno-3-26 name=__codelineno-3-26></a><span class=cm>     *         ```</span>
+<a id=__codelineno-3-27 name=__codelineno-3-27></a><span class=cm>     */</span><span class=w></span>
+<a id=__codelineno-3-28 name=__codelineno-3-28></a><span class=w>    </span><span class=kd>fun</span><span class=w> </span><span class=nf>formatPlayerMessage</span><span class=p>(</span><span class=n>inputText</span><span class=p>:</span><span class=w> </span><span class=n>Text?,</span><span class=w> </span><span class=n>player</span><span class=p>:</span><span class=w> </span><span class=n>ServerPlayerEntity</span><span class=p>,</span><span class=w> </span><span class=n>messageText</span><span class=p>:</span><span class=w> </span><span class=n>Text</span><span class=p>):</span><span class=w> </span><span class=n>Text</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-3-29 name=__codelineno-3-29></a><span class=w>        </span><span class=kd>val</span><span class=w> </span><span class=nv>placeholders</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>mapOf</span><span class=p>(</span><span class=w></span>
+<a id=__codelineno-3-30 name=__codelineno-3-30></a><span class=w>                </span><span class=s>&quot;message&quot;</span><span class=w> </span><span class=n>to</span><span class=w> </span><span class=n>messageText</span><span class=p>,</span><span class=w>    </span><span class=c1>// replace ${message} with the messageText</span><span class=w></span>
+<a id=__codelineno-3-31 name=__codelineno-3-31></a><span class=w>                </span><span class=s>&quot;playerName&quot;</span><span class=w> </span><span class=n>to</span><span class=w> </span><span class=n>player</span><span class=p>.</span><span class=na>name</span><span class=p>,</span><span class=w> </span><span class=c1>// replace ${playerName} with the player&#39;s name</span><span class=w></span>
+<a id=__codelineno-3-32 name=__codelineno-3-32></a><span class=w>                                </span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-3-33 name=__codelineno-3-33></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>parseText</span><span class=p>(</span><span class=n>inputText</span><span class=p>,</span><span class=w> </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>PREDEFINED_PLACEHOLDER_PATTERN</span><span class=p>,</span><span class=w></span>
+<a id=__codelineno-3-34 name=__codelineno-3-34></a><span class=w>                                      </span><span class=n>placeholders</span><span class=p>)</span><span class=w> </span><span class=c1>// parse the inputText</span><span class=w></span>
+<a id=__codelineno-3-35 name=__codelineno-3-35></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-3-36 name=__codelineno-3-36></a><span class=p>}</span><span class=w></span>
+</code></pre></div></td></tr></table></div> </div> </div> </div> <h3 id=dynamic-placeholders>Dynamic placeholders<a class=headerlink href=#dynamic-placeholders title="Permanent link">&para;</a></h3> <p>In case where you want to parse placeholder with a context similar to global one, you need to create a Map with <code>Identifier</code> as a key and <code>PlaceholderHandler</code> as a value (same as adding global ones). You also will need a pattern object, which is the same as with static ones.</p> <p>As opposite to global ones, you don't need to define namespace/category as it can default to minecraft one (for simpler user input). Then you just parse it with <code>parseText(Text, PlaceholderContext, Pattern, PlaceholderGetter)</code>.</p> <p>Example</p> <div class="tabbed-set tabbed-alternate" data-tabs=3:2><input checked=checked id=__tabbed_3_1 name=__tabbed_3 type=radio><input id=__tabbed_3_2 name=__tabbed_3 type=radio><div class=tabbed-labels><label for=__tabbed_3_1>Java</label><label for=__tabbed_3_2>Kotlin</label></div> <div class=tabbed-content> <div class=tabbed-block> <div class=highlight><table class=highlighttable><tr><th colspan=2 class=filename><span class=filename>DynamicPlaceholders.java</span></th></tr><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal><a href=#__codelineno-4-1> 1</a></span>
+<span class=normal><a href=#__codelineno-4-2> 2</a></span>
+<span class=normal><a href=#__codelineno-4-3> 3</a></span>
+<span class=normal><a href=#__codelineno-4-4> 4</a></span>
+<span class=normal><a href=#__codelineno-4-5> 5</a></span>
+<span class=normal><a href=#__codelineno-4-6> 6</a></span>
+<span class=normal><a href=#__codelineno-4-7> 7</a></span>
+<span class=normal><a href=#__codelineno-4-8> 8</a></span>
+<span class=normal><a href=#__codelineno-4-9> 9</a></span>
+<span class=normal><a href=#__codelineno-4-10>10</a></span>
+<span class=normal><a href=#__codelineno-4-11>11</a></span>
+<span class=normal><a href=#__codelineno-4-12>12</a></span>
+<span class=normal><a href=#__codelineno-4-13>13</a></span>
+<span class=normal><a href=#__codelineno-4-14>14</a></span>
+<span class=normal><a href=#__codelineno-4-15>15</a></span>
+<span class=normal><a href=#__codelineno-4-16>16</a></span>
+<span class=normal><a href=#__codelineno-4-17>17</a></span>
+<span class=normal><a href=#__codelineno-4-18>18</a></span>
+<span class=normal><a href=#__codelineno-4-19>19</a></span>
+<span class=normal><a href=#__codelineno-4-20>20</a></span>
+<span class=normal><a href=#__codelineno-4-21>21</a></span>
+<span class=normal><a href=#__codelineno-4-22>22</a></span>
+<span class=normal><a href=#__codelineno-4-23>23</a></span>
+<span class=normal><a href=#__codelineno-4-24>24</a></span>
+<span class=normal><a href=#__codelineno-4-25>25</a></span>
+<span class=normal><a href=#__codelineno-4-26>26</a></span>
+<span class=normal><a href=#__codelineno-4-27>27</a></span>
+<span class=normal><a href=#__codelineno-4-28>28</a></span>
+<span class=normal><a href=#__codelineno-4-29>29</a></span>
+<span class=normal><a href=#__codelineno-4-30>30</a></span>
+<span class=normal><a href=#__codelineno-4-31>31</a></span>
+<span class=normal><a href=#__codelineno-4-32>32</a></span>
+<span class=normal><a href=#__codelineno-4-33>33</a></span>
+<span class=normal><a href=#__codelineno-4-34>34</a></span>
+<span class=normal><a href=#__codelineno-4-35>35</a></span>
+<span class=normal><a href=#__codelineno-4-36>36</a></span>
+<span class=normal><a href=#__codelineno-4-37>37</a></span>
+<span class=normal><a href=#__codelineno-4-38>38</a></span>
+<span class=normal><a href=#__codelineno-4-39>39</a></span>
+<span class=normal><a href=#__codelineno-4-40>40</a></span>
+<span class=normal><a href=#__codelineno-4-41>41</a></span>
+<span class=normal><a href=#__codelineno-4-42>42</a></span>
+<span class=normal><a href=#__codelineno-4-43>43</a></span>
+<span class=normal><a href=#__codelineno-4-44>44</a></span>
+<span class=normal><a href=#__codelineno-4-45>45</a></span>
+<span class=normal><a href=#__codelineno-4-46>46</a></span>
+<span class=normal><a href=#__codelineno-4-47>47</a></span>
+<span class=normal><a href=#__codelineno-4-48>48</a></span>
+<span class=normal><a href=#__codelineno-4-49>49</a></span>
+<span class=normal><a href=#__codelineno-4-50>50</a></span>
+<span class=normal><a href=#__codelineno-4-51>51</a></span>
+<span class=normal><a href=#__codelineno-4-52>52</a></span>
+<span class=normal><a href=#__codelineno-4-53>53</a></span>
+<span class=normal><a href=#__codelineno-4-54>54</a></span>
+<span class=normal><a href=#__codelineno-4-55>55</a></span>
+<span class=normal><a href=#__codelineno-4-56>56</a></span>
+<span class=normal><a href=#__codelineno-4-57>57</a></span>
+<span class=normal><a href=#__codelineno-4-58>58</a></span>
+<span class=normal><a href=#__codelineno-4-59>59</a></span></pre></div></td><td class=code><div><pre><span></span><code><a id=__codelineno-4-1 name=__codelineno-4-1></a><span class=kd>public</span><span class=w> </span><span class=kd>class</span> <span class=nc>DynamicPlaceholders</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-2 name=__codelineno-4-2></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=kd>final</span><span class=w> </span><span class=n>Random</span><span class=w> </span><span class=n>random</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=k>new</span><span class=w> </span><span class=n>Random</span><span class=p>();</span><span class=w></span>
+<a id=__codelineno-4-3 name=__codelineno-4-3></a>
+<a id=__codelineno-4-4 name=__codelineno-4-4></a><span class=w>    </span><span class=cm>/**</span>
+<a id=__codelineno-4-5 name=__codelineno-4-5></a><span class=cm>     * Example input:</span>
+<a id=__codelineno-4-6 name=__codelineno-4-6></a><span class=cm>     * &lt;code&gt;</span>
+<a id=__codelineno-4-7 name=__codelineno-4-7></a><span class=cm>     * Hello! ${player blue}. Random number between 0 and 20: ${random 20}</span>
+<a id=__codelineno-4-8 name=__codelineno-4-8></a><span class=cm>     * &lt;/code&gt;</span>
+<a id=__codelineno-4-9 name=__codelineno-4-9></a><span class=cm>     *</span>
+<a id=__codelineno-4-10 name=__codelineno-4-10></a><span class=cm>     * Example output:</span>
+<a id=__codelineno-4-11 name=__codelineno-4-11></a><span class=cm>     * &lt;code&gt;</span>
+<a id=__codelineno-4-12 name=__codelineno-4-12></a><span class=cm>     * Hello! &lt;blue&gt;ThePlayerName&lt;/blue&gt;. Random number: 13</span>
+<a id=__codelineno-4-13 name=__codelineno-4-13></a><span class=cm>     * &lt;/code&gt;</span>
+<a id=__codelineno-4-14 name=__codelineno-4-14></a><span class=cm>     */</span><span class=w></span>
+<a id=__codelineno-4-15 name=__codelineno-4-15></a><span class=w>    </span><span class=kd>public</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>Text</span><span class=w> </span><span class=nf>parseInputText</span><span class=p>(</span><span class=n>ServerPlayerEntity</span><span class=w> </span><span class=n>player</span><span class=p>,</span><span class=w> </span><span class=n>Text</span><span class=w> </span><span class=n>inputText</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-16 name=__codelineno-4-16></a><span class=w>        </span><span class=c1>// parse the inputText message</span><span class=w></span>
+<a id=__codelineno-4-17 name=__codelineno-4-17></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>parseText</span><span class=p>(</span><span class=n>inputText</span><span class=p>,</span><span class=w> </span><span class=n>PlaceholderContext</span><span class=p>.</span><span class=na>of</span><span class=p>(</span><span class=n>player</span><span class=p>),</span><span class=w></span>
+<a id=__codelineno-4-18 name=__codelineno-4-18></a><span class=w>                                      </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>PREDEFINED_PLACEHOLDER_PATTERN</span><span class=p>,</span><span class=w></span>
+<a id=__codelineno-4-19 name=__codelineno-4-19></a><span class=w>                                      </span><span class=n>DynamicPlaceholders</span><span class=p>::</span><span class=n>getPlaceholder</span><span class=p>);</span><span class=w></span>
+<a id=__codelineno-4-20 name=__codelineno-4-20></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-4-21 name=__codelineno-4-21></a>
+<a id=__codelineno-4-22 name=__codelineno-4-22></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>PlaceholderHandler</span><span class=w> </span><span class=nf>getPlaceholder</span><span class=p>(</span><span class=n>String</span><span class=w> </span><span class=n>id</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-23 name=__codelineno-4-23></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>switch</span><span class=w> </span><span class=p>(</span><span class=n>id</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-24 name=__codelineno-4-24></a><span class=w>            </span><span class=k>case</span><span class=w> </span><span class=s>&quot;player&quot;</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>DynamicPlaceholders</span><span class=p>::</span><span class=n>playerPlaceholder</span><span class=p>;</span><span class=w></span>
+<a id=__codelineno-4-25 name=__codelineno-4-25></a><span class=w>            </span><span class=k>case</span><span class=w> </span><span class=s>&quot;random&quot;</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>DynamicPlaceholders</span><span class=p>::</span><span class=n>randomPlaceholder</span><span class=p>;</span><span class=w></span>
+<a id=__codelineno-4-26 name=__codelineno-4-26></a><span class=w>            </span><span class=k>default</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=kc>null</span><span class=p>;</span><span class=w></span>
+<a id=__codelineno-4-27 name=__codelineno-4-27></a><span class=w>        </span><span class=p>};</span><span class=w></span>
+<a id=__codelineno-4-28 name=__codelineno-4-28></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-4-29 name=__codelineno-4-29></a>
+<a id=__codelineno-4-30 name=__codelineno-4-30></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=w> </span><span class=nf>playerPlaceholder</span><span class=p>(</span><span class=n>PlaceholderContext</span><span class=w> </span><span class=n>ctx</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>arg</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-31 name=__codelineno-4-31></a><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>arg</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-4-32 name=__codelineno-4-32></a><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>invalid</span><span class=p>(</span><span class=s>&quot;No argument!&quot;</span><span class=p>);</span><span class=w></span>
+<a id=__codelineno-4-33 name=__codelineno-4-33></a>
+<a id=__codelineno-4-34 name=__codelineno-4-34></a><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=o>!</span><span class=n>ctx</span><span class=p>.</span><span class=na>hasPlayer</span><span class=p>())</span><span class=w></span>
+<a id=__codelineno-4-35 name=__codelineno-4-35></a><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>value</span><span class=p>(</span><span class=w></span>
+<a id=__codelineno-4-36 name=__codelineno-4-36></a><span class=w>                    </span><span class=n>Text</span><span class=p>.</span><span class=na>literal</span><span class=p>(</span><span class=s>&quot;You are not a player!&quot;</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-4-37 name=__codelineno-4-37></a><span class=w>                        </span><span class=p>.</span><span class=na>setStyle</span><span class=p>(</span><span class=n>Style</span><span class=p>.</span><span class=na>EMPTY</span><span class=p>.</span><span class=na>withColor</span><span class=p>(</span><span class=n>TextColor</span><span class=p>.</span><span class=na>parse</span><span class=p>(</span><span class=n>arg</span><span class=p>)))</span><span class=w></span>
+<a id=__codelineno-4-38 name=__codelineno-4-38></a><span class=w>                                          </span><span class=p>);</span><span class=w></span>
+<a id=__codelineno-4-39 name=__codelineno-4-39></a>
+<a id=__codelineno-4-40 name=__codelineno-4-40></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>value</span><span class=p>(</span><span class=w></span>
+<a id=__codelineno-4-41 name=__codelineno-4-41></a><span class=w>                </span><span class=n>ctx</span><span class=p>.</span><span class=na>player</span><span class=p>().</span><span class=na>getName</span><span class=p>().</span><span class=na>copy</span><span class=p>()</span><span class=w></span>
+<a id=__codelineno-4-42 name=__codelineno-4-42></a><span class=w>                   </span><span class=p>.</span><span class=na>setStyle</span><span class=p>(</span><span class=n>Style</span><span class=p>.</span><span class=na>EMPTY</span><span class=p>.</span><span class=na>withColor</span><span class=p>(</span><span class=n>TextColor</span><span class=p>.</span><span class=na>parse</span><span class=p>(</span><span class=n>arg</span><span class=p>)))</span><span class=w></span>
+<a id=__codelineno-4-43 name=__codelineno-4-43></a><span class=w>                                      </span><span class=p>);</span><span class=w></span>
+<a id=__codelineno-4-44 name=__codelineno-4-44></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-4-45 name=__codelineno-4-45></a>
+<a id=__codelineno-4-46 name=__codelineno-4-46></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>static</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=w> </span><span class=nf>randomPlaceholder</span><span class=p>(</span><span class=n>PlaceholderContext</span><span class=w> </span><span class=n>ctx</span><span class=p>,</span><span class=w> </span><span class=n>String</span><span class=w> </span><span class=n>arg</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-47 name=__codelineno-4-47></a><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>arg</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-48 name=__codelineno-4-48></a><span class=w>            </span><span class=kt>int</span><span class=w> </span><span class=n>randomNumber</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>random</span><span class=p>.</span><span class=na>nextInt</span><span class=p>(</span><span class=mi>10</span><span class=p>);</span><span class=w></span>
+<a id=__codelineno-4-49 name=__codelineno-4-49></a><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>value</span><span class=p>(</span><span class=n>String</span><span class=p>.</span><span class=na>valueOf</span><span class=p>(</span><span class=n>randomNumber</span><span class=p>));</span><span class=w></span>
+<a id=__codelineno-4-50 name=__codelineno-4-50></a><span class=w>        </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-4-51 name=__codelineno-4-51></a>
+<a id=__codelineno-4-52 name=__codelineno-4-52></a><span class=w>        </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-53 name=__codelineno-4-53></a><span class=w>            </span><span class=kt>int</span><span class=w> </span><span class=n>randomNumber</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>random</span><span class=p>.</span><span class=na>nextInt</span><span class=p>(</span><span class=n>Integer</span><span class=p>.</span><span class=na>parseInt</span><span class=p>(</span><span class=n>arg</span><span class=p>));</span><span class=w></span>
+<a id=__codelineno-4-54 name=__codelineno-4-54></a><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>value</span><span class=p>(</span><span class=n>String</span><span class=p>.</span><span class=na>valueOf</span><span class=p>(</span><span class=n>randomNumber</span><span class=p>));</span><span class=w></span>
+<a id=__codelineno-4-55 name=__codelineno-4-55></a><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>NumberFormatException</span><span class=w> </span><span class=n>e</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-4-56 name=__codelineno-4-56></a><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>invalid</span><span class=p>(</span><span class=s>&quot;Invalid number!&quot;</span><span class=p>);</span><span class=w></span>
+<a id=__codelineno-4-57 name=__codelineno-4-57></a><span class=w>        </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-4-58 name=__codelineno-4-58></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-4-59 name=__codelineno-4-59></a><span class=p>}</span><span class=w></span>
+</code></pre></div></td></tr></table></div> </div> <div class=tabbed-block> <div class=highlight><table class=highlighttable><tr><th colspan=2 class=filename><span class=filename>DynamicPlaceholders.kt</span></th></tr><tr><td class=linenos><div class=linenodiv><pre><span></span><span class=normal><a href=#__codelineno-5-1> 1</a></span>
+<span class=normal><a href=#__codelineno-5-2> 2</a></span>
+<span class=normal><a href=#__codelineno-5-3> 3</a></span>
+<span class=normal><a href=#__codelineno-5-4> 4</a></span>
+<span class=normal><a href=#__codelineno-5-5> 5</a></span>
+<span class=normal><a href=#__codelineno-5-6> 6</a></span>
+<span class=normal><a href=#__codelineno-5-7> 7</a></span>
+<span class=normal><a href=#__codelineno-5-8> 8</a></span>
+<span class=normal><a href=#__codelineno-5-9> 9</a></span>
+<span class=normal><a href=#__codelineno-5-10>10</a></span>
+<span class=normal><a href=#__codelineno-5-11>11</a></span>
+<span class=normal><a href=#__codelineno-5-12>12</a></span>
+<span class=normal><a href=#__codelineno-5-13>13</a></span>
+<span class=normal><a href=#__codelineno-5-14>14</a></span>
+<span class=normal><a href=#__codelineno-5-15>15</a></span>
+<span class=normal><a href=#__codelineno-5-16>16</a></span>
+<span class=normal><a href=#__codelineno-5-17>17</a></span>
+<span class=normal><a href=#__codelineno-5-18>18</a></span>
+<span class=normal><a href=#__codelineno-5-19>19</a></span>
+<span class=normal><a href=#__codelineno-5-20>20</a></span>
+<span class=normal><a href=#__codelineno-5-21>21</a></span>
+<span class=normal><a href=#__codelineno-5-22>22</a></span>
+<span class=normal><a href=#__codelineno-5-23>23</a></span>
+<span class=normal><a href=#__codelineno-5-24>24</a></span>
+<span class=normal><a href=#__codelineno-5-25>25</a></span>
+<span class=normal><a href=#__codelineno-5-26>26</a></span>
+<span class=normal><a href=#__codelineno-5-27>27</a></span>
+<span class=normal><a href=#__codelineno-5-28>28</a></span>
+<span class=normal><a href=#__codelineno-5-29>29</a></span>
+<span class=normal><a href=#__codelineno-5-30>30</a></span>
+<span class=normal><a href=#__codelineno-5-31>31</a></span>
+<span class=normal><a href=#__codelineno-5-32>32</a></span>
+<span class=normal><a href=#__codelineno-5-33>33</a></span>
+<span class=normal><a href=#__codelineno-5-34>34</a></span>
+<span class=normal><a href=#__codelineno-5-35>35</a></span>
+<span class=normal><a href=#__codelineno-5-36>36</a></span>
+<span class=normal><a href=#__codelineno-5-37>37</a></span>
+<span class=normal><a href=#__codelineno-5-38>38</a></span>
+<span class=normal><a href=#__codelineno-5-39>39</a></span>
+<span class=normal><a href=#__codelineno-5-40>40</a></span>
+<span class=normal><a href=#__codelineno-5-41>41</a></span>
+<span class=normal><a href=#__codelineno-5-42>42</a></span>
+<span class=normal><a href=#__codelineno-5-43>43</a></span>
+<span class=normal><a href=#__codelineno-5-44>44</a></span>
+<span class=normal><a href=#__codelineno-5-45>45</a></span>
+<span class=normal><a href=#__codelineno-5-46>46</a></span>
+<span class=normal><a href=#__codelineno-5-47>47</a></span>
+<span class=normal><a href=#__codelineno-5-48>48</a></span>
+<span class=normal><a href=#__codelineno-5-49>49</a></span>
+<span class=normal><a href=#__codelineno-5-50>50</a></span>
+<span class=normal><a href=#__codelineno-5-51>51</a></span>
+<span class=normal><a href=#__codelineno-5-52>52</a></span>
+<span class=normal><a href=#__codelineno-5-53>53</a></span>
+<span class=normal><a href=#__codelineno-5-54>54</a></span></pre></div></td><td class=code><div><pre><span></span><code><a id=__codelineno-5-1 name=__codelineno-5-1></a><span class=kd>object</span><span class=w> </span><span class=nc>DynamicPlaceholders</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-2 name=__codelineno-5-2></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>val</span><span class=w> </span><span class=nv>random</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>Random</span><span class=p>()</span><span class=w></span>
+<a id=__codelineno-5-3 name=__codelineno-5-3></a>
+<a id=__codelineno-5-4 name=__codelineno-5-4></a><span class=w>    </span><span class=cm>/**</span>
+<a id=__codelineno-5-5 name=__codelineno-5-5></a><span class=cm>     * Example input:</span>
+<a id=__codelineno-5-6 name=__codelineno-5-6></a><span class=cm>     * ```</span>
+<a id=__codelineno-5-7 name=__codelineno-5-7></a><span class=cm>     * Hello! ${player blue}. Random number between 0 and 20: ${random 20}</span>
+<a id=__codelineno-5-8 name=__codelineno-5-8></a><span class=cm>     * ```</span>
+<a id=__codelineno-5-9 name=__codelineno-5-9></a><span class=cm>     *</span>
+<a id=__codelineno-5-10 name=__codelineno-5-10></a><span class=cm>     * Example output:</span>
+<a id=__codelineno-5-11 name=__codelineno-5-11></a><span class=cm>     * ```</span>
+<a id=__codelineno-5-12 name=__codelineno-5-12></a><span class=cm>     * Hello! &lt;blue&gt;ThePlayerName&lt;/blue&gt;. Random number: 13</span>
+<a id=__codelineno-5-13 name=__codelineno-5-13></a><span class=cm>     * ```</span>
+<a id=__codelineno-5-14 name=__codelineno-5-14></a><span class=cm>     */</span><span class=w></span>
+<a id=__codelineno-5-15 name=__codelineno-5-15></a><span class=w>    </span><span class=kd>fun</span><span class=w> </span><span class=nf>parseInputText</span><span class=p>(</span><span class=n>player</span><span class=p>:</span><span class=w> </span><span class=n>ServerPlayerEntity</span><span class=p>,</span><span class=w> </span><span class=n>inputText</span><span class=p>:</span><span class=w> </span><span class=n>Text</span><span class=p>):</span><span class=w> </span><span class=n>Text</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-16 name=__codelineno-5-16></a><span class=w>        </span><span class=c1>// parse the inputText message</span><span class=w></span>
+<a id=__codelineno-5-17 name=__codelineno-5-17></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>parseText</span><span class=p>(</span><span class=n>inputText</span><span class=p>,</span><span class=w> </span><span class=n>PlaceholderContext</span><span class=p>.</span><span class=na>of</span><span class=p>(</span><span class=n>player</span><span class=p>),</span><span class=w></span>
+<a id=__codelineno-5-18 name=__codelineno-5-18></a><span class=w>                                      </span><span class=n>Placeholders</span><span class=p>.</span><span class=na>PREDEFINED_PLACEHOLDER_PATTERN</span><span class=p>,</span><span class=w></span>
+<a id=__codelineno-5-19 name=__codelineno-5-19></a><span class=w>                                      </span><span class=n>DynamicPlaceholders</span><span class=o>::</span><span class=n>getPlaceholder</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-20 name=__codelineno-5-20></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-5-21 name=__codelineno-5-21></a>
+<a id=__codelineno-5-22 name=__codelineno-5-22></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>fun</span><span class=w> </span><span class=nf>getPlaceholder</span><span class=p>(</span><span class=n>id</span><span class=p>:</span><span class=w> </span><span class=kt>String</span><span class=p>):</span><span class=w> </span><span class=n>PlaceholderHandler? </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-23 name=__codelineno-5-23></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>when</span><span class=w> </span><span class=p>(</span><span class=n>id</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-24 name=__codelineno-5-24></a><span class=w>            </span><span class=s>&quot;player&quot;</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>PlaceholderHandler</span><span class=p>(</span><span class=n>DynamicPlaceholders</span><span class=o>::</span><span class=n>playerPlaceholder</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-25 name=__codelineno-5-25></a><span class=w>            </span><span class=s>&quot;random&quot;</span><span class=w> </span><span class=o>-&gt;</span><span class=w> </span><span class=n>PlaceholderHandler</span><span class=p>(</span><span class=n>DynamicPlaceholders</span><span class=o>::</span><span class=n>randomPlaceholder</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-26 name=__codelineno-5-26></a><span class=w>            </span><span class=k>else</span><span class=w>     </span><span class=o>-&gt;</span><span class=w> </span><span class=kc>null</span><span class=w></span>
+<a id=__codelineno-5-27 name=__codelineno-5-27></a><span class=w>        </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-5-28 name=__codelineno-5-28></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-5-29 name=__codelineno-5-29></a>
+<a id=__codelineno-5-30 name=__codelineno-5-30></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>fun</span><span class=w> </span><span class=nf>playerPlaceholder</span><span class=p>(</span><span class=n>ctx</span><span class=p>:</span><span class=w> </span><span class=n>PlaceholderContext</span><span class=p>,</span><span class=w> </span><span class=n>arg</span><span class=p>:</span><span class=w> </span><span class=kt>String?</span><span class=p>):</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-31 name=__codelineno-5-31></a><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>arg</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-32 name=__codelineno-5-32></a><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>invalid</span><span class=p>(</span><span class=s>&quot;No argument!&quot;</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-33 name=__codelineno-5-33></a>
+<a id=__codelineno-5-34 name=__codelineno-5-34></a><span class=w>        </span><span class=k>if</span><span class=w> </span><span class=p>(</span><span class=n>ctx</span><span class=p>.</span><span class=na>player</span><span class=w> </span><span class=o>==</span><span class=w> </span><span class=kc>null</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-35 name=__codelineno-5-35></a><span class=w>            </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>value</span><span class=p>(</span><span class=w></span>
+<a id=__codelineno-5-36 name=__codelineno-5-36></a><span class=w>                    </span><span class=n>Text</span><span class=p>.</span><span class=na>literal</span><span class=p>(</span><span class=s>&quot;You are not a player!&quot;</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-37 name=__codelineno-5-37></a><span class=w>                            </span><span class=p>.</span><span class=na>setStyle</span><span class=p>(</span><span class=n>Style</span><span class=p>.</span><span class=na>EMPTY</span><span class=p>.</span><span class=na>withColor</span><span class=p>(</span><span class=n>TextColor</span><span class=p>.</span><span class=na>parse</span><span class=p>(</span><span class=n>arg</span><span class=p>)))</span><span class=w></span>
+<a id=__codelineno-5-38 name=__codelineno-5-38></a><span class=w>                                          </span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-39 name=__codelineno-5-39></a>
+<a id=__codelineno-5-40 name=__codelineno-5-40></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>value</span><span class=p>(</span><span class=w></span>
+<a id=__codelineno-5-41 name=__codelineno-5-41></a><span class=w>                </span><span class=n>ctx</span><span class=p>.</span><span class=na>player</span><span class=o>!!</span><span class=p>.</span><span class=na>name</span><span class=p>.</span><span class=na>copy</span><span class=p>()</span><span class=w></span>
+<a id=__codelineno-5-42 name=__codelineno-5-42></a><span class=w>                        </span><span class=p>.</span><span class=na>setStyle</span><span class=p>(</span><span class=n>Style</span><span class=p>.</span><span class=na>EMPTY</span><span class=p>.</span><span class=na>withColor</span><span class=p>(</span><span class=n>TextColor</span><span class=p>.</span><span class=na>parse</span><span class=p>(</span><span class=n>arg</span><span class=p>)))</span><span class=w></span>
+<a id=__codelineno-5-43 name=__codelineno-5-43></a><span class=w>                                      </span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-44 name=__codelineno-5-44></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-5-45 name=__codelineno-5-45></a>
+<a id=__codelineno-5-46 name=__codelineno-5-46></a><span class=w>    </span><span class=kd>private</span><span class=w> </span><span class=kd>fun</span><span class=w> </span><span class=nf>randomPlaceholder</span><span class=p>(</span><span class=n>ctx</span><span class=p>:</span><span class=w> </span><span class=n>PlaceholderContext</span><span class=p>,</span><span class=w> </span><span class=n>arg</span><span class=p>:</span><span class=w> </span><span class=kt>String?</span><span class=p>):</span><span class=w> </span><span class=n>PlaceholderResult</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-47 name=__codelineno-5-47></a><span class=w>        </span><span class=k>return</span><span class=w> </span><span class=k>try</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-48 name=__codelineno-5-48></a><span class=w>            </span><span class=kd>val</span><span class=w> </span><span class=nv>randomNumber</span><span class=w> </span><span class=o>=</span><span class=w> </span><span class=n>random</span><span class=p>.</span><span class=na>nextInt</span><span class=p>(</span><span class=n>arg</span><span class=o>?.</span><span class=na>toInt</span><span class=p>()</span><span class=w> </span><span class=o>?:</span><span class=w> </span><span class=m>10</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-49 name=__codelineno-5-49></a><span class=w>            </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>value</span><span class=p>(</span><span class=n>randomNumber</span><span class=p>.</span><span class=na>toString</span><span class=p>())</span><span class=w></span>
+<a id=__codelineno-5-50 name=__codelineno-5-50></a><span class=w>        </span><span class=p>}</span><span class=w> </span><span class=k>catch</span><span class=w> </span><span class=p>(</span><span class=n>e</span><span class=p>:</span><span class=w> </span><span class=n>NumberFormatException</span><span class=p>)</span><span class=w> </span><span class=p>{</span><span class=w></span>
+<a id=__codelineno-5-51 name=__codelineno-5-51></a><span class=w>            </span><span class=n>PlaceholderResult</span><span class=p>.</span><span class=na>invalid</span><span class=p>(</span><span class=s>&quot;Invalid number!&quot;</span><span class=p>)</span><span class=w></span>
+<a id=__codelineno-5-52 name=__codelineno-5-52></a><span class=w>        </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-5-53 name=__codelineno-5-53></a><span class=w>    </span><span class=p>}</span><span class=w></span>
+<a id=__codelineno-5-54 name=__codelineno-5-54></a><span class=p>}</span><span class=w></span>
+</code></pre></div></td></tr></table></div> </div> </div> </div> <h3 id=preferred-patterns-for-static>Preferred Patterns for static<a class=headerlink href=#preferred-patterns-for-static title="Permanent link">&para;</a></h3> <p>PlaceholderAPI has few Patterns you can use, which are accessible as static objects on <code>Placeholders</code> class.</p> <ul> <li><code class=highlight><span class=n>Placeholders</span><span class=p>.</span><span class=na>PREDEFINED_PLACEHOLDER_PATTERN</span><span class=w></span></code> (<code>${placeholder}</code>) - works the best in most cases, doesn't collide with other ones.</li> <li><code class=highlight><span class=n>Placeholders</span><span class=p>.</span><span class=na>ALT_PLACEHOLDER_PATTERN_CUSTOM</span><span class=w></span></code> (<code>{placeholder}</code>) - second best, but have more chance of colliding with user formatting.</li> </ul> <p>There are other ones, which usage is allowed, but they might work worse.</p> <ul> <li><code class=highlight><span class=n>Placeholders</span><span class=p>.</span><span class=na>PLACEHOLDER_PATTERN_CUSTOM</span><span class=w></span></code> (<code>%placeholder%</code>) - is the same as default one, but doesn't require <code>:</code>.</li> <li><code class=highlight><span class=n>Placeholders</span><span class=p>.</span><span class=na>PLACEHOLDER_PATTERN</span><span class=w></span></code> (<code>%category:placeholder%</code>) - used by default global placeholders (requires category).</li> <li><code class=highlight><span class=n>Placeholders</span><span class=p>.</span><span class=na>PLACEHOLDER_PATTERN_ALT</span><span class=w></span></code> (<code>{category:placeholder}</code>) - used as alternative formatting for global ones (requires category).</li> </ul> </article> </div> <script>var tabs=__md_get("__tabs");if(Array.isArray(tabs))e:for(var set of document.querySelectorAll(".tabbed-set")){var tab,labels=set.querySelector(".tabbed-labels");for(tab of tabs)for(var label of labels.getElementsByTagName("label"))if(label.innerText.trim()===tab){var input=document.getElementById(label.htmlFor);input.checked=!0;continue e}}</script> </div> <a href=# class="md-top md-icon" data-md-component=top hidden> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg> Back to top </a> </main> <footer class=md-footer> <nav class="md-footer__inner md-grid" aria-label=Footer> <a href=../adding-placeholders/ class="md-footer__link md-footer__link--prev" aria-label="Previous: Adding placeholders" rel=prev> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg> </div> <div class=md-footer__title> <div class=md-ellipsis> <span class=md-footer__direction> Previous </span> Adding placeholders </div> </div> </a> <a href=../text-format/ class="md-footer__link md-footer__link--next" aria-label="Next: Using Simplified Text Format/TextParser" rel=next> <div class=md-footer__title> <div class=md-ellipsis> <span class=md-footer__direction> Next </span> Using Simplified Text Format/TextParser </div> </div> <div class="md-footer__button md-icon"> <svg xmlns=http://www.w3.org/2000/svg viewbox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg> </div> </a> </nav> <div class="md-footer-meta md-typeset"> <div class="md-footer-meta__inner md-grid"> <div class=md-copyright> Made with <a href=https://squidfunk.github.io/mkdocs-material/ target=_blank rel=noopener> Material for MkDocs </a> </div> </div> </div> </footer> </div> <div class=md-dialog data-md-component=dialog> <div class="md-dialog__inner md-typeset"></div> </div> <script id=__config type=application/json>{"base": "../..", "features": ["content.tabs.link", "content.code.annotate", "navigation.instant", "navigation.tracking", "navigation.tabs", "navigation.sections", "toc.follow", "toc.integrate", "navigation.top"], "search": "../../assets/javascripts/workers/search.16e2a7d4.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "version": {"default": "latest", "provider": "mike"}}</script> <script src=../../assets/javascripts/bundle.5a2dcb6a.min.js></script> </body> </html>
