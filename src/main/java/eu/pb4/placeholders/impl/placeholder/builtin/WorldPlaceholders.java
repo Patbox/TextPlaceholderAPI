@@ -120,7 +120,7 @@ public class WorldPlaceholders {
                 int count = info.getGroupToCount().getInt(spawnGroup);
                 int cap = spawnGroup.getCapacity() * info.getSpawningChunkCount() / CHUNK_AREA;
 
-                return PlaceholderResult.value(count > 0 ? Text.literal("" + count).formatted(count > cap ? Formatting.LIGHT_PURPLE : count > 0.8 * cap ? Formatting.RED : count > 0.5 * cap ? Formatting.YELLOW : Formatting.DARK_GREEN) : Text.literal("-").formatted(Formatting.GRAY));
+                return PlaceholderResult.value(count > 0 ? Text.literal("" + count).formatted(count > cap ? Formatting.LIGHT_PURPLE : count > 0.8 * cap ? Formatting.RED : count > 0.5 * cap ? Formatting.GOLD : Formatting.GREEN) : Text.literal("-").formatted(Formatting.GRAY));
             } else {
                 int cap = 0;
 
@@ -134,7 +134,7 @@ public class WorldPlaceholders {
                 for (int value : info.getGroupToCount().values()) {
                     count += value;
                 }
-                return PlaceholderResult.value(count > 0 ? Text.literal("" + count).formatted(count > cap ? Formatting.LIGHT_PURPLE : count > 0.8 * cap ? Formatting.RED : count > 0.5 * cap ? Formatting.YELLOW : Formatting.DARK_GREEN) : Text.literal("-").formatted(Formatting.GRAY));
+                return PlaceholderResult.value(count > 0 ? Text.literal("" + count).formatted(count > cap ? Formatting.LIGHT_PURPLE : count > 0.8 * cap ? Formatting.RED : count > 0.5 * cap ? Formatting.GOLD : Formatting.GREEN) : Text.literal("-").formatted(Formatting.GRAY));
             }
         });
 
