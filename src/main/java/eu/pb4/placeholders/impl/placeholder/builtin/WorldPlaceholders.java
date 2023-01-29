@@ -4,6 +4,8 @@ import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.SpawnHelper;
 
@@ -97,6 +99,43 @@ public class WorldPlaceholders {
             }
 
             return PlaceholderResult.value("" + world.getPlayers().size());
+        });
+
+        Placeholders.register(new Identifier("world", "mob_count_colored"), (ctx, arg) -> {
+            ServerWorld world;
+            if (ctx.player() != null) {
+                world = ctx.player().getWorld();
+            } else {
+                world = ctx.server().getOverworld();
+            }
+
+            SpawnHelper.Info info = world.getChunkManager().getSpawnInfo();
+
+            SpawnGroup spawnGroup = null;
+            if (arg != null) {
+                spawnGroup = SpawnGroup.valueOf(arg.toUpperCase(Locale.ROOT));
+            }
+
+            if (spawnGroup != null) {
+                int count = info.getGroupToCount().getInt(spawnGroup);
+                int cap = spawnGroup.getCapacity() * info.getSpawningChunkCount() / CHUNK_AREA;
+
+                return PlaceholderResult.value(count > 0 ? Text.literal("" + count).formatted(count > cap ? Formatting.LIGHT_PURPLE : count > 0.8 * cap ? Formatting.RED : count > 0.5 * cap ? Formatting.GOLD : Formatting.GREEN) : Text.literal("-").formatted(Formatting.GRAY));
+            } else {
+                int cap = 0;
+
+                for (SpawnGroup group : SpawnGroup.values()) {
+                    cap += group.getCapacity();
+                }
+                cap = cap * info.getSpawningChunkCount() / CHUNK_AREA;
+
+                int count = 0;
+
+                for (int value : info.getGroupToCount().values()) {
+                    count += value;
+                }
+                return PlaceholderResult.value(count > 0 ? Text.literal("" + count).formatted(count > cap ? Formatting.LIGHT_PURPLE : count > 0.8 * cap ? Formatting.RED : count > 0.5 * cap ? Formatting.GOLD : Formatting.GREEN) : Text.literal("-").formatted(Formatting.GRAY));
+            }
         });
 
         Placeholders.register(new Identifier("world", "mob_count"), (ctx, arg) -> {
