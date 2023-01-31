@@ -58,7 +58,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
         if (input instanceof LiteralNode literalNode) {
             var list = new ArrayList<SubNode<?>>();
             parseLiteral(literalNode, list::add);
-            return parseSubNodes(list.listIterator(), null, -1);
+            return parseSubNodes(list.listIterator(), null, -1, false);
         } else if (input instanceof TranslatedNode translatedNode) {
             var list = new ArrayList<>();
             for (var arg : translatedNode.args()) {
@@ -78,7 +78,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     list.add(new SubNode<>(SubNodeType.TEXT_NODE, TextNode.asSingle(parseNodes(children))));
                 }
             }
-            return new TextNode[]{parentTextNode.copyWith(parseSubNodes(list.listIterator(), null, -1), this)};
+            return new TextNode[]{parentTextNode.copyWith(parseSubNodes(list.listIterator(), null, -1, false), this)};
         } else {
             return new TextNode[]{input};
         }
@@ -142,7 +142,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
         }
     }
 
-    private TextNode[] parseSubNodes(ListIterator<SubNode<?>> nodes, @Nullable SubNodeType endAt, int count) {
+    private TextNode[] parseSubNodes(ListIterator<SubNode<?>> nodes, @Nullable SubNodeType endAt, int count, boolean requireEmpty) {
         var out = new ArrayList<TextNode>();
         int startIndex = nodes.nextIndex();
         var builder = new StringBuilder();
@@ -152,7 +152,16 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             if (next.type == endAt) {
                 int foundCount = 1;
 
-                if (foundCount == count) {
+                boolean endingOrSpace;
+                if (requireEmpty && nodes.hasNext()) {
+                    var prev = nodes.next();
+                    endingOrSpace = prev.type != SubNodeType.STRING || ((String) prev.value).startsWith(" ");
+                    nodes.previous();
+                } else {
+                    endingOrSpace = true;
+                }
+
+                if (foundCount == count && endingOrSpace) {
                     if (!builder.isEmpty()) {
                         out.add(new LiteralNode(builder.toString()));
                     }
@@ -164,6 +173,14 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                 while (nodes.hasNext()) {
                     if (nodes.next().type == endAt) {
                         if ((++foundCount) == count) {
+                            if (requireEmpty && nodes.hasNext()) {
+                                var prev = nodes.next();
+                                nodes.previous();
+                                if (prev.type == SubNodeType.STRING && !((String) prev.value).startsWith(" ")) {
+                                    break;
+                                }
+                            }
+
                             if (!builder.isEmpty()) {
                                 out.add(new LiteralNode(builder.toString()));
                             }
@@ -190,7 +207,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                 builder.append((String) next.value);
                 continue;
             } else if (next.type == SubNodeType.BACK_TICK && this.allowedFormatting.contains(MarkdownFormat.QUOTE)) {
-                var value = parseSubNodes(nodes, next.type, 1);
+                var value = parseSubNodes(nodes, next.type, 1, false);
 
                 if (value != null) {
                     if (!builder.isEmpty()) {
@@ -201,7 +218,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     continue;
                 }
             } else if (next.type == SubNodeType.SPOILER_LINE && this.allowedFormatting.contains(MarkdownFormat.SPOILER)) {
-                var value = parseSubNodes(nodes, next.type, 1);
+                var value = parseSubNodes(nodes, next.type, 1, false);
 
                 if (value != null) {
                     if (!builder.isEmpty()) {
@@ -212,7 +229,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     continue;
                 }
             } else if (next.type == SubNodeType.DOUBLE_WAVY_LINE && this.allowedFormatting.contains(MarkdownFormat.STRIKETHROUGH)) {
-                var value = parseSubNodes(nodes, next.type, 1);
+                var value = parseSubNodes(nodes, next.type, 1, false);
 
                 if (value != null) {
                     if (!builder.isEmpty()) {
@@ -232,7 +249,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                         if (nexter.type == next.type) {
                             two = true;
                             var i = nodes.nextIndex();
-                            var value = parseSubNodes(nodes, next.type, 2);
+                            var value = parseSubNodes(nodes, next.type, 2, false);
 
                             if (value != null) {
                                 if (!builder.isEmpty()) {
@@ -248,15 +265,26 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                 }
 
                 if (!two && this.allowedFormatting.contains(MarkdownFormat.ITALIC)) {
-                    var value = parseSubNodes(nodes, next.type, 1);
+                    boolean startingOrSpace;
+                    if (nodes.hasPrevious()) {
+                        var prev = nodes.previous();
+                        startingOrSpace = prev.type != SubNodeType.STRING || ((String) prev.value).endsWith(" ");
+                        nodes.next();
+                    } else {
+                        startingOrSpace = true;
+                    }
 
-                    if (value != null) {
-                        if (!builder.isEmpty()) {
-                            out.add(new LiteralNode(builder.toString()));
-                            builder = new StringBuilder();
+                    if (startingOrSpace) {
+                        var value = parseSubNodes(nodes, next.type, 1, next.type == SubNodeType.FLOOR);
+
+                        if (value != null) {
+                            if (!builder.isEmpty()) {
+                                out.add(new LiteralNode(builder.toString()));
+                                builder = new StringBuilder();
+                            }
+                            out.add(new FormattingNode(value, Formatting.ITALIC));
+                            continue;
                         }
-                        out.add(new FormattingNode(value, Formatting.ITALIC));
-                        continue;
                     }
                 }
             }

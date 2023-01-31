@@ -61,19 +61,31 @@ public final class Placeholders {
 	 * @return Text
 	 */
 	public static ParentNode parseNodes(TextNode node) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, PLACEHOLDER_PATTERN, PLACEHOLDER_GETTER, NodeParser.NOOP));
+		return parseNodes(node, PlaceholderContext.KEY);
+	}
+
+	public static ParentNode parseNodes(TextNode node, ParserContext.Key<PlaceholderContext> contextKey) {
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(contextKey, node, PLACEHOLDER_PATTERN, PLACEHOLDER_GETTER, NodeParser.NOOP));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, PLACEHOLDER_GETTER, NodeParser.NOOP));
+		return parseNodes(node, pattern, PlaceholderContext.KEY);
+	}
+
+	public static ParentNode parseNodes(TextNode node, Pattern pattern, ParserContext.Key<PlaceholderContext> contextKey) {
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(contextKey, node, pattern, PLACEHOLDER_GETTER, NodeParser.NOOP));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, PlaceholderGetter placeholderGetter) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, placeholderGetter, NodeParser.NOOP));
+		return parseNodes(node, pattern, placeholderGetter, PlaceholderContext.KEY);
+	}
+
+	public static ParentNode parseNodes(TextNode node, Pattern pattern, PlaceholderGetter placeholderGetter, ParserContext.Key<PlaceholderContext> contextKey) {
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(contextKey, node, pattern, placeholderGetter, NodeParser.NOOP));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, Map<String, Text> placeholders) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, new PlaceholderGetter() {
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(PlaceholderContext.KEY, node, pattern, new PlaceholderGetter() {
 			@Override
 			public PlaceholderHandler getPlaceholder(String placeholder) {
 				return (ctx, arg) -> PlaceholderResult.value(placeholders.get(placeholder));
@@ -87,7 +99,11 @@ public final class Placeholders {
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
-		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(node, pattern, new PlaceholderGetter() {
+		return parseNodes(node, pattern, placeholders, key, PlaceholderContext.KEY);
+	}
+
+	public static ParentNode parseNodes(TextNode node, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key, ParserContext.Key<PlaceholderContext> contextKey) {
+		return new ParentNode(NodePlaceholderParserImpl.recursivePlaceholderParsing(contextKey, node, pattern, new PlaceholderGetter() {
 			@Override
 			public PlaceholderHandler getPlaceholder(String placeholder, ParserContext context) {
 				var get = context.get(key);

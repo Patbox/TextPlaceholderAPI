@@ -10,10 +10,10 @@ import org.jetbrains.annotations.ApiStatus;
 import javax.annotation.Nullable;
 
 @ApiStatus.Internal
-public record PlaceholderNode(String placeholder, Placeholders.PlaceholderGetter getter, boolean optionalContext, @Nullable String argument) implements TextNode {
+public record PlaceholderNode(ParserContext.Key<PlaceholderContext> contextKey, String placeholder, Placeholders.PlaceholderGetter getter, boolean optionalContext, @Nullable String argument) implements TextNode {
     @Override
     public Text toText(ParserContext context, boolean removeSingleSlash) {
-        var ctx = context.get(PlaceholderContext.KEY);
+        var ctx = context.get(contextKey);
         var handler = getter.getPlaceholder(placeholder, context);
         return (ctx != null || this.optionalContext) && handler != null ? handler.onPlaceholderRequest(ctx, argument).text() : Text.empty();
     }

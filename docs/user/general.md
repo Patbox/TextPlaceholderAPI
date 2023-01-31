@@ -10,8 +10,8 @@ Inner part of placeholder can take shape of either `category:placeholder` or `ca
 Additionally, some placeholders might have additional or required argument provided after first space. It's format
 fully depend on mod providing it.
 
-You can check list of [build in placeholders here](/users/default-placeholders)
-and [placeholders from mods here](/users/mod-placeholders).
+You can check list of [build in placeholders here](/user/default-placeholders)
+and [placeholders from mods here](/user/mod-placeholders).
 
 ### List of mods supporting displaying Placeholder API's placeholders:
 

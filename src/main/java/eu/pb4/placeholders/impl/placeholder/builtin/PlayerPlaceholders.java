@@ -72,6 +72,8 @@ public class PlayerPlaceholders {
             }
         });
 
+        Placeholders.register(new Identifier("player", "display_name"), Placeholders.getPlaceholders().get(new Identifier("player", "displayname")));
+
         Placeholders.register(new Identifier("player", "displayname_visual"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.player().getDisplayName()));
@@ -82,6 +84,8 @@ public class PlayerPlaceholders {
             }
         });
 
+        Placeholders.register(new Identifier("player", "display_name_visual"), Placeholders.getPlaceholders().get(new Identifier("player", "displayname_visual")));
+
         Placeholders.register(new Identifier("player", "displayname_unformatted"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(Text.literal(ctx.player().getDisplayName().getString()));
@@ -91,6 +95,7 @@ public class PlayerPlaceholders {
                 return PlaceholderResult.invalid("No player!");
             }
         });
+        Placeholders.register(new Identifier("player", "display_name_unformatted"), Placeholders.getPlaceholders().get(new Identifier("player", "displayname_unformatted")));
 
         Placeholders.register(new Identifier("player", "inventory_slot"), (ctx, arg) -> {
             if (ctx.hasPlayer() && arg != null) {
