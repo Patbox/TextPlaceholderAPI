@@ -5,6 +5,7 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.registry.Registries;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.stat.StatType;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
@@ -318,6 +319,33 @@ public class PlayerPlaceholders {
         Placeholders.register(new Identifier("player", "saturation"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(String.format("%.0f", ctx.player().getHungerManager().getSaturationLevel()));
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(new Identifier("player", "team_name"), (ctx, arg) -> {
+            if (ctx.hasPlayer()) {
+                var team = ctx.player().getScoreboardTeam();
+                return PlaceholderResult.value(team==null ? Text.empty() : Text.of(team.getName()));
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(new Identifier("player", "team_displayname"), (ctx, arg) -> {
+            if (ctx.hasPlayer()) {
+                var team = (Team) ctx.player().getScoreboardTeam();
+                return PlaceholderResult.value(team==null ? Text.empty() : team.getDisplayName());
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(new Identifier("player", "team_displayname_formatted"), (ctx, arg) -> {
+            if (ctx.hasPlayer()) {
+                var team = (Team) ctx.player().getScoreboardTeam();
+                return PlaceholderResult.value(team==null ? Text.empty() : team.getFormattedName());
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
