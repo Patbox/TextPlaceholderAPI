@@ -6,6 +6,8 @@ import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
+import java.util.Arrays;
+
 public final class InsertNode extends ParentNode {
     private final TextNode value;
 
@@ -31,5 +33,13 @@ public final class InsertNode extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children, NodeParser parser) {
         return new InsertNode(children, TextNode.asSingle(parser.parseNodes(this.value)));
+    }
+
+    @Override
+    public String toString() {
+        return "InsertNode{" +
+                "value=" + value +
+                ", children=" + Arrays.toString(children) +
+                '}';
     }
 }

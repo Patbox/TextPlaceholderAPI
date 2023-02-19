@@ -6,6 +6,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.util.Arrays;
+
 public final class FontNode extends ParentNode {
     private final Identifier font;
 
@@ -22,5 +24,13 @@ public final class FontNode extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
         return new FontNode(children, this.font);
+    }
+
+    @Override
+    public String toString() {
+        return "FontNode{" +
+                "font=" + font +
+                ", children=" + Arrays.toString(children) +
+                '}';
     }
 }

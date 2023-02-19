@@ -8,6 +8,7 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.api.parsers.NodeParser;
+import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.ArrayList;
@@ -16,95 +17,15 @@ import java.util.regex.Pattern;
 
 @ApiStatus.Internal
 public class NodePlaceholderParserImpl {
-
     public static TextNode[] recursivePlaceholderParsing(ParserContext.Key<PlaceholderContext> contextKey, TextNode text, Pattern pattern, Placeholders.PlaceholderGetter placeholders, NodeParser parser) {
-        if (text instanceof TranslatedNode translatedNode) {
-            var list = new ArrayList<>();
+        return new PatternPlaceholderParser(pattern, (arg) -> {
+            var args = arg.split(" ", 2);
 
-            for(var arg : translatedNode.args()) {
-                if (arg instanceof TextNode textNode) {
-                    list.add(new ParentNode(recursivePlaceholderParsing(contextKey, textNode, pattern, placeholders, parser)));
-                } else {
-                    list.add(arg);
-                }
+            if (placeholders.exists(args[0])) {
+                return new PlaceholderNode(contextKey, args[0], placeholders, placeholders.isContextOptional(), args.length == 2 ? args[1] : null);
+            } else {
+                return null;
             }
-
-            return new TextNode[] { new TranslatedNode(translatedNode.key(), list.toArray()) };
-
-        } else if (text instanceof LiteralNode literalNode) {
-            var out = new ArrayList<TextNode>();
-
-            String string = literalNode.value();
-            Matcher matcher = pattern.matcher(string);
-            int start;
-            int end;
-
-            int previousEnd = 0;
-
-            while (matcher.find()) {
-                var placeholder = matcher.group("id").split(" ", 2);
-                start = matcher.start();
-                end = matcher.end();
-
-                if (start != 0) {
-                    out.add(new LiteralNode(string.substring(previousEnd, start)));
-                }
-
-                if (placeholders.exists(placeholder[0])) {
-                    out.add(new PlaceholderNode(contextKey, placeholder[0], placeholders, placeholders.isContextOptional(), placeholder.length == 2 ? placeholder[1] : null));
-                } else {
-                    out.add(new LiteralNode(matcher.group(0)));
-                }
-
-                previousEnd = end;
-            }
-
-            if (previousEnd != string.length()) {
-                out.add(new LiteralNode(string.substring(previousEnd)));
-            }
-
-            return out.toArray(new TextNode[0]);
-        }
-
-
-        if (text instanceof ParentNode parentNode) {
-            var out = new ArrayList<TextNode>();
-
-            for(var text1 : parentNode.getChildren()) {
-                out.add(new ParentNode(recursivePlaceholderParsing(contextKey, text1, pattern, placeholders, parser)));
-            }
-
-            if (text instanceof HoverNode<?,?> hoverNode && hoverNode.action() == HoverNode.Action.TEXT) {
-                return new TextNode[] { new HoverNode<>(out.toArray(new TextNode[0]), HoverNode.Action.TEXT, (ParentNode) recursivePlaceholderParsing(contextKey, (TextNode) hoverNode.value(), pattern, placeholders, parser)[0]) };
-            } else if (text instanceof ClickActionNode clickActionNode) {
-                return new TextNode[] { new ClickActionNode(out.toArray(new TextNode[0]), clickActionNode.action(), TextNode.asSingle(recursivePlaceholderParsing(contextKey, clickActionNode.value(), pattern, placeholders, parser))) };
-            } else if (text instanceof InsertNode insertNode) {
-                return new TextNode[] { new InsertNode(out.toArray(new TextNode[0]), TextNode.asSingle(recursivePlaceholderParsing(contextKey, insertNode.value(), pattern, placeholders, parser))) };
-            } else if (text instanceof StyledNode node) {
-                var style = node.rawStyle();
-                var hoverValue = node.hoverValue();
-                var clickValue = node.clickValue();
-                var insertion = node.insertion();
-
-                if (hoverValue != null) {
-                    hoverValue = new ParentNode(recursivePlaceholderParsing(contextKey, hoverValue, pattern, placeholders, parser));
-                }
-
-                if (clickValue != null) {
-                    clickValue = TextNode.asSingle(recursivePlaceholderParsing(contextKey, hoverValue, pattern, placeholders, parser));
-                }
-
-                if (insertion != null) {
-                    insertion = TextNode.asSingle(recursivePlaceholderParsing(contextKey, hoverValue, pattern, placeholders, parser));
-                }
-
-
-                return new TextNode[] { new StyledNode(out.toArray(new TextNode[0]), style, hoverValue, clickValue, insertion) };
-            }
-
-            return new TextNode[] { parentNode.copyWith(out.toArray(new TextNode[0])) };
-        }
-
-        return new TextNode[] { text };
+        }).parseNodes(text);
     }
 }

@@ -6,6 +6,8 @@ import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
+import java.util.Arrays;
+
 public class ParentNode implements ParentTextNode {
     public static final ParentNode EMPTY = new ParentNode(new TextNode[0]);
     protected final TextNode[] children;
@@ -25,7 +27,7 @@ public class ParentNode implements ParentTextNode {
     }
 
     @Override
-    public final Text toText(ParserContext context, boolean removeSingleSlash) {
+    public final Text toText(ParserContext context, boolean removeBackslashes) {
         var compact = context != null && context.get(ParserContext.Key.COMPACT_TEXT) != Boolean.FALSE;
 
         if (this.children.length == 0) {
@@ -68,4 +70,11 @@ public class ParentNode implements ParentTextNode {
     }
 
     protected Text applyFormatting(MutableText out, ParserContext context) { return out; };
+
+    @Override
+    public String toString() {
+        return "ParentNode{" +
+                "children=" + Arrays.toString(children) +
+                '}';
+    }
 }

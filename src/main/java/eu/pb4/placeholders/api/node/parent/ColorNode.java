@@ -6,6 +6,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 
+import java.util.Arrays;
+
 public final class ColorNode extends ParentNode {
     private final TextColor color;
 
@@ -22,5 +24,13 @@ public final class ColorNode extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
         return new ColorNode(children, this.color);
+    }
+
+    @Override
+    public String toString() {
+        return "ColorNode{" +
+                "color=" + color +
+                ", children=" + Arrays.toString(children) +
+                '}';
     }
 }

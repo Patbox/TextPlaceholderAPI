@@ -39,4 +39,12 @@ public final class ClickActionNode extends ParentNode {
     public ParentTextNode copyWith(TextNode[] children, NodeParser parser) {
         return new ClickActionNode(children, this.action, TextNode.asSingle(parser.parseNodes(this.value)));
     }
+
+    @Override
+    public String toString() {
+        return "ClickActionNode{" +
+                "action=" + action +
+                ", value=" + value +
+                '}';
+    }
 }

@@ -5,7 +5,7 @@ import net.minecraft.text.Text;
 
 public record DirectTextNode(Text text) implements TextNode {
     @Override
-    public Text toText(ParserContext context, boolean removeSingleSlash) {
+    public Text toText(ParserContext context, boolean removeBackslashes) {
         return this.text;
     }
 }

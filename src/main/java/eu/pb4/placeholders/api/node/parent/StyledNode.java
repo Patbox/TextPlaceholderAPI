@@ -76,4 +76,14 @@ public final class StyledNode extends ParentNode {
                 this.clickValue != null ? TextNode.asSingle(parser.parseNodes(this.clickValue)) : null,
                 this.insertion != null ? TextNode.asSingle(parser.parseNodes(this.insertion)) : null);
     }
+
+    @Override
+    public String toString() {
+        return "StyledNode{" +
+                "style=" + style +
+                ", hoverValue=" + hoverValue +
+                ", clickValue=" + clickValue +
+                ", insertion=" + insertion +
+                '}';
+    }
 }

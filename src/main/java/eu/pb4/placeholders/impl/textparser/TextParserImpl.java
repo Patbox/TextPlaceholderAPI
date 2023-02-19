@@ -19,6 +19,7 @@ import static eu.pb4.placeholders.impl.GeneralUtils.Pair;
 public class TextParserImpl {
     // Based on minimessage's regex, modified to fit more parsers needs
     public static final Pattern STARTING_PATTERN = Pattern.compile("<(?<id>[^<>/]+)(?<data>([:]([']?([^'](\\\\\\\\['])?)+[']?))*)>");
+    @Deprecated
     public static final List<Pair<String, String>> ESCAPED_CHARS = new ArrayList<>();
     private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().registerTypeHierarchyAdapter(Style.class, new Style.Serializer()).create();
 

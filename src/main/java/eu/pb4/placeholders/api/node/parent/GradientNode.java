@@ -7,6 +7,8 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
 
+import java.util.Arrays;
+
 public final class GradientNode extends ParentNode {
     private final GradientProvider gradientProvider;
 
@@ -23,6 +25,14 @@ public final class GradientNode extends ParentNode {
     @Override
     public ParentTextNode copyWith(TextNode[] children) {
         return new GradientNode(children, this.gradientProvider);
+    }
+
+    @Override
+    public String toString() {
+        return "GradientNode{" +
+                "gradientProvider=" + gradientProvider +
+                ", children=" + Arrays.toString(children) +
+                '}';
     }
 
     @FunctionalInterface

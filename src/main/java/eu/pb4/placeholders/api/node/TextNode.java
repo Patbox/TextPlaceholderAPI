@@ -1,12 +1,25 @@
 package eu.pb4.placeholders.api.node;
 
 import eu.pb4.placeholders.api.ParserContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.text.Text;
 
 public interface TextNode {
-    Text toText(ParserContext context, boolean removeSingleSlash);
+    Text toText(ParserContext context, boolean removeBackslashes);
+
+    default Text toText(ParserContext context) {
+        return toText(context, true);
+    }
+
+    default Text toText(PlaceholderContext context) {
+        return toText(context.asParserContext(), true);
+    }
+
+    default Text toText() {
+        return toText(ParserContext.of(), true);
+    }
 
     static TextNode convert(Text input) {
         return GeneralUtils.convertToNodes(input);
@@ -26,6 +39,10 @@ public interface TextNode {
             case 1 -> nodes[0];
             default -> wrap(nodes);
         };
+    }
+
+    static TextNode[] array(TextNode... nodes) {
+        return nodes;
     }
 
     static TextNode empty() {

@@ -1,8 +1,10 @@
 package eu.pb4.placeholders.api.parsers;
 
 import com.mojang.serialization.Codec;
+import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.impl.textparser.MergedParser;
+import net.minecraft.text.Text;
 
 import java.util.List;
 
@@ -11,6 +13,21 @@ public interface NodeParser {
 
     TextNode[] parseNodes(TextNode input);
 
+    default TextNode parseNode(TextNode input) {
+        return TextNode.asSingle(this.parseNodes(input));
+    }
+
+    default TextNode parseNode(String input) {
+        return this.parseNode(TextNode.of(input));
+    }
+
+    default Text parseText(TextNode input, ParserContext context) {
+        return TextNode.asSingle(this.parseNodes(input)).toText(context, true);
+    }
+
+    default Text parseText(String input, ParserContext context) {
+        return parseText(TextNode.of(input), context);
+    }
 
     default Codec<WrappedText> codec() {
         return Codec.STRING.xmap(x -> WrappedText.from(this, x), w -> w.input());

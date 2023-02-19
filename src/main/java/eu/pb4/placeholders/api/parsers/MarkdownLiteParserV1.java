@@ -4,10 +4,8 @@ import com.mojang.brigadier.StringReader;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
-import eu.pb4.placeholders.api.node.parent.FormattingNode;
-import eu.pb4.placeholders.api.node.parent.ParentNode;
-import eu.pb4.placeholders.api.node.parent.ParentTextNode;
-import eu.pb4.placeholders.api.node.parent.StyledNode;
+import eu.pb4.placeholders.api.node.parent.*;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
@@ -17,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.ListIterator;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -25,6 +24,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
     private final EnumSet<MarkdownFormat> allowedFormatting = EnumSet.noneOf(MarkdownFormat.class);
     private final Function<TextNode[], TextNode> spoilerFormatting;
     private final Function<TextNode[], TextNode> backtickFormatting;
+    private final BiFunction<TextNode[], TextNode, TextNode> urlFormatting;
 
     public MarkdownLiteParserV1(MarkdownFormat... formatting) {
         this(MarkdownLiteParserV1::defaultSpoilerFormatting, MarkdownLiteParserV1::defaultQuoteFormatting, formatting);
@@ -35,22 +35,38 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             Function<TextNode[], TextNode> quoteFormatting,
             MarkdownFormat... formatting
     ) {
+        this(spoilerFormatting, quoteFormatting, MarkdownLiteParserV1::defaultUrlFormatting, formatting);
+    }
+
+    public MarkdownLiteParserV1(
+            Function<TextNode[], TextNode> spoilerFormatting,
+            Function<TextNode[], TextNode> quoteFormatting,
+            BiFunction<TextNode[], TextNode, TextNode> urlFormatting,
+            MarkdownFormat... formatting
+    ) {
         for (var form : formatting) {
             this.allowedFormatting.add(form);
         }
         this.spoilerFormatting = spoilerFormatting;
         this.backtickFormatting = quoteFormatting;
+        this.urlFormatting = urlFormatting;
     }
 
     public static TextNode defaultSpoilerFormatting(TextNode[] textNodes) {
-        return new StyledNode(new TextNode[]{TextNode.of("["), new TranslatedNode("options.hidden"), TextNode.of("]")},
-                Style.EMPTY.withColor(Formatting.GRAY).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.empty())).withItalic(true),
-                new ParentNode(textNodes), null, null);
-
+        return new HoverNode<>(TextNode.array(
+                new FormattingNode(
+                        TextNode.array(TextNode.of("["), new TranslatedNode("options.hidden"), TextNode.of("]")),
+                        Formatting.GRAY, Formatting.ITALIC
+                )
+        ), HoverNode.Action.TEXT, TextNode.asSingle(textNodes));
     }
 
     public static TextNode defaultQuoteFormatting(TextNode[] textNodes) {
-        return new StyledNode(textNodes, Style.EMPTY.withColor(Formatting.GRAY).withItalic(true), null, null, null);
+        return new FormattingNode(textNodes, Formatting.GRAY, Formatting.ITALIC);
+    }
+
+    public static TextNode defaultUrlFormatting(TextNode[] textNodes, TextNode url) {
+        return new ClickActionNode(TextNode.array(new FormattingNode(textNodes, Formatting.BLUE, Formatting.UNDERLINE)), ClickEvent.Action.OPEN_URL, url);
     }
 
     @Override
@@ -92,9 +108,9 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             var i = reader.read();
             if (i == '\\' && reader.canRead()) {
                 var next = reader.read();
-                if (next != '~' && next != '`' && next != '_' && next != '*' && next != '|') {
-                    builder.append(i);
-                }
+                //if (next != '~' && next != '`' && next != '_' && next != '*' && next != '|') {
+                builder.append(i);
+                //}
                 builder.append(next);
                 continue;
             }
@@ -121,6 +137,10 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     case '`' -> SubNodeType.BACK_TICK;
                     case '*' -> SubNodeType.STAR;
                     case '_' -> SubNodeType.FLOOR;
+                    case '(' -> SubNodeType.BRACKET_OPEN;
+                    case ')' -> SubNodeType.BRACKET_CLOSE;
+                    case '[' -> SubNodeType.SQR_BRACKET_OPEN;
+                    case ']' -> SubNodeType.SQR_BRACKET_CLOSE;
                     default -> null;
                 };
             }
@@ -287,6 +307,30 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                         }
                     }
                 }
+            } else if (next.type == SubNodeType.SQR_BRACKET_OPEN && this.allowedFormatting.contains(MarkdownFormat.URL) && nodes.hasNext()) {
+                var start = nodes.nextIndex();
+                var value = parseSubNodes(nodes, SubNodeType.SQR_BRACKET_CLOSE, 1, false);
+
+                if (value != null) {
+                    if (nodes.hasNext()) {
+                        var check = nodes.next().type == SubNodeType.BRACKET_OPEN;
+
+                        if (check) {
+                            var url = parseSubNodes(nodes, SubNodeType.BRACKET_CLOSE, 1, false);
+                            if (url != null) {
+                                if (!builder.isEmpty()) {
+                                    out.add(new LiteralNode(builder.toString()));
+                                    builder = new StringBuilder();
+                                }
+                                out.add(this.urlFormatting.apply(value, TextNode.asSingle(url)));
+                                continue;
+                            }
+                        }
+                    }
+                }
+                while (start != nodes.nextIndex()) {
+                    nodes.previous();
+                }
             }
 
             builder.append((String) next.value);
@@ -312,7 +356,8 @@ public final class MarkdownLiteParserV1 implements NodeParser {
         UNDERLINE,
         STRIKETHROUGH,
         QUOTE,
-        SPOILER
+        SPOILER,
+        URL
     }
 
     private record SubNodeType<T>(T selfValue) {
@@ -324,6 +369,10 @@ public final class MarkdownLiteParserV1 implements NodeParser {
         public static final SubNodeType<String> DOUBLE_WAVY_LINE = new SubNodeType<>("~~");
         public static final SubNodeType<String> BACK_TICK = new SubNodeType<>("`");
         public static final SubNodeType<String> SPOILER_LINE = new SubNodeType<>("||");
+        public static final SubNodeType<String> BRACKET_OPEN = new SubNodeType<>("(");
+        public static final SubNodeType<String> BRACKET_CLOSE = new SubNodeType<>(")");
+        public static final SubNodeType<String> SQR_BRACKET_OPEN = new SubNodeType<>("[");
+        public static final SubNodeType<String> SQR_BRACKET_CLOSE = new SubNodeType<>("]");
     }
 
     private record SubNode<T>(SubNodeType<T> type, T value) {
