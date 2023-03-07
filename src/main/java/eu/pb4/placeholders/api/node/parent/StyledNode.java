@@ -6,7 +6,6 @@ import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.*;
 import org.jetbrains.annotations.Nullable;
 
-
 public final class StyledNode extends ParentNode {
     private final Style style;
 

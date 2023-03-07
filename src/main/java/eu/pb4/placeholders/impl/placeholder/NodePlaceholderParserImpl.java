@@ -15,17 +15,10 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Deprecated(forRemoval = true)
 @ApiStatus.Internal
 public class NodePlaceholderParserImpl {
     public static TextNode[] recursivePlaceholderParsing(ParserContext.Key<PlaceholderContext> contextKey, TextNode text, Pattern pattern, Placeholders.PlaceholderGetter placeholders, NodeParser parser) {
-        return new PatternPlaceholderParser(pattern, (arg) -> {
-            var args = arg.split(" ", 2);
-
-            if (placeholders.exists(args[0])) {
-                return new PlaceholderNode(contextKey, args[0], placeholders, placeholders.isContextOptional(), args.length == 2 ? args[1] : null);
-            } else {
-                return null;
-            }
-        }).parseNodes(text);
+        return PatternPlaceholderParser.of(pattern, contextKey, placeholders).parseNodes(text);
     }
 }

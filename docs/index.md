@@ -27,6 +27,7 @@ of Simplified Text Format allows creating great user/admin experience.
 - [Getting Started](dev/getting-started)
 - [Adding placeholders](dev/adding-placeholders)
 - [Parsing placeholders](dev/parsing-placeholders)
-- [Using Simplified Text Format/TextParser](dev/text-format)
+- [TextNodes and NodeParsers](dev/text-nodes)
+- [Using Simplified Text Format (TextParserV1)](dev/text-format)
 
 *[JIJ]: Jar-in-Jar

@@ -15,6 +15,7 @@ nav:
             - dev/getting-started.md
             - dev/adding-placeholders.md
             - dev/parsing-placeholders.md
+            - dev/text-nodes.md
             - dev/text-format.md
 
 
