@@ -12,7 +12,11 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 
 !!! tip inline end "Vanilla Statistics"
 
-    A list of statistics can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#List_of_custom_statistic_names)
+    A list of `[statistic]`s can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#List_of_custom_statistic_names)
+
+    A list of `[type]`s can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#Statistic_types_and_names)
+
+    Examples: `%player:statistic play_time%`, `%player:statistic mined diamond_ore%`
 
 - `%player:name%` - The player's name.
 - `%player:name_visual%` - The player's name (without hover and click action).
@@ -33,7 +37,8 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%player:equipment_slot [name]%` - The player's equipment at selected slot. Valid values for `[name]`
   are `mainhand`, `offhand`, `head`, `chest`, `legs` and `feet`.
 - `%player:playtime%`/`%player:playtime [formatting]%` - The player's playtime.
-- `%player:statistic [statistic]%` - The value of player's statistic.
+- `%player:statistic [statistic]%`/`%player:statistic [type] [statistic]%` - The formatted value of player's statistic.
+- `%player:statistic_raw [statistic]%`/`%player:statistic_raw [type] [statistic]%` - The value of player's statistic.
 
 ### World
 
