@@ -4,6 +4,8 @@ import com.mojang.logging.LogUtils;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
+import net.fabricmc.loader.api.Version;
+import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -18,6 +20,19 @@ import java.util.ArrayList;
 public class GeneralUtils {
     public static final Logger LOGGER = LoggerFactory.getLogger("Text Placeholder API");
     public static final boolean IS_DEV = FabricLoader.getInstance().isDevelopmentEnvironment();
+
+    public static final boolean IS_LEGACY_TRANSLATION;
+
+    static {
+        boolean IS_LEGACY1;
+        try {
+            IS_LEGACY1 = FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion().compareTo(Version.parse("1.19.4")) < 0;
+        } catch (VersionParsingException e) {
+            IS_LEGACY1 = false;
+            e.printStackTrace();
+        }
+        IS_LEGACY_TRANSLATION = IS_LEGACY1;
+    }
 
     public static String durationToString(long x) {
         long seconds = x % 60;
@@ -71,7 +86,6 @@ public class GeneralUtils {
                 }
             } else {
                 out.append(base.copyContentOnly().setStyle(Style.EMPTY.withColor(posToColor.getColorAt(pos++, totalLength))));
-
             }
 
             for (Text sibling : base.getSiblings()) {
@@ -222,12 +236,19 @@ public class GeneralUtils {
                 }
             }
 
-
-            list.add(new TranslatedNode(content.getKey(), args.toArray()));
+            if (IS_LEGACY_TRANSLATION) {
+                list.add(TranslatedNode.of(content.getKey(), args.toArray()));
+            } else {
+                list.add(TranslatedNode.ofFallback(content.getKey(), content.getFallback(), args.toArray()));
+            }
         } else if (input.getContent() instanceof ScoreTextContent content) {
             list.add(new ScoreNode(content.getName(), content.getObjective()));
         } else if (input.getContent() instanceof KeybindTextContent content) {
             list.add(new KeybindNode(content.getKey()));
+        } else if (input.getContent() instanceof SelectorTextContent content) {
+            list.add(new SelectorNode(content.getPattern(), content.getSeparator().map(GeneralUtils::convertToNodes)));
+        } else if (input.getContent() instanceof NbtTextContent content) {
+            list.add(new NbtNode(content.getPath(), content.shouldInterpret(), content.getSeparator().map(GeneralUtils::convertToNodes), content.getDataSource()));
         }
 
 

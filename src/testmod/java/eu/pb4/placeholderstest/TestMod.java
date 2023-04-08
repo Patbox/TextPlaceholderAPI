@@ -17,6 +17,7 @@ import net.minecraft.command.argument.TextArgumentType;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.Texts;
 
 import java.util.Map;
 
@@ -74,7 +75,7 @@ public class TestMod implements ModInitializer {
             var textTime = System.nanoTime() - time;
 
             player.sendMessage(Text.literal(Text.Serializer.toJson(text)), false);
-            player.sendMessage(text, false);
+            player.sendMessage(Texts.parse(context.getSource(), text, context.getSource().getEntity(), 0), false);
             player.sendMessage(Text.literal(
                       "Tag: " + ((tagTime / 1000) / 1000d) + " ms | " +
                             "Placeholder: " + ((placeholderTime / 1000) / 1000d) + " ms | " +

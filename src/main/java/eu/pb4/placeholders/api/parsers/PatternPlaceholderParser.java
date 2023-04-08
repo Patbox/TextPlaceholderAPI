@@ -65,7 +65,7 @@ public record PatternPlaceholderParser(Pattern pattern, Function<String, @Nullab
                 }
             }
 
-            return new TextNode[]{new TranslatedNode(translatedNode.key(), list.toArray())};
+            return new TextNode[]{TranslatedNode.ofFallback(translatedNode.key(), translatedNode.fallback(), list.toArray())};
 
         } else if (text instanceof LiteralNode literalNode) {
             var out = new ArrayList<TextNode>();

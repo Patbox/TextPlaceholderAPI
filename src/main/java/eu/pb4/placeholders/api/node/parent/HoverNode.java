@@ -25,7 +25,7 @@ public final class HoverNode<T, H> extends ParentNode {
     @Override
     protected Text applyFormatting(MutableText out, ParserContext context) {
         if (this.action == Action.TEXT) {
-            return out.setStyle(out.getStyle().withHoverEvent(new HoverEvent((HoverEvent.Action<Object>) this.action.vanillaType(), ((ParentTextNode) this.value).toText(context, true))));
+            return out.setStyle(out.getStyle().withHoverEvent(new HoverEvent((HoverEvent.Action<Object>) this.action.vanillaType(), ((TextNode) this.value).toText(context, true))));
         } else if (this.action == Action.ENTITY) {
             return out.setStyle(out.getStyle().withHoverEvent(new HoverEvent((HoverEvent.Action<Object>) this.action.vanillaType(), ((EntityNodeContent) this.value).toVanilla(context))));
         } else {

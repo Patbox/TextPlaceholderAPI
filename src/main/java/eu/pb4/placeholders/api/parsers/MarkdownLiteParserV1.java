@@ -55,7 +55,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
     public static TextNode defaultSpoilerFormatting(TextNode[] textNodes) {
         return new HoverNode<>(TextNode.array(
                 new FormattingNode(
-                        TextNode.array(TextNode.of("["), new TranslatedNode("options.hidden"), TextNode.of("]")),
+                        TextNode.array(TextNode.of("["), TranslatedNode.of("options.hidden"), TextNode.of("]")),
                         Formatting.GRAY, Formatting.ITALIC
                 )
         ), HoverNode.Action.TEXT, TextNode.asSingle(textNodes));
@@ -84,7 +84,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     list.add(arg);
                 }
             }
-            return new TextNode[]{new TranslatedNode(translatedNode.key(), list.toArray())};
+            return new TextNode[]{TranslatedNode.ofFallback(translatedNode.key(), translatedNode.fallback(), list.toArray())};
         } else if (input instanceof ParentTextNode parentTextNode) {
             var list = new ArrayList<SubNode<?>>();
             for (var children : parentTextNode.getChildren()) {

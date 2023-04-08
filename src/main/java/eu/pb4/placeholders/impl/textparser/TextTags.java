@@ -8,10 +8,8 @@ import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.registry.Registries;
+import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -32,9 +30,9 @@ public final class TextTags {
             aliases.put("dark_gray", List.of("dark_grey"));
             aliases.put("strikethrough", List.of("st"));
             aliases.put("obfuscated", List.of("obf"));
-            aliases.put("italic", List.of("i"));
+            aliases.put("italic", List.of("i", "em"));
             aliases.put("bold", List.of("b"));
-            aliases.put("underline", List.of("underlined"));
+            aliases.put("underline", List.of("underlined", "u"));
 
             for (Formatting formatting : Formatting.values()) {
                 TextParserV1.registerDefault(
@@ -98,7 +96,33 @@ public final class TextTags {
                                 textList.add(new ParentNode(parse(removeEscaping(cleanArgument(part)), handlers)));
                             }
 
-                            var out = new TranslatedNode(removeEscaping(cleanArgument(lines[0])), textList.toArray(new TextNode[0]));
+                            var out = TranslatedNode.of(removeEscaping(cleanArgument(lines[0])), textList.toArray(new TextNode[0]));
+                            return new TextParserV1.TagNodeValue(out, 0);
+                        }
+                        return TextParserV1.TagNodeValue.EMPTY;
+                    }));
+        }
+
+        {
+            TextParserV1.registerDefault(TextParserV1.TextTag.of(
+                    "lang_fallback",
+                    List.of("translatef", "langf", "translate_fallback"),
+                    "special",
+                    false,
+                    (tag, data, input, handlers, endAt) -> {
+                        var lines = data.split(":");
+                        if (lines.length > 1) {
+                            List<TextNode> textList = new ArrayList<>();
+                            int skipped = 0;
+                            for (String part : lines) {
+                                if (skipped < 2) {
+                                    skipped++;
+                                    continue;
+                                }
+                                textList.add(new ParentNode(parse(removeEscaping(cleanArgument(part)), handlers)));
+                            }
+
+                            var out = TranslatedNode.ofFallback(removeEscaping(cleanArgument(lines[0])), removeEscaping(cleanArgument(lines[1])), textList.toArray(new TextNode[0]));
                             return new TextParserV1.TagNodeValue(out, 0);
                         }
                         return TextParserV1.TagNodeValue.EMPTY;
@@ -107,6 +131,7 @@ public final class TextTags {
 
         {
             TextParserV1.registerDefault(TextParserV1.TextTag.of("keybind",
+                    List.of("key"),
                     "special",
                     false,
                     (tag, data, input, handlers, endAt) -> {
@@ -245,10 +270,30 @@ public final class TextTags {
                                                 ));
                                             }
                                         } else if (action == HoverEvent.Action.SHOW_ITEM) {
-                                            return out.value(new HoverNode<>(out.nodes(),
-                                                    HoverNode.Action.ITEM_STACK,
-                                                    new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[1])))))
-                                            ));
+                                            try {
+                                                return out.value(new HoverNode<>(out.nodes(),
+                                                        HoverNode.Action.ITEM_STACK,
+                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[1])))))
+                                                ));
+                                            } catch (Throwable e) {
+                                                lines = lines[1].split(":", 2);
+                                                if (lines.length > 0) {
+                                                    var stack = Registries.ITEM.get(Identifier.tryParse(lines[0])).getDefaultStack();
+
+                                                    if (lines.length > 1) {
+                                                        stack.setCount(Integer.parseInt(lines[1]));
+                                                    }
+
+                                                    if (lines.length > 2) {
+                                                        stack.setNbt(StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[2]))));
+                                                    }
+
+                                                    return out.value(new HoverNode<>(out.nodes(),
+                                                            HoverNode.Action.ITEM_STACK,
+                                                            new HoverEvent.ItemStackContent(stack)
+                                                    ));
+                                                }
+                                            }
                                         } else {
                                             return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT, new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers))));
                                         }
@@ -266,6 +311,7 @@ public final class TextTags {
             TextParserV1.registerDefault(
                     TextParserV1.TextTag.of(
                             "insert",
+                            List.of("insertion"),
                             "click_action",
                             false,
 
@@ -487,7 +533,58 @@ public final class TextTags {
                             }
                     )
             );
+        }
 
+        {
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
+                            "selector",
+                            "special",
+                            false, (tag, data, input, handlers, endAt) -> {
+                                String[] lines = data.split(":");
+                                if (lines.length == 2) {
+                                    return new TextParserV1.TagNodeValue(new SelectorNode(restoreOriginalEscaping(cleanArgument(lines[0])), Optional.of(TextNode.asSingle(recursiveParsing(restoreOriginalEscaping(cleanArgument(lines[1])), handlers, null).nodes()))), 0);
+                                } else if (lines.length == 1) {
+                                    return new TextParserV1.TagNodeValue(new SelectorNode(restoreOriginalEscaping(cleanArgument(lines[0])), Optional.empty()), 0);
+                                }
+                                return TextParserV1.TagNodeValue.EMPTY;
+                            }
+                    )
+            );
+        }
+
+        {
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
+                            "nbt",
+                            "special",
+                            false, (tag, data, input, handlers, endAt) -> {
+                                String[] lines = data.split(":");
+
+                                if (lines.length < 3) {
+                                    return TextParserV1.TagNodeValue.EMPTY;
+                                }
+
+                                var cleanLine1 = restoreOriginalEscaping(cleanArgument(lines[1]));
+
+                                var type = switch (lines[0]) {
+                                    case "block" -> new BlockNbtDataSource(cleanLine1);
+                                    case "entity" -> new EntityNbtDataSource(cleanLine1);
+                                    case "storage" -> new StorageNbtDataSource(Identifier.tryParse(cleanLine1));
+                                    default -> null;
+                                };
+
+                                if (type == null) {
+                                    return TextParserV1.TagNodeValue.EMPTY;
+                                }
+
+                                Optional<TextNode> separator = lines.length > 3 ? Optional.of(TextNode.asSingle(recursiveParsing(restoreOriginalEscaping(cleanArgument(lines[3])), handlers, null).nodes())) : Optional.empty();
+                                var shouldInterpret = lines.length > 4 ? Boolean.parseBoolean(lines[4]) : false;
+
+                                return new TextParserV1.TagNodeValue(new NbtNode(lines[2], shouldInterpret, separator, type), 0);
+                            }
+                    )
+            );
         }
     }
 }

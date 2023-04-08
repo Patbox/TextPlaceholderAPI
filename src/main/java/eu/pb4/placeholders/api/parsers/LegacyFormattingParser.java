@@ -46,7 +46,7 @@ public class LegacyFormattingParser implements NodeParser {
                     list.add(arg);
                 }
             }
-            return new TextNode[] { new TranslatedNode(translatedNode.key(), list.toArray()) };
+            return new TextNode[] { TranslatedNode.ofFallback(translatedNode.key(), translatedNode.fallback(), list.toArray()) };
         } else if (input instanceof ParentTextNode parentTextNode) {
             return parseParents(parentTextNode);
         } else {
