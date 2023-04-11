@@ -27,6 +27,71 @@ import static net.minecraft.server.command.CommandManager.argument;
 
 public class TestMod implements ModInitializer {
 
+    private static int perf(CommandContext<ServerCommandSource> context) {
+        long placeholderTimeTotal = 0;
+        long contextTimeTotal = 0;
+        long tagTimeTotal = 0;
+        long textTimeTotal = 0;
+        Text output = null;
+        var input = context.getArgument("text", String.class);
+        ServerPlayerEntity player = context.getSource().getPlayer();
+
+        int iter = 1024 * 20;
+
+        try {
+            for (int i = 0; i < iter; i++) {
+                var time = System.nanoTime();
+                var tags = TextNode.asSingle(
+                        LegacyFormattingParser.ALL.parseNodes(
+                                TextNode.asSingle(
+                                        MarkdownLiteParserV1.ALL.parseNodes(
+                                                TextNode.asSingle(
+                                                        TextParserV1.DEFAULT.parseNodes(new LiteralNode(input))
+                                                )
+                                        )
+                                )
+                        )
+                );
+                tagTimeTotal += System.nanoTime() - time;
+                time = System.nanoTime();
+
+                var placeholders = Placeholders.parseNodes(tags);
+                placeholderTimeTotal += System.nanoTime() - time;
+                time = System.nanoTime();
+
+                var ctx = ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player));
+                contextTimeTotal += System.nanoTime() - time;
+                time = System.nanoTime();
+
+                Text text = placeholders.toText(ctx, true);
+                textTimeTotal +=  System.nanoTime() - time;
+                output = text;
+            }
+            long total = tagTimeTotal + placeholderTimeTotal + textTimeTotal + contextTimeTotal;
+
+            player.sendMessage(Text.literal(Text.Serializer.toJson(output)), false);
+            player.sendMessage(Texts.parse(context.getSource(), output, context.getSource().getEntity(), 0), false);
+            player.sendMessage(Text.literal(
+                    "<FULL> Tag: " + ((tagTimeTotal / 1000) / 1000d) + " ms | " +
+                            "Context: " + ((contextTimeTotal / 1000) / 1000d) + " ms | " +
+                            "Placeholder: " + ((placeholderTimeTotal / 1000) / 1000d) + " ms | " +
+                            "Text: " + ((textTimeTotal / 1000) / 1000d) + " ms | " +
+                            "All: " + ((total / 1000) / 1000d) + " ms"
+            ), false);
+
+            player.sendMessage(Text.literal(
+                    "<SINGLE> Tag: " + ((tagTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                            "Context: " + ((contextTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                            "Placeholder: " + ((placeholderTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                            "Text: " + ((textTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                            "All: " + ((total / iter / 1000) / 1000d) + " ms"
+            ), false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     private static int test(CommandContext<ServerCommandSource> context) {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
@@ -180,6 +245,10 @@ public class TestMod implements ModInitializer {
 
             dispatcher.register(
                     literal("test3").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test3))
+            );
+
+            dispatcher.register(
+                    literal("perm").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::perf))
             );
             dispatcher.register(
                     literal("test4text").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test4Text))

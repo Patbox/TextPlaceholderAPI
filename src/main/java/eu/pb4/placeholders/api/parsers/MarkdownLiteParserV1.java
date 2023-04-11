@@ -5,6 +5,7 @@ import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.*;
+import eu.pb4.placeholders.impl.textparser.TextParserImpl;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
@@ -185,7 +186,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     if (!builder.isEmpty()) {
                         out.add(new LiteralNode(builder.toString()));
                     }
-                    return out.toArray(new TextNode[0]);
+                    return out.toArray(TextParserImpl.CASTER);
                 }
 
                 var xStart = nodes.nextIndex();
@@ -204,7 +205,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                             if (!builder.isEmpty()) {
                                 out.add(new LiteralNode(builder.toString()));
                             }
-                            return out.toArray(new TextNode[0]);
+                            return out.toArray(TextParserImpl.CASTER);
                         }
                     } else {
                         break;
@@ -340,7 +341,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             if (!builder.isEmpty()) {
                 out.add(new LiteralNode(builder.toString()));
             }
-            return out.toArray(new TextNode[0]);
+            return out.toArray(TextParserImpl.CASTER);
         } else {
             while (startIndex != nodes.nextIndex()) {
                 nodes.previous();

@@ -41,6 +41,11 @@ public final class ClickActionNode extends ParentNode {
     }
 
     @Override
+    public boolean isDynamicNoChildren() {
+        return this.value.isDynamic();
+    }
+
+    @Override
     public String toString() {
         return "ClickActionNode{" +
                 "action=" + action +

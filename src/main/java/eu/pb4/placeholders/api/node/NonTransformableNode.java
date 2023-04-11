@@ -11,4 +11,9 @@ public record NonTransformableNode(TextNode node) implements TextNode {
     public Text toText(ParserContext context, boolean removeBackslashes) {
         return node.toText(context, removeBackslashes);
     }
+
+    @Override
+    public boolean isDynamic() {
+        return node.isDynamic();
+    }
 }

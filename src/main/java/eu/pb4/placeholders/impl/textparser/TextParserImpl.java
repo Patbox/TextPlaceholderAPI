@@ -2,6 +2,8 @@ package eu.pb4.placeholders.impl.textparser;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import eu.pb4.placeholders.api.node.DirectTextNode;
+import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.LiteralNode;
@@ -185,6 +187,8 @@ public class TextParserImpl {
         }
         return new TextParserV1.NodeList(text.toArray(new TextNode[0]), currentEnd);
     }
+
+    public static final TextNode[] CASTER = new TextNode[0];
 
     // Cursed don't touch this
     @ApiStatus.Experimental

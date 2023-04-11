@@ -30,4 +30,9 @@ public record PlaceholderNode(ParserContext.Key<PlaceholderContext> contextKey, 
             return Text.empty();
         }
     }
+
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
 }

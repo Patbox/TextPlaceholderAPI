@@ -7,6 +7,7 @@ import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.ColorNode;
 import eu.pb4.placeholders.api.node.parent.FormattingNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
+import eu.pb4.placeholders.impl.textparser.TextParserImpl;
 import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
@@ -64,7 +65,7 @@ public class LegacyFormattingParser implements NodeParser {
             }
         }
 
-        return new TextNode[] { parentTextNode.copyWith(list.toArray(new TextNode[0]), this) };
+        return new TextNode[] { parentTextNode.copyWith(list.toArray(TextParserImpl.CASTER), this) };
     }
 
     private TextNode[] parseLiteral(LiteralNode literalNode, List<TextNode> nexts) {
@@ -103,7 +104,7 @@ public class LegacyFormattingParser implements NodeParser {
 
                         return new TextNode[] {
                                 new LiteralNode(builder.toString()),
-                                new ColorNode(list.toArray(new TextNode[0]), TextColor.fromRgb(rgb))
+                                new ColorNode(list.toArray(TextParserImpl.CASTER), TextColor.fromRgb(rgb))
                         };
                     } catch (Throwable e) {
                         //noop
@@ -125,7 +126,7 @@ public class LegacyFormattingParser implements NodeParser {
 
                     return new TextNode[] {
                             new LiteralNode(builder.toString()),
-                            new FormattingNode(list.toArray(new TextNode[0]), x)
+                            new FormattingNode(list.toArray(TextParserImpl.CASTER), x)
                     };
                 } else {
                     builder.append('&');

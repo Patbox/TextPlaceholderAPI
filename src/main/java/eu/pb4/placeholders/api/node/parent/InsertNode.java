@@ -42,4 +42,9 @@ public final class InsertNode extends ParentNode {
                 ", children=" + Arrays.toString(children) +
                 '}';
     }
+
+    @Override
+    public boolean isDynamicNoChildren() {
+        return this.value.isDynamic();
+    }
 }

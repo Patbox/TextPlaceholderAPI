@@ -1,6 +1,5 @@
 package eu.pb4.placeholders.impl;
 
-import com.mojang.logging.LogUtils;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
@@ -78,11 +77,23 @@ public class GeneralUtils {
         if (base.getStyle().getColor() == null) {
             MutableText out = Text.empty().setStyle(base.getStyle());
             if (base.getContent() instanceof LiteralTextContent literalTextContent) {
-                for (String letter : literalTextContent.string().replaceAll("\\p{So}|.", "$0\0").split("\0+")) {
-                    if (!letter.isEmpty()) {
-                        out.append(Text.literal(letter).setStyle(Style.EMPTY.withColor(posToColor.getColorAt(pos++, totalLength))));
-
+                var l = literalTextContent.string().length();
+                for (var i = 0; i < l; i++) {
+                    var character = literalTextContent.string().charAt(i);
+                    int value;
+                    if (Character.isHighSurrogate(character) && i + 1 < l) {
+                        var next = literalTextContent.string().charAt(++i);
+                        if (Character.isLowSurrogate(next)) {
+                            value = Character.toCodePoint(character, next);
+                        } else {
+                            value = character;
+                        }
+                    } else {
+                        value = character;
                     }
+
+                    out.append(Text.literal(Character.toString(value)).setStyle(Style.EMPTY.withColor(posToColor.getColorAt(pos++, totalLength))));
+
                 }
             } else {
                 out.append(base.copyContentOnly().setStyle(Style.EMPTY.withColor(posToColor.getColorAt(pos++, totalLength))));
@@ -202,14 +213,17 @@ public class GeneralUtils {
         return baseText;
     }
 
-    public static Text getItemText(ItemStack stack) {
+    public static Text getItemText(ItemStack stack, boolean rarity) {
         if (!stack.isEmpty()) {
             MutableText mutableText = Text.empty().append(stack.getName());
             if (stack.hasCustomName()) {
                 mutableText.formatted(Formatting.ITALIC);
             }
 
-            mutableText.formatted(stack.getRarity().formatting).styled((style) -> {
+            if (rarity) {
+                mutableText.formatted(stack.getRarity().formatting);
+            }
+            mutableText.styled((style) -> {
                 return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(stack)));
             });
 

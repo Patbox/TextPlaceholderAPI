@@ -21,6 +21,10 @@ public interface TextNode {
         return toText(ParserContext.of(), true);
     }
 
+    default boolean isDynamic() {
+        return false;
+    }
+
     static TextNode convert(Text input) {
         return GeneralUtils.convertToNodes(input);
     }

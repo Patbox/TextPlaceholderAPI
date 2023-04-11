@@ -12,7 +12,7 @@ public class ParentNode implements ParentTextNode {
     public static final ParentNode EMPTY = new ParentNode(new TextNode[0]);
     protected final TextNode[] children;
 
-    public ParentNode(TextNode[] children) {
+    public ParentNode(TextNode... children) {
         this.children = children;
     }
 

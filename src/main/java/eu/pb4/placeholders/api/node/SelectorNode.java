@@ -10,4 +10,9 @@ public record SelectorNode(String pattern, Optional<TextNode> separator) impleme
     public Text toText(ParserContext context, boolean removeBackslashes) {
         return Text.selector(pattern, separator.map(x -> x.toText(context, removeBackslashes)));
     }
+
+    @Override
+    public boolean isDynamic() {
+        return separator.isPresent() && separator.get().isDynamic();
+    }
 }

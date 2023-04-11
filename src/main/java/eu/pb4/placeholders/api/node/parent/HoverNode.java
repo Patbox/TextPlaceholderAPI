@@ -66,6 +66,11 @@ public final class HoverNode<T, H> extends ParentNode {
                 '}';
     }
 
+    @Override
+    public boolean isDynamicNoChildren() {
+        return (this.action == Action.TEXT && ((TextNode) this.value).isDynamic()) || (this.action == Action.ENTITY && ((EntityNodeContent) this.value).name.isDynamic());
+    }
+
     public record Action<T, H>(HoverEvent.Action<H> vanillaType) {
         public static final Action<EntityNodeContent, HoverEvent.EntityContent> ENTITY = new Action<>(HoverEvent.Action.SHOW_ENTITY);
         public static final Action<HoverEvent.ItemStackContent, HoverEvent.ItemStackContent> ITEM_STACK = new Action<>(HoverEvent.Action.SHOW_ITEM);

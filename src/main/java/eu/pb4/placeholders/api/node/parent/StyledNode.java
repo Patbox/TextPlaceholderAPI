@@ -77,6 +77,12 @@ public final class StyledNode extends ParentNode {
     }
 
     @Override
+    public boolean isDynamicNoChildren() {
+        return (this.clickValue != null && this.clickValue.isDynamic()) || (this.hoverValue != null && this.hoverValue.isDynamic())
+                || (this.insertion != null && this.insertion.isDynamic());
+    }
+
+    @Override
     public String toString() {
         return "StyledNode{" +
                 "style=" + style +

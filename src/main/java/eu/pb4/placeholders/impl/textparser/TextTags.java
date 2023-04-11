@@ -1,9 +1,8 @@
 package eu.pb4.placeholders.impl.textparser;
 
-import com.google.common.util.concurrent.AtomicDouble;
 import eu.pb4.placeholders.api.node.*;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.api.node.parent.*;
+import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
@@ -28,25 +27,74 @@ public final class TextTags {
             aliases.put("gray", List.of("grey"));
             aliases.put("light_purple", List.of("pink"));
             aliases.put("dark_gray", List.of("dark_grey"));
-            aliases.put("strikethrough", List.of("st"));
-            aliases.put("obfuscated", List.of("obf"));
-            aliases.put("italic", List.of("i", "em"));
-            aliases.put("bold", List.of("b"));
-            aliases.put("underline", List.of("underlined", "u"));
 
             for (Formatting formatting : Formatting.values()) {
+                if (formatting.isModifier()) {
+                    continue;
+                }
+
                 TextParserV1.registerDefault(
                         TextParserV1.TextTag.of(
                                 formatting.getName(),
                                 aliases.containsKey(formatting.getName()) ? aliases.get(formatting.getName()) : List.of(),
-                                formatting.isColor() ? "color" : "formatting",
+                                "color",
                                 true,
-                                (tag, data, input, handlers, endAt) -> {
-                                    var out = recursiveParsing(input, handlers, endAt);
-                                    return new TextParserV1.TagNodeValue(new FormattingNode(out.nodes(), formatting), out.length());
-                                })
+                                wrap((nodes, arg) -> new FormattingNode(nodes, formatting))
+                        )
                 );
             }
+        }
+
+        {
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
+                            "bold",
+                            List.of("b"),
+                            "formatting",
+                            true,
+                            bool(BoldNode::new)
+                    )
+            );
+
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
+                            "underline",
+                            List.of("underlined", "u"),
+                            "formatting",
+                            true,
+                            bool(UnderlinedNode::new)
+                    )
+            );
+
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
+                            "strikethrough", List.of("st"),
+                            "formatting",
+                            true,
+                            bool(StrikethroughNode::new)
+                    )
+            );
+
+
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
+                            "obfuscated",
+                            List.of("obf", "matrix"),
+                            "formatting",
+                            true,
+                            bool(ObfuscatedNode::new)
+                    )
+            );
+
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
+                            "italic",
+                            List.of("i", "em"),
+                            "formatting",
+                            true,
+                            bool(ItalicNode::new)
+                    )
+            );
         }
 
         {
@@ -56,10 +104,7 @@ public final class TextTags {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            (tag, data, input, handlers, endAt) -> {
-                                var out = recursiveParsing(input, handlers, endAt);
-                                return new TextParserV1.TagNodeValue(new ColorNode(out.nodes(), TextColor.parse(cleanArgument(data))), out.length());
-                            }
+                            wrap((nodes, data) -> new ColorNode(nodes, TextColor.parse(cleanArgument(data))))
                     )
             );
         }
@@ -69,10 +114,7 @@ public final class TextTags {
                             "font",
                             "other_formatting",
                             false,
-                            (tag, data, input, handlers, endAt) -> {
-                                var out = recursiveParsing(input, handlers, endAt);
-                                return out.value(new FontNode(out.nodes(), Identifier.tryParse(cleanArgument(data))));
-                            }
+                            wrap((nodes, data) -> new FontNode(nodes, Identifier.tryParse(cleanArgument(data))))
                     )
             );
         }
@@ -96,7 +138,7 @@ public final class TextTags {
                                 textList.add(new ParentNode(parse(removeEscaping(cleanArgument(part)), handlers)));
                             }
 
-                            var out = TranslatedNode.of(removeEscaping(cleanArgument(lines[0])), textList.toArray(new TextNode[0]));
+                            var out = TranslatedNode.of(removeEscaping(cleanArgument(lines[0])), textList.toArray(TextParserImpl.CASTER));
                             return new TextParserV1.TagNodeValue(out, 0);
                         }
                         return TextParserV1.TagNodeValue.EMPTY;
@@ -122,7 +164,7 @@ public final class TextTags {
                                 textList.add(new ParentNode(parse(removeEscaping(cleanArgument(part)), handlers)));
                             }
 
-                            var out = TranslatedNode.ofFallback(removeEscaping(cleanArgument(lines[0])), removeEscaping(cleanArgument(lines[1])), textList.toArray(new TextNode[0]));
+                            var out = TranslatedNode.ofFallback(removeEscaping(cleanArgument(lines[0])), removeEscaping(cleanArgument(lines[1])), textList.toArray(TextParserImpl.CASTER));
                             return new TextParserV1.TagNodeValue(out, 0);
                         }
                         return TextParserV1.TagNodeValue.EMPTY;
@@ -579,12 +621,38 @@ public final class TextTags {
                                 }
 
                                 Optional<TextNode> separator = lines.length > 3 ? Optional.of(TextNode.asSingle(recursiveParsing(restoreOriginalEscaping(cleanArgument(lines[3])), handlers, null).nodes())) : Optional.empty();
-                                var shouldInterpret = lines.length > 4 ? Boolean.parseBoolean(lines[4]) : false;
+                                var shouldInterpret = lines.length > 4 && Boolean.parseBoolean(lines[4]);
 
                                 return new TextParserV1.TagNodeValue(new NbtNode(lines[2], shouldInterpret, separator, type), 0);
                             }
                     )
             );
         }
+    }
+
+    private static boolean isntFalse(String arg) {
+        return arg.isEmpty() || !arg.equals("false");
+    }
+
+    private static TextParserV1.TagNodeBuilder wrap(Wrapper wrapper) {
+        return (tag, data, input, handlers, endAt) -> {
+            var out = recursiveParsing(input, handlers, endAt);
+            return new TextParserV1.TagNodeValue(wrapper.wrap(out.nodes(), data), out.length());
+        };
+    }
+
+    private static TextParserV1.TagNodeBuilder bool(BooleanTag wrapper) {
+        return (tag, data, input, handlers, endAt) -> {
+            var out = recursiveParsing(input, handlers, endAt);
+            return new TextParserV1.TagNodeValue(wrapper.wrap(out.nodes(), isntFalse(data)), out.length());
+        };
+    }
+
+    interface Wrapper {
+        TextNode wrap(TextNode[] nodes, String arg);
+    }
+
+    interface BooleanTag {
+        TextNode wrap(TextNode[] nodes, boolean value);
     }
 }

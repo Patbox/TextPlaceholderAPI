@@ -108,7 +108,29 @@ public class PlayerPlaceholders {
                     if (slot >= 0 && slot < inventory.size()) {
                         var stack = inventory.getStack(slot);
 
-                        return PlaceholderResult.value(GeneralUtils.getItemText(stack));
+                        return PlaceholderResult.value(GeneralUtils.getItemText(stack, true));
+                    }
+
+                } catch (Exception e) {
+                    // noop
+                }
+                return PlaceholderResult.invalid("Invalid argument");
+            } else {
+                return PlaceholderResult.invalid("No player or invalid argument!");
+            }
+        });
+
+        Placeholders.register(new Identifier("player", "inventory_slot_no_rarity"), (ctx, arg) -> {
+            if (ctx.hasPlayer() && arg != null) {
+                try {
+                    int slot = Integer.parseInt(arg);
+
+                    var inventory = ctx.player().getInventory();
+
+                    if (slot >= 0 && slot < inventory.size()) {
+                        var stack = inventory.getStack(slot);
+
+                        return PlaceholderResult.value(GeneralUtils.getItemText(stack, false));
                     }
 
                 } catch (Exception e) {
@@ -126,7 +148,23 @@ public class PlayerPlaceholders {
                     var slot = EquipmentSlot.byName(arg);
 
                     var stack = ctx.player().getEquippedStack(slot);
-                    return PlaceholderResult.value(GeneralUtils.getItemText(stack));
+                    return PlaceholderResult.value(GeneralUtils.getItemText(stack, true));
+                } catch (Exception e) {
+                    // noop
+                }
+                return PlaceholderResult.invalid("Invalid argument");
+            } else {
+                return PlaceholderResult.invalid("No player or invalid argument!");
+            }
+        });
+
+        Placeholders.register(new Identifier("player", "equipment_slot_no_rarity"), (ctx, arg) -> {
+            if (ctx.hasPlayer() && arg != null) {
+                try {
+                    var slot = EquipmentSlot.byName(arg);
+
+                    var stack = ctx.player().getEquippedStack(slot);
+                    return PlaceholderResult.value(GeneralUtils.getItemText(stack, false));
                 } catch (Exception e) {
                     // noop
                 }

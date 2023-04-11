@@ -37,4 +37,15 @@ public record TranslatedNode(String key, @Nullable String fallback, Object[] arg
             return Text.translatableWithFallback(this.key(), this.fallback, args);
         }
     }
+
+    @Override
+    public boolean isDynamic() {
+        for (var obj : args) {
+            if (obj instanceof TextNode t && t.isDynamic()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
