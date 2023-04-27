@@ -20,7 +20,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "time"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -33,7 +33,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "time_alt"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -50,7 +50,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "day"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -61,7 +61,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "id"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -72,7 +72,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "name"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -93,7 +93,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "player_count"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -104,7 +104,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "mob_count_colored"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -141,7 +141,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "mob_count"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }
@@ -168,7 +168,7 @@ public class WorldPlaceholders {
         Placeholders.register(new Identifier("world", "mob_cap"), (ctx, arg) -> {
             ServerWorld world;
             if (ctx.player() != null) {
-                world = ctx.player().getWorld();
+                world = ctx.player().getServerWorld();
             } else {
                 world = ctx.server().getOverworld();
             }

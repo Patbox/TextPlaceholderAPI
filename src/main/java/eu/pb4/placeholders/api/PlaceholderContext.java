@@ -87,7 +87,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player, ViewObject view) {
-        return new PlaceholderContext(player.getServer(), player.getCommandSource(), player.getWorld(), player, player, player.getGameProfile(), view);
+        return new PlaceholderContext(player.getServer(), player.getCommandSource(), player.getServerWorld(), player, player, player.getGameProfile(), view);
     }
 
     public static PlaceholderContext of(ServerCommandSource source) {
