@@ -3,9 +3,6 @@ package eu.pb4.placeholders.impl.placeholder.builtin;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.PlaceholderResult;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
-import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
@@ -14,7 +11,6 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
 
@@ -108,59 +104,18 @@ public class ServerPlaceholders {
             return PlaceholderResult.value(Objects.equals(arg, "gb")
                     ? String.format("%.1f", (float) heapUsage.getUsed() / 1073741824)
                     : String.format("%d", heapUsage.getUsed() / 1048576));
-        });
+            });
 
         Placeholders.register(new Identifier("server", "max_ram"), (ctx, arg) -> {
-            MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
-            MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
+                    MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
+                    MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
 
-            return PlaceholderResult.value(Objects.equals(arg, "gb")
-                    ? String.format("%.1f", (float) heapUsage.getMax() / 1073741824)
-                    : String.format("%d", heapUsage.getMax() / 1048576));
-        });
+                    return PlaceholderResult.value(Objects.equals(arg, "gb")
+                            ? String.format("%.1f", (float) heapUsage.getMax() / 1073741824)
+                            : String.format("%d", heapUsage.getMax() / 1048576));
+                });
 
         Placeholders.register(new Identifier("server", "online"), (ctx, arg) -> PlaceholderResult.value(String.valueOf(ctx.server().getPlayerManager().getCurrentPlayerCount())));
         Placeholders.register(new Identifier("server", "max_players"), (ctx, arg) -> PlaceholderResult.value(String.valueOf(ctx.server().getPlayerManager().getMaxPlayerCount())));
-
-        Placeholders.register(new Identifier("server", "objective_name_top"), (ctx, arg) -> {
-            var args = arg.split(" ");
-            if (args.length >= 2) {
-                ServerScoreboard scoreboard = ctx.server().getScoreboard();
-                ScoreboardObjective scoreboardObjective = scoreboard.getObjective(args[0]);
-                if (scoreboardObjective == null) {
-                    return PlaceholderResult.invalid("Invalid objective!");
-                }
-                try {
-                    int position = Integer.parseInt(args[1]);
-                    Collection<ScoreboardPlayerScore> playerScores = scoreboard.getAllPlayerScores(scoreboardObjective);
-                    ScoreboardPlayerScore score = playerScores.toArray(ScoreboardPlayerScore[]::new)[playerScores.size() - position];
-                    return PlaceholderResult.value(score.getPlayerName());
-                } catch (Exception e) {
-                    /* Into the void you go! */
-                    return PlaceholderResult.invalid("Invalid position!");
-                }
-            }
-            return PlaceholderResult.invalid("Not enough arguments!");
-        });
-        Placeholders.register(new Identifier("server", "objective_score_top"), (ctx, arg) -> {
-            var args = arg.split(" ");
-            if (args.length >= 2) {
-                ServerScoreboard scoreboard = ctx.server().getScoreboard();
-                ScoreboardObjective scoreboardObjective = scoreboard.getObjective(args[0]);
-                if (scoreboardObjective == null) {
-                    return PlaceholderResult.invalid("Invalid objective!");
-                }
-                try {
-                    int position = Integer.parseInt(args[1]);
-                    Collection<ScoreboardPlayerScore> playerScores = scoreboard.getAllPlayerScores(scoreboardObjective);
-                    ScoreboardPlayerScore score = playerScores.toArray(ScoreboardPlayerScore[]::new)[playerScores.size() - position];
-                    return PlaceholderResult.value(String.valueOf(score.getScore()));
-                } catch (Exception e) {
-                    /* Into the void you go! */
-                    return PlaceholderResult.invalid("Invalid position!");
-                }
-            }
-            return PlaceholderResult.invalid("Not enough arguments!");
-        });
     }
 }

@@ -5,9 +5,6 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.registry.Registries;
-import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
-import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.stat.StatType;
 import net.minecraft.stat.Stats;
@@ -258,25 +255,6 @@ public class PlayerPlaceholders {
                     /* Into the void you go! */
                 }
                 return PlaceholderResult.invalid("Invalid statistic!");
-            } else {
-                return PlaceholderResult.invalid("No player!");
-            }
-        });
-
-        Placeholders.register(new Identifier("player", "objective"), (ctx, arg) -> {
-            if (ctx.hasPlayer() && arg != null) {
-                try {
-                    ServerScoreboard scoreboard = ctx.server().getScoreboard();
-                    ScoreboardObjective scoreboardObjective = scoreboard.getObjective(arg);
-                    if (scoreboardObjective == null) {
-                        return PlaceholderResult.invalid("Invalid objective!");
-                    }
-                    ScoreboardPlayerScore score = scoreboard.getPlayerScore(ctx.player().getEntityName(), scoreboardObjective);
-                    return PlaceholderResult.value(String.valueOf(score.getScore()));
-                } catch (Exception e) {
-                    /* Into the void you go! */
-                }
-                return PlaceholderResult.invalid("Invalid objective!");
             } else {
                 return PlaceholderResult.invalid("No player!");
             }

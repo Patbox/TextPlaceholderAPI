@@ -12,11 +12,7 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 
 !!! tip inline end "Vanilla Statistics"
 
-    A list of `[statistic]`s can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#List_of_custom_statistic_names)
-
-    A list of `[type]`s can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#Statistic_types_and_names)
-
-    Examples: `%player:statistic play_time%`, `%player:statistic mined diamond_ore%`
+    A list of statistics can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#List_of_custom_statistic_names)
 
 - `%player:name%` - The player's name.
 - `%player:name_visual%` - The player's name (without hover and click action).
@@ -37,9 +33,7 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%player:equipment_slot [name]%` - The player's equipment at selected slot. Valid values for `[name]`
   are `mainhand`, `offhand`, `head`, `chest`, `legs` and `feet`.
 - `%player:playtime%`/`%player:playtime [formatting]%` - The player's playtime.
-- `%player:statistic [statistic]%`/`%player:statistic [type] [statistic]%` - The formatted value of player's statistic.
-- `%player:statistic_raw [statistic]%`/`%player:statistic_raw [type] [statistic]%` - The value of player's statistic.
-- `%player:objective [objective]%` - The value of player's scoreboard objective.
+- `%player:statistic [statistic]%` - The value of player's statistic.
 
 ### World
 
@@ -75,8 +69,6 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%server:mod_version [modid]%` - Returns version of the specified mod.
 - `%server:mod_name [modid]%` - Returns name of the specified mod.
 - `%server:mod_description [modid]%` - Returns description of the specified mod.
-- `%server:objective_name_top [objective] [position]%` - Shows name of the player at the `position`th place in the scoreboard `objective`.
-- `%server:objective_score_top [objective] [position]%` - Shows score of the player at the `position`th place in the scoreboard `objective`.
 
 *[TPS]: Ticks Per Second. The number of ticks per second executing on the server. <20 TPS means the server is lagging.
 *[MSPT]: Milliseconds Per Tick. The number of milliseconds it takes for a tick on the server. >50 MSPT means the server is lagging.
