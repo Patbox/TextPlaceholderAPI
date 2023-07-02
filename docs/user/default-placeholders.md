@@ -64,8 +64,10 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%server:mspt%` - The server's MSPT.
 - `%server:mspt_colored%` - The server's MSPT (colored).
 - `%server:time%`/`%server:time [formatting]%` - The server's time.
+- `%server:uptime%`/`%server:uptime [formatting]%` (2.1.2+)- The server's uptime.
 - `%server:version%` - The server's version.
 - `%server:name%` - The server's name.
+- `%server:motd%` - The server's motd.
 - `%server:used_ram%`/`%server:used_ram [gb]%` - The amount of ram used by server. (If the argument `gb` is added, it is displayed in
   gigabytes)
 - `%server:max_ram%`/`%server:max_ram [gb]%` - The maximum amount of ram that can be used by server. (If the argument `gb` is added, it is

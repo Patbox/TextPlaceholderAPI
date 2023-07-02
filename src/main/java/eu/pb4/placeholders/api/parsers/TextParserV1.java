@@ -1,7 +1,6 @@
 package eu.pb4.placeholders.api.parsers;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.serialization.Codec;
 import eu.pb4.placeholders.api.node.EmptyNode;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
@@ -17,12 +16,18 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import static eu.pb4.placeholders.impl.textparser.TextParserImpl.recursiveParsing;
+
+/**
+ * Regex-based text parsing implementation. Should be always used first.
+ * Loosely based on MiniMessage, with some degree of compatibility with it.
+ */
 public class TextParserV1 implements NodeParser {
 
     public static final TextParserV1 DEFAULT = new TextParserV1();
     public static final TextParserV1 SAFE = new TextParserV1();
 
-    private final boolean allowOverrides = false;
+    private boolean allowOverrides = false;
 
     private final List<TextTag> tags = new ArrayList<>();
     private final Map<String, TextTag> byName = new HashMap<>();
@@ -144,6 +149,38 @@ public class TextParserV1 implements NodeParser {
     @FunctionalInterface
     public interface TagNodeBuilder {
         TagNodeValue parseString(String tag, String data, String input, TagParserGetter tags, String endAt);
+
+        static TagNodeBuilder selfClosing(SelfTagCreator selfTagCreator) {
+            return (tag, data, input, handlers, endAt) -> {
+                return new TextParserV1.TagNodeValue(selfTagCreator.createTextNode(data), 0);
+            };
+        }
+
+        static TagNodeBuilder wrapping(FormattingTagCreator formattingTagCreator) {
+            return (tag, data, input, handlers, endAt) -> {
+                var out = parseNodesWith(input, handlers, endAt);
+                return new TextParserV1.TagNodeValue(formattingTagCreator.createTextNode(out.nodes(), data), out.length());
+            };
+        }
+
+        static TagNodeBuilder wrappingBoolean(BooleanFormattingTagCreator formattingTagCreator) {
+            return (tag, data, input, handlers, endAt) -> {
+                var out = parseNodesWith(input, handlers, endAt);
+                return new TextParserV1.TagNodeValue(formattingTagCreator.createTextNode(out.nodes(), data == null || data.isEmpty() || !data.equals("false")), out.length());
+            };
+        }
+
+        interface SelfTagCreator {
+            TextNode createTextNode(String arg);
+        }
+        
+        interface FormattingTagCreator {
+            TextNode createTextNode(TextNode[] nodes, String arg);
+        }
+
+        interface BooleanFormattingTagCreator {
+            TextNode createTextNode(TextNode[] nodes, boolean arg);
+        }
     }
 
     @FunctionalInterface

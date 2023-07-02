@@ -16,6 +16,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Parser that can read legacy (and legacy like) format and convert it into TextNodes
+ */
 public class LegacyFormattingParser implements NodeParser {
     public static NodeParser COLORS = new LegacyFormattingParser(true, Arrays.stream(Formatting.values()).filter(x -> !x.isColor()).toArray(x -> new Formatting[x]));
     public static NodeParser BASE_COLORS = new LegacyFormattingParser(false, Arrays.stream(Formatting.values()).filter(x -> !x.isColor()).toArray(x -> new Formatting[x]));

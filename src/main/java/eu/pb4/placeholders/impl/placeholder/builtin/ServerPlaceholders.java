@@ -2,17 +2,21 @@ package eu.pb4.placeholders.impl.placeholder.builtin;
 
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.PlaceholderResult;
+import eu.pb4.placeholders.impl.GeneralUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
+import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -64,7 +68,36 @@ public class ServerPlaceholders {
             return PlaceholderResult.value(format.format(new Date(System.currentTimeMillis())));
         });
 
+        {
+            var ref = new Object() {
+                WeakReference<MinecraftServer> server;
+                long ms;
+            };
+
+            Placeholders.register(new Identifier("server", "uptime"), (ctx, arg) -> {
+                if (ref.server == null || !ref.server.refersTo(ctx.server())) {
+                    ref.server = new WeakReference<>(ctx.server());
+                    ref.ms = System.currentTimeMillis() - ctx.server().getTicks() * 50L;
+                }
+
+                return PlaceholderResult.value(arg != null
+                        ? DurationFormatUtils.formatDuration((System.currentTimeMillis() - ref.ms), arg, true)
+                        : GeneralUtils.durationToString((System.currentTimeMillis() - ref.ms) / 1000)
+                );
+            });
+        }
+
         Placeholders.register(new Identifier("server", "version"), (ctx, arg) -> PlaceholderResult.value(ctx.server().getVersion()));
+
+        Placeholders.register(new Identifier("server", "motd"), (ctx, arg) -> {
+            var metadata = ctx.server().getServerMetadata();
+
+            if (metadata == null) {
+                return PlaceholderResult.invalid("Server metadata missing!");
+            }
+
+            return PlaceholderResult.value(metadata.description());
+        });
 
         Placeholders.register(new Identifier("server", "mod_version"), (ctx, arg) -> {
             if (arg != null) {

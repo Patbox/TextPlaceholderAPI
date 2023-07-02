@@ -1,12 +1,13 @@
 package eu.pb4.placeholders.api;
 
+import eu.pb4.placeholders.api.parsers.TextParserV1;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 public final class PlaceholderResult {
     private final Text text;
-    private final String string;
+    private String string;
     private final boolean valid;
 
     private PlaceholderResult(Text text, String reason) {
@@ -17,7 +18,6 @@ public final class PlaceholderResult {
             this.text = Text.literal("[" + (reason != null ? reason : "Invalid placeholder!") + "]").setStyle(Style.EMPTY.withColor(Formatting.GRAY).withItalic(true));
             this.valid = false;
         }
-        this.string = this.text.getString();
     }
 
     /**
@@ -31,10 +31,16 @@ public final class PlaceholderResult {
 
     /**
      * Returns text component as String (without formatting) from placeholder
+     * It's not recommended for general usage, as it makes it text static/unable to change depending on player's language or other settings
+     * and removes all styling.
      *
      * @return String
      */
+    @Deprecated
     public String string() {
+        if (this.string == null) {
+            this.string = this.text.getString();
+        }
         return this.string;
     }
 
@@ -80,7 +86,7 @@ public final class PlaceholderResult {
      * @return PlaceholderResult
      */
     public static PlaceholderResult value(String text) {
-        return new PlaceholderResult(TextParserUtils.formatText(text), null);
+        return new PlaceholderResult(TextParserV1.DEFAULT.parseText(text, null), null);
     }
 }
 

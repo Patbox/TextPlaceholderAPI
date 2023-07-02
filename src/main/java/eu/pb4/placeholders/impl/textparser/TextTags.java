@@ -424,17 +424,10 @@ public final class TextTags {
 
                                 var out = recursiveParsing(input, handlers, endAt);
 
-                                final float finalFreq = freq;
-                                final float finalFreqLength = (finalFreq < 0 ? -freq : 0);
-                                final float finalOffset = offset;
-                                final float finalSaturation = saturation;
-                                final int finalOverriddenLength = overriddenLength;
-
-                                return out.value(new GradientNode(out.nodes(), finalOverriddenLength < 0
-                                        ? (pos, length) -> TextColor.fromRgb(GeneralUtils.hvsToRgb((((pos * finalFreq) + (finalFreqLength * length)) / (length + 1) + finalOffset) % 1, finalSaturation, 1))
-                                        : (pos, length) -> TextColor.fromRgb(GeneralUtils.hvsToRgb((((pos * finalFreq) + (finalFreqLength * length)) / (finalOverriddenLength + 1) + finalOffset) % 1, finalSaturation, 1))
-
-                                ));
+                                return out.value(overriddenLength < 0
+                                        ? GradientNode.rainbow(saturation, 1, freq, offset, out.nodes())
+                                        : GradientNode.rainbow(saturation, 1,  freq, offset, overriddenLength, out.nodes())
+                                );
                             }
                     )
             );
@@ -451,7 +444,6 @@ public final class TextTags {
                                 String[] val = data.split(":");
 
                                 var out = recursiveParsing(input, handlers, endAt);
-                                //String flatString = GeneralUtils.textToString(out.text());
                                 List<TextColor> textColors = new ArrayList<>();
                                 for (String string : val) {
                                     TextColor color = TextColor.parse(string);
@@ -459,48 +451,7 @@ public final class TextTags {
                                         textColors.add(color);
                                     }
                                 }
-                                if (textColors.size() == 0) {
-                                    textColors.add(TextColor.fromFormatting(Formatting.WHITE));
-                                    textColors.add(TextColor.fromFormatting(Formatting.WHITE));
-                                } else if (textColors.size() == 1) {
-                                    textColors.add(textColors.get(0));
-                                }
-
-                                GeneralUtils.HSV hsv = GeneralUtils.rgbToHsv(textColors.get(0).getRgb());
-
-                                final int colorSize = textColors.size();
-
-                                return out.value(new GradientNode(out.nodes(), (pos, length) -> {
-                                    final double step = ((double) colorSize - 1) / length;
-                                    final float sectionSize = ((float) length) / (colorSize - 1);
-                                    final float progress = (pos % sectionSize) / sectionSize;
-
-                                    GeneralUtils.HSV colorA = GeneralUtils.rgbToHsv(textColors.get(Math.min((int) (pos / sectionSize), colorSize - 1)).getRgb());
-                                    GeneralUtils.HSV colorB = GeneralUtils.rgbToHsv(textColors.get(Math.min((int) (pos / sectionSize) + 1, colorSize - 1)).getRgb());
-
-                                    float hue;
-                                    {
-                                        float h = colorB.h() - colorA.h();
-                                        float delta = (h + ((Math.abs(h) > 0.50001) ? ((h < 0) ? 1 : -1) : 0));
-
-                                        float futureHue = (float) (colorA.h() + delta * step * pos);
-                                        if (futureHue < 0) {
-                                            futureHue += 1;
-                                        } else if (futureHue > 1) {
-                                            futureHue -= 1;
-                                        }
-                                        hue = futureHue;
-                                    }
-
-                                    float sat = MathHelper.clamp(colorB.s() * progress + colorA.s() * (1 - progress), 0, 1);
-
-                                    float value = MathHelper.clamp(colorB.v() * progress + colorA.v() * (1 - progress), 0, 1);
-
-                                    return TextColor.fromRgb(GeneralUtils.hvsToRgb(
-                                            MathHelper.clamp(hue, 0, 1),
-                                            sat,
-                                            value));
-                                }));
+                                return out.value(GradientNode.colors(textColors, out.nodes()));
                             }
                     )
             );
@@ -526,25 +477,8 @@ public final class TextTags {
                                         textColors.add(color);
                                     }
                                 }
+                                return out.value(GradientNode.colorsHard(textColors, out.nodes()));
 
-                                if (textColors.size() == 0) {
-                                    textColors.add(TextColor.fromFormatting(Formatting.WHITE));
-                                    textColors.add(TextColor.fromFormatting(Formatting.WHITE));
-                                } else if (textColors.size() == 1) {
-                                    textColors.add(textColors.get(0));
-                                }
-
-                                final int colorSize = textColors.size();
-
-                                return out.value(new GradientNode(out.nodes(), (pos, length) -> {
-                                    if (length == 0) {
-                                        return textColors.get(0);
-                                    }
-
-                                    final float sectionSize = ((float) length) / colorSize;
-
-                                    return textColors.get(Math.min((int) (pos / sectionSize), colorSize - 1));
-                                }));
                             }
                     )
             );

@@ -4,7 +4,10 @@ import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.impl.GeneralUtils;
+import eu.pb4.placeholders.impl.textparser.TextParserImpl;
 import net.minecraft.text.Text;
+
+import java.util.List;
 
 public interface TextNode {
     Text toText(ParserContext context, boolean removeBackslashes);
@@ -37,10 +40,22 @@ public interface TextNode {
         return new ParentNode(nodes);
     }
 
+    static TextNode wrap(List<TextNode> nodes) {
+        return new ParentNode(nodes.toArray(GeneralUtils.CASTER));
+    }
+
     static TextNode asSingle(TextNode... nodes) {
         return switch (nodes.length) {
             case 0 -> EmptyNode.INSTANCE;
             case 1 -> nodes[0];
+            default -> wrap(nodes);
+        };
+    }
+
+    static TextNode asSingle(List<TextNode> nodes) {
+        return switch (nodes.size()) {
+            case 0 -> EmptyNode.INSTANCE;
+            case 1 -> nodes.get(0);
             default -> wrap(nodes);
         };
     }

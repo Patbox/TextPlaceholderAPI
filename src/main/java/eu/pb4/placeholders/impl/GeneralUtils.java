@@ -19,6 +19,7 @@ import java.util.ArrayList;
 public class GeneralUtils {
     public static final Logger LOGGER = LoggerFactory.getLogger("Text Placeholder API");
     public static final boolean IS_DEV = FabricLoader.getInstance().isDevelopmentEnvironment();
+    public static final TextNode[] CASTER = new TextNode[0];
 
     public static final boolean IS_LEGACY_TRANSLATION;
 
@@ -271,7 +272,7 @@ public class GeneralUtils {
         }
 
         if (input.getStyle() == Style.EMPTY) {
-            return new ParentNode(list.toArray(new TextNode[0]));
+            return new ParentNode(list);
         } else {
             var style = input.getStyle();
             var hoverValue = style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT

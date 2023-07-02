@@ -7,6 +7,7 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import java.util.Arrays;
+import java.util.Collection;
 
 public class ParentNode implements ParentTextNode {
     public static final ParentNode EMPTY = new ParentNode(new TextNode[0]);
@@ -14,6 +15,10 @@ public class ParentNode implements ParentTextNode {
 
     public ParentNode(TextNode... children) {
         this.children = children;
+    }
+
+    public ParentNode(Collection<TextNode> children) {
+        this(children.toArray(GeneralUtils.CASTER));
     }
 
     @Override

@@ -25,11 +25,23 @@ public final class ParserContext {
 
     @Nullable
     public <T> T get(Key<T> key) {
+        //noinspection unchecked
         return (T) this.map.get(key);
     };
 
 
-    public record Key<T>(String key, Class<T> type) {
+    public record Key<T>(String key, @Nullable Class<T> type) {
         public static final Key<Boolean> COMPACT_TEXT = new Key<>("compact_text", Boolean.class);
+
+        public static <T> Key<T> of(String key, T type) {
+            //noinspection unchecked
+            return new Key<T>(key, (Class<T>) type.getClass());
+        }
+
+
+        public static <T> Key<T> of(String key) {
+            //noinspection unchecked
+            return new Key<T>(key, null);
+        }
     };
 }
