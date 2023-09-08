@@ -43,7 +43,7 @@ public class ParentNode implements ParentTextNode {
                 return out;
             }
 
-            return ((MutableText) this.applyFormatting(out.copy(), context)).fillStyle(out.getStyle());
+            return ((MutableText) this.applyFormatting(out.copy(), context));
         } else {
             MutableText base = compact ? null : Text.empty();
 

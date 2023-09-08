@@ -74,6 +74,8 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
   displayed in gigabytes)
 - `%server:online%` - The number of online players.
 - `%server:max_players%` - The maximum player count.
+- `%server:brand%` (2.1.3+) - Returns server's brand ("fabric"/"quilt"/etc).
+- `%server:mod_count%` (2.1.3+) - Returns amount of installed mods.
 - `%server:mod_version [modid]%` - Returns version of the specified mod.
 - `%server:mod_name [modid]%` - Returns name of the specified mod.
 - `%server:mod_description [modid]%` - Returns description of the specified mod.

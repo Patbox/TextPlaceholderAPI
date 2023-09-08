@@ -15,6 +15,7 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static eu.pb4.placeholders.impl.textparser.TextParserImpl.*;
 
@@ -487,6 +488,23 @@ public final class TextTags {
         {
             TextParserV1.registerDefault(
                     TextParserV1.TextTag.of(
+                            "clear",
+                            "special",
+                            false,
+                            (tag, data, input, handlers, endAt) -> {
+                                String[] val = data.isEmpty() ? new String[0] : data.split(":");
+
+                                var out = recursiveParsing(input, handlers, endAt);
+                                return out.value(new TransformNode(out.nodes(), getTransform(val)));
+
+                            }
+                    )
+            );
+        }
+
+        {
+            TextParserV1.registerDefault(
+                    TextParserV1.TextTag.of(
                             "raw_style",
                             "special",
                             false,
@@ -564,6 +582,32 @@ public final class TextTags {
         }
     }
 
+    private static Function<MutableText, Text> getTransform(String[] val) {
+        if (val.length == 0) {
+            return GeneralUtils.MutableTransformer.CLEAR;
+        }
+
+        Function<Style, Style> func = (x) -> x;
+
+        for (var arg : val) {
+            func = func.andThen(switch (arg) {
+                case "hover" -> x -> x.withHoverEvent(null);
+                case "click" -> x -> x.withClickEvent(null);
+                case "color" -> x -> x.withColor((TextColor) null);
+                case "insertion" -> x -> x.withInsertion(null);
+                case "font" -> x -> x.withFont(null);
+                case "bold" -> x -> x.withBold(null);
+                case "italic" -> x -> x.withItalic(null);
+                case "underline" -> x -> x.withUnderline(null);
+                case "strikethrough" -> x -> x.withStrikethrough(null);
+                case "all" -> x -> Style.EMPTY;
+                default -> x -> x;
+            });
+        };
+
+        return new GeneralUtils.MutableTransformer(func);
+    }
+
     private static boolean isntFalse(String arg) {
         return arg.isEmpty() || !arg.equals("false");
     }
@@ -581,6 +625,8 @@ public final class TextTags {
             return new TextParserV1.TagNodeValue(wrapper.wrap(out.nodes(), isntFalse(data)), out.length());
         };
     }
+
+
 
     interface Wrapper {
         TextNode wrap(TextNode[] nodes, String arg);

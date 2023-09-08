@@ -88,7 +88,7 @@ public class TextParserImpl {
         var text = new ArrayList<TextNode>();
 
         Matcher matcher = STARTING_PATTERN.matcher(input);
-        Matcher matcherEnd = endAt != null ? Pattern.compile(endAt).matcher(input) : null;
+        Matcher matcherEnd = endAt != null ? Pattern.compile("(" + endAt + ")|(</>)").matcher(input) : null;
         int currentPos = 0;
         int offset = 0;
         boolean hasEndTag = endAt != null && matcherEnd.find();
@@ -112,7 +112,7 @@ public class TextParserImpl {
                     currentEnd = matcher.start();
                     if (currentPos < currentEnd) {
                         String restOfText = restoreOriginalEscaping(input.substring(currentPos, currentEnd));
-                        if (restOfText.length() != 0) {
+                        if (!restOfText.isEmpty()) {
                             text.add(new LiteralNode(restOfText));
                         }
                     }
@@ -121,7 +121,7 @@ public class TextParserImpl {
                 } else {
                     String betweenText = input.substring(currentPos, matcher.start());
 
-                    if (betweenText.length() != 0) {
+                    if (!betweenText.isEmpty()) {
                         text.add(new LiteralNode(restoreOriginalEscaping(betweenText)));
                     }
                     currentPos = matcher.end();
@@ -139,7 +139,7 @@ public class TextParserImpl {
                 if (handler != null) {
                     String betweenText = input.substring(currentPos, matcher.start());
 
-                    if (betweenText.length() != 0) {
+                    if (!betweenText.isEmpty()) {
                         text.add(new LiteralNode(restoreOriginalEscaping(betweenText)));
 
                     }
@@ -175,13 +175,13 @@ public class TextParserImpl {
 
         if (currentPos < currentEnd) {
             String restOfText = restoreOriginalEscaping(input.substring(currentPos, currentEnd));
-            if (restOfText.length() != 0) {
+            if (!restOfText.isEmpty()) {
                 text.add(new LiteralNode(restOfText));
             }
         }
 
         if (hasEndTag) {
-            currentEnd += endAt.length();
+            currentEnd += matcherEnd.group().length();
         } else {
             currentEnd = input.length();
         }
@@ -212,7 +212,7 @@ public class TextParserImpl {
                 }
             }
 
-            if (stringList.size() > 0) {
+            if (!stringList.isEmpty()) {
                 stringList.add(0, "");
             }
 

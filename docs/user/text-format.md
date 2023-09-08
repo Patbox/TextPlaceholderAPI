@@ -17,7 +17,7 @@ Formatting is build on concept of tags.
     <lang:'chat.type.team.sent':'<hover\:\'<lang\:chat.type.team.hover>\'><suggest_command\:\'/teammsg \'>${team}':'${displayName}':'${message}'>
     ```
 
-Most of them come in pairs of a starting (`#!xml <tag>`) and closing one (`#!xml </tag>`).
+Most of them come in pairs of a starting (`#!xml <tag>`) and closing one (`#!xml </tag>` for direct or `#!xml <‍/‍>` (2.1.3+) for automatic).
 While closing ones are technically optional, without them formatting will continue until end of
 an input text or special `#!xml <reset>` tag. Some tags support arguments, which can be passed by adding `:`
 after tag name in starting one (for example `#!xml <color:#FF3333> </color>`). Arguments containing symbols like
@@ -174,5 +174,23 @@ There 2 types of gradients:
 
 `#!xml <reset>` and `#!xml <r>` are special, self-contained tags which close all previous formatting. They are
 useful in cases, where you want to close multiple formatting tags quickly
-  
 
+### Clear (2.1.3+)
+
+!!! note inline end
+
+      This tag should be closed.
+
+This tag allows you to clear any formatting within this tag, without leaving any visible tags. It also
+works with placeholders, which gives a bit more flexibility.
+
+This tag can work without arguments making it clear all formatting or with them limiting clearing to selected types.
+
+Examples:
+
+- `#!xml <clear>` - Removes all formatting, leaving only text.
+- `#!xml <clear:hover>` - Removes all hovers.
+- `#!xml <clear:hover:color>` - Removes all hovers and colors.
+
+Supported arguments: `color`, `bold`, `italic`, `strikethrough`, `underline`, `hover`, `click`, 
+`insertion`, `font`, `all`.

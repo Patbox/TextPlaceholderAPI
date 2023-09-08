@@ -121,6 +121,14 @@ public class ServerPlaceholders {
             return PlaceholderResult.invalid("Invalid argument");
         });
 
+        Placeholders.register(new Identifier("server", "brand"), (ctx, arg) -> {
+            return PlaceholderResult.value(Text.literal(ctx.server().getServerModName()));
+        });
+
+        Placeholders.register(new Identifier("server", "mod_count"), (ctx, arg) -> {
+            return PlaceholderResult.value(Text.literal("" + FabricLoader.getInstance().getAllMods().size()));
+        });
+
         Placeholders.register(new Identifier("server", "mod_description"), (ctx, arg) -> {
             if (arg != null) {
                 var container = FabricLoader.getInstance().getModContainer(arg);

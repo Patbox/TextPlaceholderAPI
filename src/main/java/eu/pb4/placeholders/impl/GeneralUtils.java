@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.function.Function;
 
 
 @ApiStatus.Internal
@@ -162,6 +163,12 @@ public class GeneralUtils {
         return new HSV(h, s, cmax);
     }
 
+    public static Text deepTransform(Text input) {
+        var output = cloneText(input);
+        removeHoverAndClick(output);
+        return output;
+    }
+
     public static Text removeHoverAndClick(Text input) {
         var output = cloneText(input);
         removeHoverAndClick(output);
@@ -212,6 +219,32 @@ public class GeneralUtils {
 
         baseText.setStyle(input.getStyle());
         return baseText;
+    }
+
+    public static MutableText cloneTransformText(Text input, Function<MutableText, MutableText> transform) {
+        MutableText baseText;
+        if (input.getContent() instanceof TranslatableTextContent translatable) {
+            var obj = new ArrayList<>();
+
+            for (var arg : translatable.getArgs()) {
+                if (arg instanceof Text argText) {
+                    obj.add(cloneTransformText(argText, transform));
+                } else {
+                    obj.add(arg);
+                }
+            }
+
+            baseText = Text.translatable(translatable.getKey(), obj.toArray());
+        } else {
+            baseText = input.copyContentOnly();
+        }
+
+        for (var sibling : input.getSiblings()) {
+            baseText.append(cloneTransformText(sibling, transform));
+        }
+
+        baseText.setStyle(input.getStyle());
+        return transform.apply(baseText);
     }
 
     public static Text getItemText(ItemStack stack, boolean rarity) {
@@ -313,5 +346,18 @@ public class GeneralUtils {
     }
 
     public record Pair<L, R>(L left, R right) {
+    }
+
+    public record MutableTransformer(Function<Style, Style> textMutableTextFunction) implements Function<MutableText, Text> {
+        public static final MutableTransformer CLEAR = new MutableTransformer(x -> Style.EMPTY);
+
+        @Override
+        public Text apply(MutableText text) {
+            return GeneralUtils.cloneTransformText(text, this::transformStyle);
+        }
+
+        private MutableText transformStyle(MutableText mutableText) {
+            return mutableText.setStyle(textMutableTextFunction.apply(mutableText.getStyle()));
+        }
     }
 }
