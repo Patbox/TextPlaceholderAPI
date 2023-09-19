@@ -51,7 +51,7 @@ public class PlayerPlaceholders {
 
         Placeholders.register(new Identifier("player", "ping"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(String.valueOf(ctx.player().pingMilliseconds));
+                return PlaceholderResult.value(String.valueOf(ctx.player().networkHandler.getLatency()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -59,7 +59,7 @@ public class PlayerPlaceholders {
 
         Placeholders.register(new Identifier("player", "ping_colored"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
-                int x = ctx.player().pingMilliseconds;
+                int x = ctx.player().networkHandler.getLatency();
                 return PlaceholderResult.value(Text.literal(String.valueOf(x)).formatted(x < 100 ? Formatting.GREEN : x < 200 ? Formatting.GOLD : Formatting.RED));
             } else {
                 return PlaceholderResult.invalid("No player!");
@@ -267,7 +267,7 @@ public class PlayerPlaceholders {
             if (ctx.hasPlayer() && arg != null) {
                 try {
                     ServerScoreboard scoreboard = ctx.server().getScoreboard();
-                    ScoreboardObjective scoreboardObjective = scoreboard.getObjective(arg);
+                    ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(arg);
                     if (scoreboardObjective == null) {
                         return PlaceholderResult.invalid("Invalid objective!");
                     }

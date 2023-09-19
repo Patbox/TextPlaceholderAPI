@@ -167,7 +167,7 @@ public class ServerPlaceholders {
             var args = arg.split(" ");
             if (args.length >= 2) {
                 ServerScoreboard scoreboard = ctx.server().getScoreboard();
-                ScoreboardObjective scoreboardObjective = scoreboard.getObjective(args[0]);
+                ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(args[0]);
                 if (scoreboardObjective == null) {
                     return PlaceholderResult.invalid("Invalid objective!");
                 }
@@ -187,7 +187,7 @@ public class ServerPlaceholders {
             var args = arg.split(" ");
             if (args.length >= 2) {
                 ServerScoreboard scoreboard = ctx.server().getScoreboard();
-                ScoreboardObjective scoreboardObjective = scoreboard.getObjective(args[0]);
+                ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(args[0]);
                 if (scoreboardObjective == null) {
                     return PlaceholderResult.invalid("Invalid objective!");
                 }
