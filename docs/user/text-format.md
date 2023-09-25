@@ -145,7 +145,7 @@ and `[optional arg X]` are optional, fully formatted arguments you can pass.
 
 !!! question inline end "Control Keys"
 
-    You can find a list of control keys on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Controls#Configurable_controls)
+    You can find a list of control keys on the [Minecraft Wiki](https://minecraft.wiki/w/Controls#Configurable_controls)
 
 !!! note inline end
 
