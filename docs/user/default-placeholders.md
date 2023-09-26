@@ -12,9 +12,9 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 
 !!! tip inline end "Vanilla Statistics"
 
-    A list of `[statistic]`s can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#List_of_custom_statistic_names)
+    A list of `[statistic]`s can be found on the [Minecraft Wiki](https://minecraft.wiki/w/Statistics#List_of_custom_statistic_names)
 
-    A list of `[type]`s can be found on the [Minecraft Wiki](https://minecraft.fandom.com/wiki/Statistics#Statistic_types_and_names)
+    A list of `[type]`s can be found on the [Minecraft Wiki](https://minecraft.wiki/w/Statistics#Statistic_types_and_names)
 
     Examples: `%player:statistic play_time%`, `%player:statistic mined diamond_ore%`
 
