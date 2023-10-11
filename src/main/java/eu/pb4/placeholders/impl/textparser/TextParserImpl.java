@@ -2,12 +2,17 @@ package eu.pb4.placeholders.impl.textparser;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.node.DirectTextNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import io.netty.util.internal.UnstableApi;
+import net.minecraft.class_8828;
 import net.minecraft.text.*;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -23,7 +28,6 @@ public class TextParserImpl {
     public static final Pattern STARTING_PATTERN = Pattern.compile("<(?<id>[^<>/]+)(?<data>([:]([']?([^'](\\\\\\\\['])?)+[']?))*)>");
     @Deprecated
     public static final List<Pair<String, String>> ESCAPED_CHARS = new ArrayList<>();
-    private static final Gson GSON = new GsonBuilder().disableHtmlEscaping().registerTypeHierarchyAdapter(Style.class, new Style.Serializer()).create();
 
     static {
         ESCAPED_CHARS.add(new Pair<>("\\", "&slsh;\002"));
@@ -195,11 +199,10 @@ public class TextParserImpl {
     @UnstableApi
     public static String convertToString(Text text) {
         StringBuilder builder = new StringBuilder();
-        String style = GSON.toJson(text.getStyle());
-        if (style != null && !style.equals("null")) {
-            builder.append("<style:").append(style).append(">");
-        }
-        if (text.getContent() instanceof LiteralTextContent literalText) {
+        DataResult<JsonElement> dataResult = Style.Serializer.field_46613.encodeStart(JsonOps.INSTANCE, text.getStyle());
+        Either<String, DataResult.PartialResult<JsonElement>> styleEither = dataResult.get().mapLeft(JsonElement::toString);
+        styleEither.ifLeft(style -> builder.append("<style:").append(style).append(">"));
+        if (text.getContent() instanceof class_8828.LiteralTextContent literalText) {
             builder.append(escapeCharacters(literalText.string()));
         } else if (text.getContent() instanceof TranslatableTextContent translatableText) {
             List<String> stringList = new ArrayList<>();
@@ -229,9 +232,7 @@ public class TextParserImpl {
             builder.append(convertToString(text1));
         }
 
-        if (style != null && !style.equals("null")) {
-            builder.append("</style>");
-        }
+        styleEither.ifLeft(style -> builder.append("</style>"));
         return builder.toString();
     }
 
