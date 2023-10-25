@@ -5,7 +5,6 @@ import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
-import net.minecraft.class_8828;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -57,8 +56,8 @@ public class GeneralUtils {
 
     public static boolean isEmpty(Text text) {
         return (
-                text.getContent() == class_8828.field_46625
-                || (text.getContent() instanceof class_8828.LiteralTextContent l && l.string().isEmpty())
+                text.getContent() == PlainTextContent.EMPTY
+                || (text.getContent() instanceof PlainTextContent.Literal l && l.string().isEmpty())
                ) && text.getSiblings().isEmpty();
     }
 
@@ -67,7 +66,7 @@ public class GeneralUtils {
     }
 
     private static int getGradientLength(Text base) {
-        int length = base.getContent() instanceof class_8828.LiteralTextContent l ? l.string().length() : base.getContent() == class_8828.field_46625 ? 0 : 1;
+        int length = base.getContent() instanceof PlainTextContent.Literal l ? l.string().length() : base.getContent() == PlainTextContent.EMPTY ? 0 : 1;
 
         for (var text : base.getSiblings()) {
             length += getGradientLength(text);
@@ -79,7 +78,7 @@ public class GeneralUtils {
     private static TextLengthPair recursiveGradient(Text base, GradientNode.GradientProvider posToColor, int pos, int totalLength) {
         if (base.getStyle().getColor() == null) {
             MutableText out = Text.empty().setStyle(base.getStyle());
-            if (base.getContent() instanceof class_8828.LiteralTextContent literalTextContent) {
+            if (base.getContent() instanceof PlainTextContent.Literal literalTextContent) {
                 var l = literalTextContent.string().length();
                 for (var i = 0; i < l; i++) {
                     var character = literalTextContent.string().charAt(i);
@@ -271,7 +270,7 @@ public class GeneralUtils {
     public static ParentNode convertToNodes(Text input) {
         var list = new ArrayList<TextNode>();
 
-        if (input.getContent() instanceof class_8828.LiteralTextContent content) {
+        if (input.getContent() instanceof PlainTextContent.Literal content) {
             list.add(new LiteralNode(content.string()));
         } else if (input.getContent() instanceof TranslatableTextContent content) {
             var args = new ArrayList<>();

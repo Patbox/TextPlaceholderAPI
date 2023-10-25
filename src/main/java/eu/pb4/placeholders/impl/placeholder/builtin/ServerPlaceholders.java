@@ -25,7 +25,7 @@ import java.util.Objects;
 public class ServerPlaceholders {
     public static void register() {
         Placeholders.register(new Identifier("server", "tps"), (ctx, arg) -> {
-            double tps = 1000f / Math.max(ctx.server().getTickTime(), 50);
+            double tps = 1000f / Math.max(ctx.server().method_54832(), 50);
             String format = "%.1f";
 
             if (arg != null) {
@@ -41,7 +41,7 @@ public class ServerPlaceholders {
         });
 
         Placeholders.register(new Identifier("server", "tps_colored"), (ctx, arg) -> {
-            double tps = 1000f / Math.max(ctx.server().getTickTime(), 50);
+            double tps = 1000f / Math.max(ctx.server().method_54832(), 50);
             String format = "%.1f";
 
             if (arg != null) {
@@ -55,10 +55,10 @@ public class ServerPlaceholders {
             return PlaceholderResult.value(Text.literal(String.format(format, tps)).formatted(tps > 19 ? Formatting.GREEN : tps > 16 ? Formatting.GOLD : Formatting.RED));
         });
 
-        Placeholders.register(new Identifier("server", "mspt"), (ctx, arg) -> PlaceholderResult.value(String.format("%.0f", ctx.server().getTickTime())));
+        Placeholders.register(new Identifier("server", "mspt"), (ctx, arg) -> PlaceholderResult.value(String.format("%.0f", ctx.server().method_54832())));
 
         Placeholders.register(new Identifier("server", "mspt_colored"), (ctx, arg) -> {
-            float x = ctx.server().getTickTime();
+            float x = ctx.server().method_54832();
             return PlaceholderResult.value(Text.literal(String.format("%.0f", x)).formatted(x < 45 ? Formatting.GREEN : x < 51 ? Formatting.GOLD : Formatting.RED));
         });
 

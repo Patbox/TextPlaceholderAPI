@@ -1,22 +1,19 @@
 package eu.pb4.placeholders.impl.textparser;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.JsonOps;
-import eu.pb4.placeholders.api.node.DirectTextNode;
-import eu.pb4.placeholders.api.node.parent.ParentTextNode;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
-import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.LiteralNode;
+import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.TextParserV1;
 import io.netty.util.internal.UnstableApi;
-import net.minecraft.class_8828;
 import net.minecraft.text.*;
 import org.jetbrains.annotations.ApiStatus;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -199,10 +196,10 @@ public class TextParserImpl {
     @UnstableApi
     public static String convertToString(Text text) {
         StringBuilder builder = new StringBuilder();
-        DataResult<JsonElement> dataResult = Style.Serializer.field_46613.encodeStart(JsonOps.INSTANCE, text.getStyle());
+        DataResult<JsonElement> dataResult = Style.Codecs.CODEC.encodeStart(JsonOps.INSTANCE, text.getStyle());
         Either<String, DataResult.PartialResult<JsonElement>> styleEither = dataResult.get().mapLeft(JsonElement::toString);
         styleEither.ifLeft(style -> builder.append("<style:").append(style).append(">"));
-        if (text.getContent() instanceof class_8828.LiteralTextContent literalText) {
+        if (text.getContent() instanceof PlainTextContent.Literal literalText) {
             builder.append(escapeCharacters(literalText.string()));
         } else if (text.getContent() instanceof TranslatableTextContent translatableText) {
             List<String> stringList = new ArrayList<>();
@@ -225,7 +222,7 @@ public class TextParserImpl {
         } else if (text.getContent() instanceof KeybindTextContent keybindText) {
             builder.append("<key:'").append(keybindText.getKey()).append("'>");
         } else {
-            builder.append("<raw:'").append(escapeCharacters(Text.Serializer.toJson(text.copy()))).append("'>");
+            builder.append("<raw:'").append(escapeCharacters(Text.Serialization.toJsonString(text.copy()))).append("'>");
         }
 
         for (Text text1 : text.getSiblings()) {

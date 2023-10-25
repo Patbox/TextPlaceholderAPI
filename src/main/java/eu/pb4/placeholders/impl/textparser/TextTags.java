@@ -300,7 +300,7 @@ public final class TextTags {
 
                                 try {
                                     if (lines.length > 1) {
-                                        HoverEvent.Action<?> action = HoverEvent.Action.field_46604.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).get().left().orElse(null);
+                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).get().left().orElse(null);
                                         if (action == HoverEvent.Action.SHOW_TEXT) {
                                             return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT, new ParentNode(parse(restoreOriginalEscaping(cleanArgument(lines[1])), handlers))));
                                         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
@@ -504,7 +504,7 @@ public final class TextTags {
                             "raw_style",
                             "special",
                             false,
-                            (tag, data, input, handlers, endAt) -> new TextParserV1.TagNodeValue(new DirectTextNode(Text.Serializer.fromLenientJson(restoreOriginalEscaping(cleanArgument(data)))), 0)
+                            (tag, data, input, handlers, endAt) -> new TextParserV1.TagNodeValue(new DirectTextNode(Text.Serialization.fromLenientJson(restoreOriginalEscaping(cleanArgument(data)))), 0)
                     )
             );
         }
