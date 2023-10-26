@@ -1,7 +1,7 @@
 package eu.pb4.placeholders.impl.placeholder.builtin;
 
-import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.PlaceholderResult;
+import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.ScoreboardObjective;
@@ -11,6 +11,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.TimeHelper;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.lang.management.ManagementFactory;
@@ -21,11 +22,12 @@ import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 public class ServerPlaceholders {
     public static void register() {
         Placeholders.register(new Identifier("server", "tps"), (ctx, arg) -> {
-            double tps = 1000f / Math.max(ctx.server().method_54832(), 50);
+            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().method_54832(), ctx.server().method_54833().method_54749());
             String format = "%.1f";
 
             if (arg != null) {
@@ -41,7 +43,7 @@ public class ServerPlaceholders {
         });
 
         Placeholders.register(new Identifier("server", "tps_colored"), (ctx, arg) -> {
-            double tps = 1000f / Math.max(ctx.server().method_54832(), 50);
+            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().method_54832(), ctx.server().method_54833().method_54749());
             String format = "%.1f";
 
             if (arg != null) {
