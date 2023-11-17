@@ -4,8 +4,8 @@ import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.scoreboard.ScoreboardEntry;
 import net.minecraft.scoreboard.ScoreboardObjective;
-import net.minecraft.scoreboard.ScoreboardPlayerScore;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.text.Text;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
 public class ServerPlaceholders {
     public static void register() {
         Placeholders.register(new Identifier("server", "tps"), (ctx, arg) -> {
-            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().method_54832(), ctx.server().method_54833().method_54749());
+            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().getAverageTickTime(), ctx.server().getTickManager().getMillisPerTick());
             String format = "%.1f";
 
             if (arg != null) {
@@ -43,7 +43,7 @@ public class ServerPlaceholders {
         });
 
         Placeholders.register(new Identifier("server", "tps_colored"), (ctx, arg) -> {
-            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().method_54832(), ctx.server().method_54833().method_54749());
+            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().getAverageTickTime(), ctx.server().getTickManager().getMillisPerTick());
             String format = "%.1f";
 
             if (arg != null) {
@@ -57,10 +57,10 @@ public class ServerPlaceholders {
             return PlaceholderResult.value(Text.literal(String.format(format, tps)).formatted(tps > 19 ? Formatting.GREEN : tps > 16 ? Formatting.GOLD : Formatting.RED));
         });
 
-        Placeholders.register(new Identifier("server", "mspt"), (ctx, arg) -> PlaceholderResult.value(String.format("%.0f", ctx.server().method_54832())));
+        Placeholders.register(new Identifier("server", "mspt"), (ctx, arg) -> PlaceholderResult.value(String.format("%.0f", ctx.server().getAverageTickTime())));
 
         Placeholders.register(new Identifier("server", "mspt_colored"), (ctx, arg) -> {
-            float x = ctx.server().method_54832();
+            float x = ctx.server().getAverageTickTime();
             return PlaceholderResult.value(Text.literal(String.format("%.0f", x)).formatted(x < 45 ? Formatting.GREEN : x < 51 ? Formatting.GOLD : Formatting.RED));
         });
 
@@ -175,9 +175,9 @@ public class ServerPlaceholders {
                 }
                 try {
                     int position = Integer.parseInt(args[1]);
-                    Collection<ScoreboardPlayerScore> playerScores = scoreboard.getAllPlayerScores(scoreboardObjective);
-                    ScoreboardPlayerScore score = playerScores.toArray(ScoreboardPlayerScore[]::new)[playerScores.size() - position];
-                    return PlaceholderResult.value(score.getPlayerName());
+                    Collection<ScoreboardEntry> scoreboardEntries = scoreboard.getScoreboardEntries(scoreboardObjective);
+                    ScoreboardEntry scoreboardEntry = scoreboardEntries.toArray(ScoreboardEntry[]::new)[scoreboardEntries.size() - position];
+                    return PlaceholderResult.value(scoreboardEntry.name());
                 } catch (Exception e) {
                     /* Into the void you go! */
                     return PlaceholderResult.invalid("Invalid position!");
@@ -195,9 +195,9 @@ public class ServerPlaceholders {
                 }
                 try {
                     int position = Integer.parseInt(args[1]);
-                    Collection<ScoreboardPlayerScore> playerScores = scoreboard.getAllPlayerScores(scoreboardObjective);
-                    ScoreboardPlayerScore score = playerScores.toArray(ScoreboardPlayerScore[]::new)[playerScores.size() - position];
-                    return PlaceholderResult.value(String.valueOf(score.getScore()));
+                    Collection<ScoreboardEntry> scoreboardEntries = scoreboard.getScoreboardEntries(scoreboardObjective);
+                    ScoreboardEntry scoreboardEntry = scoreboardEntries.toArray(ScoreboardEntry[]::new)[scoreboardEntries.size() - position];
+                    return PlaceholderResult.value(String.valueOf(scoreboardEntry.value()));
                 } catch (Exception e) {
                     /* Into the void you go! */
                     return PlaceholderResult.invalid("Invalid position!");
