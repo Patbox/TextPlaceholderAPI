@@ -478,6 +478,11 @@ public final class TextTags {
                                         textColors.add(color);
                                     }
                                 }
+                                // We cannot have an empty list!
+                                if (textColors.isEmpty()) {
+                                    return out.value(new ParentNode(out.nodes()));
+                                }
+
                                 return out.value(GradientNode.colorsHard(textColors, out.nodes()));
 
                             }

@@ -370,7 +370,7 @@ public class PlayerPlaceholders {
 
         Placeholders.register(new Identifier("player", "hunger"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(String.format("%.0f", ctx.player().getHungerManager().getFoodLevel()));
+                return PlaceholderResult.value(String.valueOf(ctx.player().getHungerManager().getFoodLevel()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
