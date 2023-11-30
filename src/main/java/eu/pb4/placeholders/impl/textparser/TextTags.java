@@ -1,5 +1,7 @@
 package eu.pb4.placeholders.impl.textparser;
 
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
@@ -105,7 +107,7 @@ public final class TextTags {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            wrap((nodes, data) -> new ColorNode(nodes, TextColor.parse(cleanArgument(data))))
+                            wrap((nodes, data) -> new ColorNode(nodes, TextColor.parse(cleanArgument(data)).get().left().orElse(null)))
                     )
             );
         }
@@ -190,9 +192,10 @@ public final class TextTags {
                 String[] lines = data.split(":", 2);
                 var out = recursiveParsing(input, handlers, endAt);
                 if (lines.length > 1) {
-                    ClickEvent.Action action = ClickEvent.Action.byName(cleanArgument(lines[0]));
-                    if (action != null) {
-                        return out.value(new ClickActionNode(out.nodes(), action, new LiteralNode(restoreOriginalEscaping(cleanArgument(lines[1])))));
+                    for (ClickEvent.Action action : ClickEvent.Action.values()) {
+                        if (action.asString().equals(cleanArgument(lines[0]))) {
+                            return out.value(new ClickActionNode(out.nodes(), action, new LiteralNode(restoreOriginalEscaping(cleanArgument(lines[1])))));
+                        }
                     }
                 }
                 return out.value(new ParentNode(out.nodes()));
@@ -297,8 +300,7 @@ public final class TextTags {
 
                                 try {
                                     if (lines.length > 1) {
-                                        HoverEvent.Action<?> action = HoverEvent.Action.byName(cleanArgument(lines[0].toLowerCase(Locale.ROOT)));
-
+                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).get().left().orElse(null);
                                         if (action == HoverEvent.Action.SHOW_TEXT) {
                                             return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT, new ParentNode(parse(restoreOriginalEscaping(cleanArgument(lines[1])), handlers))));
                                         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
@@ -447,10 +449,7 @@ public final class TextTags {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 List<TextColor> textColors = new ArrayList<>();
                                 for (String string : val) {
-                                    TextColor color = TextColor.parse(string);
-                                    if (color != null) {
-                                        textColors.add(color);
-                                    }
+                                    TextColor.parse(string).get().ifLeft(textColors::add);
                                 }
                                 return out.value(GradientNode.colors(textColors, out.nodes()));
                             }
@@ -473,10 +472,7 @@ public final class TextTags {
                                 var textColors = new ArrayList<TextColor>();
 
                                 for (String string : val) {
-                                    TextColor color = TextColor.parse(string);
-                                    if (color != null) {
-                                        textColors.add(color);
-                                    }
+                                    TextColor.parse(string).get().ifLeft(textColors::add);
                                 }
                                 // We cannot have an empty list!
                                 if (textColors.isEmpty()) {
@@ -513,7 +509,7 @@ public final class TextTags {
                             "raw_style",
                             "special",
                             false,
-                            (tag, data, input, handlers, endAt) -> new TextParserV1.TagNodeValue(new DirectTextNode(Text.Serializer.fromLenientJson(restoreOriginalEscaping(cleanArgument(data)))), 0)
+                            (tag, data, input, handlers, endAt) -> new TextParserV1.TagNodeValue(new DirectTextNode(Text.Serialization.fromLenientJson(restoreOriginalEscaping(cleanArgument(data)))), 0)
                     )
             );
         }
