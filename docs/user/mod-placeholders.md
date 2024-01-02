@@ -7,13 +7,15 @@ These placeholders are provided by other mods. Some are build in directly, while
 ### [AfkPlus](https://modrinth.com/mod/afkplus)
 
 - `%afkplus:afk%` - Returns a configurable "[AFK]" tag if the player is marked as AFK.
-- `%afkplus:name`/`%afkplus:display_name%` - Returns a configurable replacement for `%player:displayname%` if the player is marked as AFK.
-  This allows for backport formatting, and it can fully support LuckPerms Prefixes, and other mods.  By default it returns the standard
+- `%afkplus:name%`/`%afkplus:display_name%` - Returns a configurable replacement for `%player:displayname%` if the player is marked as AFK.
+  This allows for backport formatting, and it can fully support LuckPerms Prefixes, and other mods.  By default, it returns the standard
   `%player:displayname%` when not AFK, which is also configurable.
 - `%afkplus:duration%` - Returns the (HH-mm-SS.ss) duration since a player went AFK, or nothing.
-  Configurable in a more human readable format, ie. (5 minutes, 3 seconds).
+  Configurable in a more human-readable format, i.e., 5 minutes, 3 seconds.
 - `%afkplus:time%` - Returns the time (yyyy-MM-dd_HH.mm.ss) since a player went AFK, or nothing.
 - `%afkplus:reason%` - Returns the reason why a player went AFK, or nothing.
+- `%afkplus:invulnerable%` - Returns a basic tag to display the status if a player is marked as "invulnerable" using the "disableDamage"
+  features.  It is also used under the default "[AFK]" tag method, with "[AFK:I]", for example.
 
 ### [Get Off My Lawn ReServed](https://pb4.eu/#get-off-my-lawn)
 
