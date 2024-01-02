@@ -15,7 +15,7 @@ These placeholders are provided by other mods. Some are build in directly, while
 - `%afkplus:time%` - Returns the time (yyyy-MM-dd_HH.mm.ss) since a player went AFK, or nothing.
 - `%afkplus:reason%` - Returns the reason why a player went AFK, or nothing.
 - `%afkplus:invulnerable%` - Returns a basic tag to display the status if a player is marked as "invulnerable" using the "disableDamage"
-  features.  It is also used under the default "[AFK]" tag method, with "[AFK:I]", for example.
+  features.  It is also used internally under the default "[AFK]" tag method, with "[AFK:I]", for example.
 
 ### [Get Off My Lawn ReServed](https://pb4.eu/#get-off-my-lawn)
 
