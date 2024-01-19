@@ -6,7 +6,7 @@ import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.*;
 import org.jetbrains.annotations.Nullable;
 
-public final class StyledNode extends ParentNode {
+public final class StyledNode extends SimpleStylingNode {
     private final Style style;
 
     private final ParentNode hoverValue;
@@ -56,11 +56,6 @@ public final class StyledNode extends ParentNode {
     @Nullable
     public TextNode insertion() {
         return insertion;
-    }
-
-    @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return (out.getStyle() == Style.EMPTY ? out : Text.empty().append(out)).setStyle(this.style(context));
     }
 
     @Override

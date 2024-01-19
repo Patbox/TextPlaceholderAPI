@@ -2,12 +2,13 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.Style;
 
 import java.util.Arrays;
 
-public final class StrikethroughNode extends ParentNode {
+public final class StrikethroughNode extends SimpleStylingNode {
+    private static final Style TRUE = Style.EMPTY.withStrikethrough(true);
+    private static final Style FALSE = Style.EMPTY.withStrikethrough(false);
     private final boolean value;
 
     public StrikethroughNode(TextNode[] nodes, boolean value) {
@@ -16,8 +17,8 @@ public final class StrikethroughNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return out.setStyle(out.getStyle().withStrikethrough(this.value));
+    protected Style style(ParserContext context) {
+        return this.value ? TRUE : FALSE;
     }
 
     @Override

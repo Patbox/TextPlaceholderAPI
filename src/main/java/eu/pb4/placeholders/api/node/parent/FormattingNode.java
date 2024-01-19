@@ -3,13 +3,14 @@ package eu.pb4.placeholders.api.node.parent;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import net.minecraft.text.MutableText;
+import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.Arrays;
 
 
-public final class FormattingNode extends ParentNode {
+public final class FormattingNode extends SimpleStylingNode {
     private final Formatting[] formatting;
 
     public FormattingNode(TextNode[] children, Formatting formatting) {
@@ -22,8 +23,8 @@ public final class FormattingNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return out.formatted(this.formatting);
+    protected Style style(ParserContext context) {
+        return Style.EMPTY.withFormatting(this.formatting);
     }
 
     @Override

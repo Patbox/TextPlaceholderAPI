@@ -2,13 +2,12 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.Style;
 import net.minecraft.util.Identifier;
 
 import java.util.Arrays;
 
-public final class FontNode extends ParentNode {
+public final class FontNode extends SimpleStylingNode {
     private final Identifier font;
 
     public FontNode(TextNode[] children, Identifier font) {
@@ -17,8 +16,8 @@ public final class FontNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return out.setStyle(out.getStyle().withFont(font));
+    protected Style style(ParserContext context) {
+        return Style.EMPTY.withFont(font);
     }
 
     @Override

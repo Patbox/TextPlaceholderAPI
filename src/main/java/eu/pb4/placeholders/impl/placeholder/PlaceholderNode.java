@@ -7,8 +7,8 @@ import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 
 @ApiStatus.Internal
 public record PlaceholderNode(ParserContext.Key<PlaceholderContext> contextKey, String placeholder, Placeholders.PlaceholderGetter getter, boolean optionalContext, @Nullable String argument) implements TextNode {

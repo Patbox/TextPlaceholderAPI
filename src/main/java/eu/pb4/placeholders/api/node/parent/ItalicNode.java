@@ -2,12 +2,14 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.Style;
 
 import java.util.Arrays;
 
-public final class ItalicNode extends ParentNode {
+public final class ItalicNode extends SimpleStylingNode {
+    private static final Style TRUE = Style.EMPTY.withItalic(true);
+    private static final Style FALSE = Style.EMPTY.withItalic(false);
+
     private final boolean value;
 
     public ItalicNode(TextNode[] nodes, boolean value) {
@@ -16,8 +18,8 @@ public final class ItalicNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return out.setStyle(out.getStyle().withItalic(this.value));
+    protected Style style(ParserContext context) {
+        return this.value ? TRUE : FALSE;
     }
 
     @Override

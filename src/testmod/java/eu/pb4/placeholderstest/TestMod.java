@@ -69,7 +69,7 @@ public class TestMod implements ModInitializer {
             }
             long total = tagTimeTotal + placeholderTimeTotal + textTimeTotal + contextTimeTotal;
 
-            player.sendMessage(Text.literal(Text.Serializer.toJson(output)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(output)), false);
             player.sendMessage(Texts.parse(context.getSource(), output, context.getSource().getEntity(), 0), false);
             player.sendMessage(Text.literal(
                     "<FULL> Tag: " + ((tagTimeTotal / 1000) / 1000d) + " ms | " +
@@ -106,7 +106,7 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             Text text = TextParserUtils.formatText(context.getArgument("text", String.class));
-            player.sendMessage(Text.literal(Text.Serializer.toJson(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,7 +139,7 @@ public class TestMod implements ModInitializer {
             Text text = placeholders.toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
             var textTime = System.nanoTime() - time;
 
-            player.sendMessage(Text.literal(Text.Serializer.toJson(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(Texts.parse(context.getSource(), text, context.getSource().getEntity(), 0), false);
             player.sendMessage(Text.literal(
                       "Tag: " + ((tagTime / 1000) / 1000d) + " ms | " +
@@ -161,7 +161,7 @@ public class TestMod implements ModInitializer {
                     Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
                     Map.of("player", player.getName())
             );
-            player.sendMessage(Text.literal(Text.Serializer.toJson(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -177,7 +177,7 @@ public class TestMod implements ModInitializer {
                     Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
                     Map.of("player", player.getName())
             ).toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
-            player.sendMessage(Text.literal(Text.Serializer.toJson(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -193,7 +193,7 @@ public class TestMod implements ModInitializer {
                     player,
                     Map.of(new Identifier("player"), (ctx) -> PlaceholderResult.value(Text.literal("").append(player.getName()).setStyle(Style.EMPTY.withColor(TextColor.parse(ctx.getArgument()))))), Placeholders.ALT_PLACEHOLDER_PATTERN_CUSTOM);
 
-            player.sendMessage(Text.literal(Text.Serializer.toJson(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -209,7 +209,7 @@ public class TestMod implements ModInitializer {
                     player,
                     Map.of(new Identifier("player"), (ctx) -> PlaceholderResult.value(Text.literal("").append(player.getName()).setStyle(Style.EMPTY.withColor(TextColor.parse(ctx.getArgument()))))), Placeholders.ALT_PLACEHOLDER_PATTERN_CUSTOM);
 
-            player.sendMessage(Text.literal(Text.Serializer.toJson(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
 
             // Never use it, pls
             player.sendMessage(Text.literal(eu.pb4.placeholders.old.util.TextParserUtils.convertToString(text)), false);

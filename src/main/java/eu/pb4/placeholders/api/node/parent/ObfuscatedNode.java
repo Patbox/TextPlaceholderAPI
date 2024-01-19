@@ -2,12 +2,13 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.Style;
 
 import java.util.Arrays;
 
-public final class ObfuscatedNode extends ParentNode {
+public final class ObfuscatedNode extends SimpleStylingNode {
+    private static final Style TRUE = Style.EMPTY.withObfuscated(true);
+    private static final Style FALSE = Style.EMPTY.withObfuscated(false);
     private final boolean value;
 
     public ObfuscatedNode(TextNode[] nodes, boolean value) {
@@ -16,8 +17,8 @@ public final class ObfuscatedNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return out.setStyle(out.getStyle().withObfuscated(this.value));
+    protected Style style(ParserContext context) {
+        return this.value ? TRUE : FALSE;
     }
 
     @Override

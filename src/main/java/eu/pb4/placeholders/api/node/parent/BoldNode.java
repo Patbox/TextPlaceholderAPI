@@ -2,22 +2,18 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.Style;
 
 import java.util.Arrays;
 
-public final class BoldNode extends ParentNode {
+public final class BoldNode extends SimpleStylingNode {
+    private static final Style TRUE = Style.EMPTY.withBold(true);
+    private static final Style FALSE = Style.EMPTY.withBold(false);
     private final boolean value;
 
     public BoldNode(TextNode[] nodes, boolean value) {
         super(nodes);
         this.value = value;
-    }
-
-    @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return out.setStyle(out.getStyle().withBold(this.value));
     }
 
     @Override
@@ -31,5 +27,10 @@ public final class BoldNode extends ParentNode {
                 "value=" + value +
                 ", children=" + Arrays.toString(children) +
                 '}';
+    }
+
+    @Override
+    protected Style style(ParserContext context) {
+        return this.value ? TRUE : FALSE;
     }
 }

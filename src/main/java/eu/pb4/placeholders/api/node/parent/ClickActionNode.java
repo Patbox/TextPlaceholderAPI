@@ -4,10 +4,9 @@ import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.ClickEvent;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
+import net.minecraft.text.Style;
 
-public final class ClickActionNode extends ParentNode {
+public final class ClickActionNode extends SimpleStylingNode {
     private final ClickEvent.Action action;
     private final TextNode value;
 
@@ -26,8 +25,8 @@ public final class ClickActionNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
-        return out.setStyle(out.getStyle().withClickEvent(new ClickEvent(this.action, this.value.toText(context, true).getString())));
+    protected Style style(ParserContext context) {
+        return Style.EMPTY.withClickEvent(new ClickEvent(this.action, this.value.toText(context, true).getString()));
     }
 
     @Override
