@@ -45,7 +45,7 @@ public final class Placeholders {
 		}
 	};
 
-	public static final NodeParser DEFAULT_PLACEHOLDER_PARSER = PatternPlaceholderParser.of(PLACEHOLDER_PATTERN, PlaceholderContext.KEY, DEFAULT_PLACEHOLDER_GETTER);
+	public static final NodeParser DEFAULT_PLACEHOLDER_PARSER = TagLikeParser.placeholder(TagLikeParser.PLACEHOLDER, PlaceholderContext.KEY, DEFAULT_PLACEHOLDER_GETTER);
 
 	/**
 	 * Parses PlaceholderContext, can be used for parsing by hand
@@ -71,7 +71,7 @@ public final class Placeholders {
 	}
 
 	public static ParentNode parseNodes(TextNode node, ParserContext.Key<PlaceholderContext> contextKey) {
-		return asSingleParent(PatternPlaceholderParser.of(PLACEHOLDER_PATTERN, contextKey, DEFAULT_PLACEHOLDER_GETTER).parseNodes(node));
+		return asSingleParent(TagLikeParser.placeholder(TagLikeParser.PLACEHOLDER, contextKey, DEFAULT_PLACEHOLDER_GETTER).parseNodes(node));
 	}
 
 	public static ParentNode parseNodes(TextNode node, Pattern pattern) {

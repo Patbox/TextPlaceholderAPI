@@ -6,136 +6,190 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
-import eu.pb4.placeholders.api.node.parent.ColorNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.impl.placeholder.PlaceholderNode;
-import net.minecraft.text.TextColor;
+import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
+import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
+import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @ApiStatus.Experimental
-public record TagLikeParser(Format format, Provider provider) implements NodeParser {
-    private static final TextNode[] EMPTY = new TextNode[0];
+public abstract class TagLikeParser implements NodeParser {
     public static final Format TAGS = new Format('<', '>', ' ');
     public static final Format TAGS_LEGACY = new Format('<', '>', ':');
     public static final Format PLACEHOLDER = new Format('%', '%', ' ');
     public static final Format PLACEHOLDER_ALTERNATIVE = new Format('{', '}', ' ');
     public static final Format PLACEHOLDER_USER = new Format("${", "}", "");
+    private static final TextNode[] EMPTY = new TextNode[0];
 
-    @Deprecated
-    public static TagLikeParser wrapEmulate(TextParserV1 parser) {
-        return new TagLikeParser(TAGS_LEGACY, new Provider() {
-            @Override
-            public boolean isValidTag(String tag, Stack<Scope> stack) {
-                if (tag.equals("/") || (stack.peek().id != null && tag.equals("/" + stack.peek().id)) || tag.startsWith("#") || tag.equals("r") || tag.equals("reset")) {
-                    return true;
-                }
+    public static TagLikeParser of(Format format, Provider provider) {
+        return new SingleTagLikeParser(format, provider);
+    }
 
-                return parser.getTagParser(tag) != null;
-            }
+    public static TagLikeParser placeholder(Format format, ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter placeholders) {
+        return new SingleTagLikeParser(format, Provider.placeholder(contextKey, placeholders));
+    }
 
-            @Override
-            public void handleTag(String id, String argument, Stack<Scope> stack, NodeParser self) {
-                if ((id.equals("/") && stack.size() > 1) || id.equals("/" + stack.peek().id)) {
-                    var curr = stack.pop();
-                    stack.peek().nodes.add(curr.collapse(self));
-                    return;
-                }
+    public static TagLikeParser of(Pair<Format, Provider>... formatsAndProviders) {
+        return new MultiTagLikeParser(formatsAndProviders);
+    }
 
-                if (id.equals("r") || id.equals("reset")) {
-                    while (stack.size() != 1) {
-                        var curr = stack.pop();
-                        stack.peek().nodes.add(curr.collapse(self));
-                    }
-                    return;
-                }
+    public static TagLikeParser of(Map<Format, Provider> formatsAndProviders) {
+        var list = new ArrayList<>(formatsAndProviders.size());
 
-                if (id.startsWith("#")) {
-                    var text = TextColor.parse(id);
-                    if (text.result().isPresent()) {
-                        stack.push(Scope.enclosing(id, x -> new ColorNode(x, text.result().get())));
-                    }
-                    return;
-                }
-
-
-                var tag = parser.getTag(id);
-
-                var x = tag.parser().parseString(id, argument, "<" + id + ":" + argument + ">", parser::getTagParser, null);
-
-                if (x.length() != 0 && x.node() instanceof ParentTextNode parentTextNode) {
-                    stack.push(Scope.enclosingParsed(id, parentTextNode::copyWith));
-                } else {
-                    stack.peek().nodes.add(x.node());
-                }
-            }
-        });
+        for (var entry : formatsAndProviders.entrySet()) {
+            list.add(Pair.of(entry));
+        }
+        return new MultiTagLikeParser(list.toArray(new Pair[0]));
     }
 
     @Override
     public TextNode[] parseNodes(TextNode input) {
-        var stack = new Stack<Scope>();
-        stack.push(Scope.parent());
-
-        parse(input, stack);
-
-        while (!stack.isEmpty()) {
-            var box = stack.pop();
-
-            if (stack.isEmpty()) {
-                return box.nodes().toArray(EMPTY);
-            }
-
-            stack.peek().nodes.add(box.collapse(this));
-        }
-
-        return new TextNode[] { input };
+        var context = new Context(this);
+        parse(input, context);
+        return context.toTextNode();
     }
 
-    private void parse(TextNode node, Stack<Scope> stack) {
+    private void parse(TextNode node, Context context) {
         if (node instanceof LiteralNode literal) {
-            int pos = 0;
-            var string = literal.value();
+            this.handleLiteral(literal.value(), context);
+        } else if (node instanceof TranslatedNode translatedNode) {
+            context.addNode(translatedNode.transform(this));
+        } else if (node instanceof ParentTextNode parent) {
+            var size = context.size();
+            context.pushWithParser(null, parent::copyWith);
+            for (var x : parent.getChildren()) {
+                parse(x, context);
+            }
+
+            context.pop(context.size() - size);
+        } else {
+            context.addNode(node);
+        }
+    }
+
+    protected abstract void handleLiteral(String value, Context context);
+
+    public interface Provider {
+        static Provider placeholder(ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter placeholders) {
+            return new Provider() {
+                @Override
+                public boolean isValidTag(String tag, Context context) {
+                    return placeholders.exists(tag);
+                }
+
+                @Override
+                public void handleTag(String id, String argument, Context context) {
+                    context.addNode(new PlaceholderNode(contextKey, id, placeholders,
+                            placeholders.isContextOptional(), argument != null && !argument.isEmpty() ? argument : null));
+                }
+            };
+        }
+
+        boolean isValidTag(String tag, Context context);
+
+        void handleTag(String id, String argument, Context context);
+    }
+
+    public static final class Context {
+        private final Stack<Scope> stack = new Stack<>();
+        private final TagLikeParser parser;
+
+        Context(TagLikeParser parser) {
+            this.parser = parser;
+            this.stack.push(Scope.parent());
+        }
+
+        public boolean contains(String id) {
+            for (int i = 0; i < stack.size(); i++) {
+                if (id.equals(stack.get(stack.size() - i - 1).id)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void pop() {
+            if (this.stack.size() > 1) {
+                var x = this.stack.pop();
+                this.stack.peek().nodes.add(x.collapse(this.parser));
+            }
+        }
+
+        public void pop(int count) {
+            count = Math.min(count, this.stack.size() - 1);
+            for (int i = 0; i < count; i++) {
+                var x = this.stack.pop();
+                this.stack.peek().nodes.add(x.collapse(this.parser));
+            }
+        }
+
+        public void pop(String id) {
+            if (!contains(id)) {
+                return;
+            }
 
             while (true) {
-                var tag = this.format.find(string, pos, provider, stack);
-                if (tag == null) {
-                    stack.peek().nodes.add(new LiteralNode(string.substring(pos)));
-                    break;
-                } else {
-                    stack.peek().nodes.add(new LiteralNode(string.substring(pos, tag.start)));
+                var x = this.stack.pop();
+                this.stack.peek().nodes.add(x.collapse(this.parser));
+                if (x.id.equals(id)) {
+                    return;
                 }
-                pos = tag.end;
-                
-                this.provider.handleTag(tag.id, tag.argument, stack, this);
             }
-        } else if (node instanceof TranslatedNode translatedNode) {
-            stack.peek().nodes.add(translatedNode.transform(this));
-        } else if (node instanceof ParentTextNode parent) {
-            var box = Scope.enclosingParsed(parent::copyWith);
-            stack.push(box);
-            for (var x : parent.getChildren()) {
-                parse(x, stack);
+        }
+
+        @Nullable
+        public String peekId() {
+            return this.stack.peek().id;
+        }
+
+        public void pushParent() {
+            this.stack.push(Scope.parent());
+        }
+
+        public void push(String id, Function<TextNode[], TextNode> merge) {
+            this.stack.push(Scope.enclosing(id, merge));
+        }
+
+        public void pushWithParser(String id, BiFunction<TextNode[], NodeParser, TextNode> merge) {
+            this.stack.push(Scope.enclosingParsed(id, merge));
+        }
+
+        public void addNode(TextNode node) {
+            this.stack.peek().nodes.add(node);
+        }
+
+        public TextNode[] toTextNode() {
+            while (!stack.isEmpty()) {
+                var box = stack.pop();
+
+                if (stack.isEmpty()) {
+                    return box.nodes().toArray(EMPTY);
+                }
+
+                stack.peek().nodes.add(box.collapse(this.parser));
             }
-            while (stack.peek() != box) {
-                var curr = stack.pop();
-                stack.peek().nodes.add(curr.collapse(this));
-            }
-            var pop = stack.pop();
-            stack.peek().nodes.add(pop.collapse(this));
-        } else {
-            stack.peek().nodes.add(node);
+
+            return null;
+        }
+
+        public int size() {
+            return this.stack.size() - 1;
         }
     }
 
-    public record Scope(@Nullable String id, List<TextNode> nodes, BiFunction<TextNode[], NodeParser, TextNode> merger) {
+    private record Scope(@Nullable String id, List<TextNode> nodes,
+                         BiFunction<TextNode[], NodeParser, TextNode> merger) {
         public static Scope parent() {
             return enclosing(ParentNode::new);
         }
@@ -161,26 +215,6 @@ public record TagLikeParser(Format format, Provider provider) implements NodePar
         }
     }
 
-    public interface Provider {
-        boolean isValidTag(String tag, Stack<Scope> stack);
-        void handleTag(String id, String argument, Stack<Scope> stack, NodeParser parser);
-
-        static Provider placeholder(ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter placeholders) {
-            return new Provider() {
-                @Override
-                public boolean isValidTag(String tag, Stack<Scope> stack) {
-                    return placeholders.exists(tag);
-                }
-
-                @Override
-                public void handleTag(String id, String argument, Stack<Scope> stack, NodeParser parser) {
-                    stack.peek().nodes.add(new PlaceholderNode(contextKey, id, placeholders,
-                            placeholders.isContextOptional(), argument != null && !argument.isEmpty() ? argument : null));
-                }
-            };
-        }
-    }
-
     public record Format(char[] start, char[] end, char[] argument, char[] argumentWrappers) {
         public Format(char start, char end, char argument) {
             this(new char[]{start}, new char[]{end}, new char[]{argument}, new char[]{'"', '\'', '`'});
@@ -195,7 +229,7 @@ public record TagLikeParser(Format format, Provider provider) implements NodePar
         }
 
         @Nullable
-        TagInfo find(String string, int start, Provider provider, Stack<Scope> stack) {
+        public TagInfo find(String string, int start, Provider provider, Context context) {
             int maxLength = string.length() - this.start.length + this.end.length;
             main:
             for (int i = start; i < maxLength; i++) {
@@ -278,7 +312,7 @@ public record TagLikeParser(Format format, Provider provider) implements NodePar
                     if (matched) {
                         var str = builder.toString();
                         if (id == null) {
-                            if (provider.isValidTag(str, stack)) {
+                            if (provider.isValidTag(str, context)) {
                                 id = str;
                                 builder = new StringBuilder();
                                 if (!isEnd) {
@@ -291,10 +325,7 @@ public record TagLikeParser(Format format, Provider provider) implements NodePar
                             argument = str;
                         }
 
-                        if (isEnd) {
-                            return new TagInfo(i, b + this.end.length, id, argument);
-                        }
-                        continue;
+                        return new TagInfo(i, b + this.end.length, id, argument);
                     }
 
                     builder.append(curr);

@@ -3,6 +3,7 @@ package eu.pb4.placeholders.api.parsers;
 import com.google.common.collect.ImmutableList;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.parent.ColorNode;
+import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.TextTagsV2;
 import net.minecraft.text.TextColor;
 import org.jetbrains.annotations.Nullable;
@@ -14,34 +15,30 @@ import java.util.function.Function;
  * Text parsing implementation. Should be used first.
  * Loosely based on MiniMessage, with some degree of compatibility with it.
  */
-public class TextParserV2 implements NodeParser {
-    private final TagLikeParser parser = new TagLikeParser(TagLikeParser.TAGS_LEGACY, new TagLikeParser.Provider() {
+public class TextParserV2 implements NodeParser, TagLikeWrapper {
+    private final TagLikeParser parser = new SingleTagLikeParser(TagLikeParser.TAGS_LEGACY, new TagLikeParser.Provider() {
         @Override
-        public boolean isValidTag(String tag, Stack<TagLikeParser.Scope> stack) {
-            var peek = stack.peek();
-            return tag.equals("r") || tag.equals("reset") || tag.startsWith("#") || TextParserV2.this.getTag(tag) != null || tag.equals("/") || (peek.id() != null && tag.equals("/" + peek.id()));
+        public boolean isValidTag(String tag, TagLikeParser.Context context) {
+            var peek = context.peekId();
+            return tag.equals("r") || tag.equals("reset") || tag.startsWith("#") || TextParserV2.this.getTag(tag) != null || tag.equals("/") || (peek != null && tag.equals("/" + peek));
         }
 
         @Override
-        public void handleTag(String id, String argument, Stack<TagLikeParser.Scope> stack, NodeParser parser) {
-            if ((id.equals("/") && stack.size() > 1) || id.equals("/" + stack.peek().id())) {
-                var curr = stack.pop();
-                stack.peek().nodes().add(curr.collapse(parser));
+        public void handleTag(String id, String argument, TagLikeParser.Context context) {
+            if (id.equals("/") || id.equals("/" + context.peekId())) {
+                context.pop();
                 return;
             }
 
             if (id.equals("r") || id.equals("reset")) {
-                while (stack.size() != 1) {
-                    var curr = stack.pop();
-                    stack.peek().nodes().add(curr.collapse(parser));
-                }
+                context.pop(context.size());
                 return;
             }
 
             if (id.startsWith("#")) {
                 var text = TextColor.parse(id);
                 if (text.result().isPresent()) {
-                    stack.push(TagLikeParser.Scope.enclosing(id, x -> new ColorNode(x, text.result().get())));
+                    context.push(id, x -> new ColorNode(x, text.result().get()));
                 }
                 return;
             }
@@ -52,9 +49,9 @@ public class TextParserV2 implements NodeParser {
             assert tag != null;
 
             if (tag.selfContained) {
-                stack.peek().nodes().add(tag.nodeCreator.createTextNode(TextNode.array(), argument,  TextParserV2.this));
+                context.addNode(tag.nodeCreator.createTextNode(TextNode.array(), argument,  TextParserV2.this));
             } else {
-                stack.push(TagLikeParser.Scope.enclosing(id, (a) -> tag.nodeCreator.createTextNode(a, argument, TextParserV2.this)));
+                context.push(id, (a) -> tag.nodeCreator.createTextNode(a, argument, TextParserV2.this));
             }
         }
     });
@@ -105,6 +102,10 @@ public class TextParserV2 implements NodeParser {
                 }
             }
         }
+    }
+
+    public TagLikeParser asTagLikeParser() {
+        return this.parser;
     }
 
     public List<TextTag> getTags() {

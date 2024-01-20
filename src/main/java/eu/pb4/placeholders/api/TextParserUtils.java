@@ -6,6 +6,7 @@ import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import net.minecraft.text.Text;
 
+@Deprecated
 public final class TextParserUtils {
     private TextParserUtils() {}
 

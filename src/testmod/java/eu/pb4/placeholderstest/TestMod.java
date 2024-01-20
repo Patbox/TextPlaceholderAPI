@@ -35,7 +35,7 @@ public class TestMod implements ModInitializer {
 
         for (var pair : List.of(
                 Pair.of(TextParserV1.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER),
-                Pair.of(TextParserV2.DEFAULT, new TagLikeParser(TagLikeParser.PLACEHOLDER,
+                Pair.of(TextParserV2.DEFAULT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
                         TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER)))
         )) {
             player.sendMessage(Text.literal("Parser: " + pair), false);
