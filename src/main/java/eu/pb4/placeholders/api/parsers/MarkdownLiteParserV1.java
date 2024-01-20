@@ -80,15 +80,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             parseLiteral(literalNode, list::add);
             return parseSubNodes(list.listIterator(), null, -1, false);
         } else if (input instanceof TranslatedNode translatedNode) {
-            var list = new ArrayList<>();
-            for (var arg : translatedNode.args()) {
-                if (arg instanceof TextNode textNode) {
-                    list.add(TextNode.asSingle(this.parseNodes(textNode)));
-                } else {
-                    list.add(arg);
-                }
-            }
-            return new TextNode[]{TranslatedNode.ofFallback(translatedNode.key(), translatedNode.fallback(), list.toArray())};
+            return new TextNode[]{ translatedNode.transform(this) };
         } else if (input instanceof ParentTextNode parentTextNode) {
             var list = new ArrayList<SubNode<?>>();
             for (var children : parentTextNode.getChildren()) {

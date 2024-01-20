@@ -55,18 +55,7 @@ public record PatternPlaceholderParser(Pattern pattern, Function<String, @Nullab
     @Override
     public TextNode[] parseNodes(TextNode text) {
         if (text instanceof TranslatedNode translatedNode) {
-            var list = new ArrayList<>();
-
-            for (var arg : translatedNode.args()) {
-                if (arg instanceof TextNode textNode) {
-                    list.add(TextNode.asSingle(this.parseNodes(textNode)));
-                } else {
-                    list.add(arg);
-                }
-            }
-
-            return new TextNode[]{TranslatedNode.ofFallback(translatedNode.key(), translatedNode.fallback(), list.toArray())};
-
+            return new TextNode[]{ translatedNode.transform(this) };
         } else if (text instanceof LiteralNode literalNode) {
             var out = new ArrayList<TextNode>();
 

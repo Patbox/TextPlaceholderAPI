@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import eu.pb4.placeholders.api.node.EmptyNode;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.impl.textparser.TextParserImpl;
@@ -114,6 +115,11 @@ public class TextParserV1 implements NodeParser {
     public @Nullable TagNodeBuilder getTagParser(String name) {
         var o = this.byNameAlias.get(name);
         return o != null ? o.parser() : null;
+    }
+
+    public @Nullable TextTag getTag(String name) {
+        var o = this.byNameAlias.get(name);
+        return o;
     }
 
     public record TextTag(String name, String[] aliases, String type, boolean userSafe, TagNodeBuilder parser) {

@@ -9,6 +9,7 @@ import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.LegacyFormattingParser;
+import eu.pb4.placeholders.api.parsers.TagLikeParser;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.api.parsers.MarkdownLiteParserV1;
 import net.fabricmc.api.ModInitializer;
@@ -108,6 +109,24 @@ public class TestMod implements ModInitializer {
             Text text = TextParserUtils.formatText(context.getArgument("text", String.class));
             player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private static int test2Emula(CommandContext<ServerCommandSource> context) {
+        try {
+            ServerPlayerEntity player = context.getSource().getPlayer();
+            var form = context.getArgument("text", String.class);
+            Text text = TextParserV1.DEFAULT.parseNode(form).toText();
+            Text text2 = TagLikeParser.wrapEmulate(TextParserV1.DEFAULT).parseNode(form).toText();
+            player.sendMessage(Text.literal("Legacy"), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
+            player.sendMessage(text, false);
+            player.sendMessage(Text.literal("WrapEmu"), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2)), false);
+            player.sendMessage(text2, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -241,6 +260,10 @@ public class TestMod implements ModInitializer {
 
             dispatcher.register(
                     literal("test2").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2))
+            );
+
+            dispatcher.register(
+                    literal("test2emu").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2Emula))
             );
 
             dispatcher.register(

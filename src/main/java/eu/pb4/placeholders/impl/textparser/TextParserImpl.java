@@ -19,6 +19,8 @@ import java.util.regex.Pattern;
 
 import static eu.pb4.placeholders.impl.GeneralUtils.Pair;
 
+
+@Deprecated
 @ApiStatus.Internal
 public class TextParserImpl {
     // Based on minimessage's regex, modified to fit more parsers needs

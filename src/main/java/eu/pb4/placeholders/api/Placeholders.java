@@ -5,6 +5,8 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.PatternPlaceholderParser;
+import eu.pb4.placeholders.api.parsers.TagLikeParser;
+import eu.pb4.placeholders.impl.placeholder.PlaceholderNode;
 import eu.pb4.placeholders.impl.placeholder.builtin.PlayerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.ServerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.WorldPlaceholders;

@@ -42,15 +42,7 @@ public class LegacyFormattingParser implements NodeParser {
         if (input instanceof LiteralNode literalNode) {
             return parseLiteral(literalNode, nextNodes);
         } else if (input instanceof TranslatedNode translatedNode) {
-            var list = new ArrayList<>();
-            for (var arg : translatedNode.args()) {
-                if (arg instanceof TextNode textNode) {
-                    list.add(TextNode.asSingle(this.parseNodes(textNode)));
-                } else {
-                    list.add(arg);
-                }
-            }
-            return new TextNode[] { TranslatedNode.ofFallback(translatedNode.key(), translatedNode.fallback(), list.toArray()) };
+            return new TextNode[] { translatedNode.transform(this) };
         } else if (input instanceof ParentTextNode parentTextNode) {
             return parseParents(parentTextNode);
         } else {
