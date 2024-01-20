@@ -8,10 +8,8 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.parsers.LegacyFormattingParser;
-import eu.pb4.placeholders.api.parsers.TagLikeParser;
-import eu.pb4.placeholders.api.parsers.TextParserV1;
-import eu.pb4.placeholders.api.parsers.MarkdownLiteParserV1;
+import eu.pb4.placeholders.api.parsers.*;
+import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.TextArgumentType;
@@ -20,6 +18,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.text.Texts;
 
+import java.util.List;
 import java.util.Map;
 
 import static net.minecraft.server.command.CommandManager.literal;
@@ -29,66 +28,67 @@ import static net.minecraft.server.command.CommandManager.argument;
 public class TestMod implements ModInitializer {
 
     private static int perf(CommandContext<ServerCommandSource> context) {
-        long placeholderTimeTotal = 0;
-        long contextTimeTotal = 0;
-        long tagTimeTotal = 0;
-        long textTimeTotal = 0;
-        Text output = null;
         var input = context.getArgument("text", String.class);
         ServerPlayerEntity player = context.getSource().getPlayer();
-
         int iter = 1024 * 20;
+        // old = NodeParser.merge(TextParserV1.DEFAULT, MarkdownLiteParserV1.ALL, LegacyFormattingParser.ALL)
 
-        try {
-            for (int i = 0; i < iter; i++) {
-                var time = System.nanoTime();
-                var tags = TextNode.asSingle(
-                        LegacyFormattingParser.ALL.parseNodes(
-                                TextNode.asSingle(
-                                        MarkdownLiteParserV1.ALL.parseNodes(
-                                                TextNode.asSingle(
-                                                        TextParserV1.DEFAULT.parseNodes(new LiteralNode(input))
-                                                )
-                                        )
-                                )
-                        )
-                );
-                tagTimeTotal += System.nanoTime() - time;
-                time = System.nanoTime();
+        for (var pair : List.of(
+                Pair.of(TextParserV1.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER),
+                Pair.of(TextParserV2.DEFAULT, new TagLikeParser(TagLikeParser.PLACEHOLDER,
+                        TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER)))
+        )) {
+            player.sendMessage(Text.literal("Parser: " + pair), false);
+            long placeholderTimeTotal = 0;
+            long contextTimeTotal = 0;
+            long tagTimeTotal = 0;
+            long textTimeTotal = 0;
+            Text output = null;
 
-                var placeholders = Placeholders.parseNodes(tags);
-                placeholderTimeTotal += System.nanoTime() - time;
-                time = System.nanoTime();
+            var parser = pair.left();
+            var placeholder = pair.right();
 
-                var ctx = ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player));
-                contextTimeTotal += System.nanoTime() - time;
-                time = System.nanoTime();
+            try {
+                for (int i = 0; i < iter; i++) {
+                    var time = System.nanoTime();
+                    var tags = TextNode.asSingle(parser.parseNodes(new LiteralNode(input)));
+                    tagTimeTotal += System.nanoTime() - time;
+                    time = System.nanoTime();
 
-                Text text = placeholders.toText(ctx, true);
-                textTimeTotal +=  System.nanoTime() - time;
-                output = text;
+                    var placeholders = TextNode.asSingle(placeholder.parseNodes(tags));
+                    placeholderTimeTotal += System.nanoTime() - time;
+                    time = System.nanoTime();
+
+                    var ctx = ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player));
+                    contextTimeTotal += System.nanoTime() - time;
+                    time = System.nanoTime();
+
+                    Text text = placeholders.toText(ctx, true);
+                    textTimeTotal += System.nanoTime() - time;
+                    output = text;
+                }
+                long total = tagTimeTotal + placeholderTimeTotal + textTimeTotal + contextTimeTotal;
+
+                //player.sendMessage(Text.literal(Text.Serialization.toJsonString(output)), false);
+                player.sendMessage(Texts.parse(context.getSource(), output, context.getSource().getEntity(), 0), false);
+                player.sendMessage(Text.literal(
+                        "<FULL> Tag: " + ((tagTimeTotal / 1000) / 1000d) + " ms | " +
+                                "Context: " + ((contextTimeTotal / 1000) / 1000d) + " ms | " +
+                                "Placeholder: " + ((placeholderTimeTotal / 1000) / 1000d) + " ms | " +
+                                "Text: " + ((textTimeTotal / 1000) / 1000d) + " ms | " +
+                                "All: " + ((total / 1000) / 1000d) + " ms"
+                ), false);
+
+                player.sendMessage(Text.literal(
+                        "<SINGLE> Tag: " + ((tagTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                                "Context: " + ((contextTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                                "Placeholder: " + ((placeholderTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                                "Text: " + ((textTimeTotal / iter / 1000) / 1000d) + " ms | " +
+                                "All: " + ((total / iter / 1000) / 1000d) + " ms"
+                ), false);
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-            long total = tagTimeTotal + placeholderTimeTotal + textTimeTotal + contextTimeTotal;
-
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(output)), false);
-            player.sendMessage(Texts.parse(context.getSource(), output, context.getSource().getEntity(), 0), false);
-            player.sendMessage(Text.literal(
-                    "<FULL> Tag: " + ((tagTimeTotal / 1000) / 1000d) + " ms | " +
-                            "Context: " + ((contextTimeTotal / 1000) / 1000d) + " ms | " +
-                            "Placeholder: " + ((placeholderTimeTotal / 1000) / 1000d) + " ms | " +
-                            "Text: " + ((textTimeTotal / 1000) / 1000d) + " ms | " +
-                            "All: " + ((total / 1000) / 1000d) + " ms"
-            ), false);
-
-            player.sendMessage(Text.literal(
-                    "<SINGLE> Tag: " + ((tagTimeTotal / iter / 1000) / 1000d) + " ms | " +
-                            "Context: " + ((contextTimeTotal / iter / 1000) / 1000d) + " ms | " +
-                            "Placeholder: " + ((placeholderTimeTotal / iter / 1000) / 1000d) + " ms | " +
-                            "Text: " + ((textTimeTotal / iter / 1000) / 1000d) + " ms | " +
-                            "All: " + ((total / iter / 1000) / 1000d) + " ms"
-            ), false);
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return 0;
     }
@@ -115,16 +115,32 @@ public class TestMod implements ModInitializer {
         return 0;
     }
 
-    private static int test2Emula(CommandContext<ServerCommandSource> context) {
+    private static int test2oldnew(CommandContext<ServerCommandSource> context) {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var form = context.getArgument("text", String.class);
             Text text = TextParserV1.DEFAULT.parseNode(form).toText();
-            Text text2 = TagLikeParser.wrapEmulate(TextParserV1.DEFAULT).parseNode(form).toText();
-            player.sendMessage(Text.literal("Legacy"), false);
+            Text text2 = TextParserV2.DEFAULT.parseNode(form).toText();
+            player.sendMessage(Text.literal("v1"), false);
+            player.sendMessage(text, false);
+            player.sendMessage(Text.literal("v2"), false);
+            player.sendMessage(text2, false);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private static int test2oldnewjson(CommandContext<ServerCommandSource> context) {
+        try {
+            ServerPlayerEntity player = context.getSource().getPlayer();
+            var form = context.getArgument("text", String.class);
+            Text text = TextParserV1.DEFAULT.parseNode(form).toText();
+            Text text2 = TextParserV2.DEFAULT.parseNode(form).toText();
+            player.sendMessage(Text.literal("v1"), false);
             player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
-            player.sendMessage(Text.literal("WrapEmu"), false);
+            player.sendMessage(Text.literal("v2"), false);
             player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2)), false);
             player.sendMessage(text2, false);
         } catch (Exception e) {
@@ -263,7 +279,11 @@ public class TestMod implements ModInitializer {
             );
 
             dispatcher.register(
-                    literal("test2emu").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2Emula))
+                    literal("test2oldnew").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2oldnew))
+            );
+
+            dispatcher.register(
+                    literal("test2oldnewj").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2oldnewjson))
             );
 
             dispatcher.register(

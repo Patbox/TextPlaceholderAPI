@@ -192,47 +192,4 @@ public class TextParserImpl {
     }
 
     public static final TextNode[] CASTER = new TextNode[0];
-
-    // Cursed don't touch this
-    @ApiStatus.Experimental
-    @UnstableApi
-    public static String convertToString(Text text) {
-        StringBuilder builder = new StringBuilder();
-        DataResult<JsonElement> dataResult = Style.Codecs.CODEC.encodeStart(JsonOps.INSTANCE, text.getStyle());
-        Either<String, DataResult.PartialResult<JsonElement>> styleEither = dataResult.get().mapLeft(JsonElement::toString);
-        styleEither.ifLeft(style -> builder.append("<style:").append(style).append(">"));
-        if (text.getContent() instanceof PlainTextContent.Literal literalText) {
-            builder.append(escapeCharacters(literalText.string()));
-        } else if (text.getContent() instanceof TranslatableTextContent translatableText) {
-            List<String> stringList = new ArrayList<>();
-
-            for (Object arg : translatableText.getArgs()) {
-                if (arg instanceof Text text1) {
-                    stringList.add("'" + escapeCharacters(convertToString(text1)) + "'");
-                } else {
-                    stringList.add("'" + escapeCharacters(arg.toString()) + "'");
-                }
-            }
-
-            if (!stringList.isEmpty()) {
-                stringList.add(0, "");
-            }
-
-            String additional = String.join(":", stringList);
-
-            builder.append("<lang:'").append(translatableText.getKey()).append("'").append(additional).append(">");
-        } else if (text.getContent() instanceof KeybindTextContent keybindText) {
-            builder.append("<key:'").append(keybindText.getKey()).append("'>");
-        } else {
-            builder.append("<raw:'").append(escapeCharacters(Text.Serialization.toJsonString(text.copy()))).append("'>");
-        }
-
-        for (Text text1 : text.getSiblings()) {
-            builder.append(convertToString(text1));
-        }
-
-        styleEither.ifLeft(style -> builder.append("</style>"));
-        return builder.toString();
-    }
-
 }

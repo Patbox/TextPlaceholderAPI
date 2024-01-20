@@ -128,7 +128,8 @@ public record TagLikeParser(Format format, Provider provider) implements NodePar
                 var curr = stack.pop();
                 stack.peek().nodes.add(curr.collapse(this));
             }
-            stack.peek().nodes.add(stack.pop().collapse(this));
+            var pop = stack.pop();
+            stack.peek().nodes.add(pop.collapse(this));
         } else {
             stack.peek().nodes.add(node);
         }
@@ -214,6 +215,7 @@ public record TagLikeParser(Format format, Provider provider) implements NodePar
 
                 char wrapper = 0;
                 var builder = new StringBuilder();
+                validationLoop:
                 for (int b = i + 1; b < maxLength; b++) {
                     var curr = string.charAt(b);
                     var matched = true;
@@ -242,7 +244,7 @@ public record TagLikeParser(Format format, Provider provider) implements NodePar
                             if (curr == argumentWrapper) {
                                 builder.append(curr);
                                 wrapper = curr;
-                                continue;
+                                continue validationLoop;
                             }
                         }
                     }
