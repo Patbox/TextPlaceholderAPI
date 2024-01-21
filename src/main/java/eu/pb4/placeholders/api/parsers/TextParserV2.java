@@ -1,6 +1,7 @@
 package eu.pb4.placeholders.api.parsers;
 
 import com.google.common.collect.ImmutableList;
+import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.parent.ColorNode;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
@@ -49,9 +50,9 @@ public class TextParserV2 implements NodeParser, TagLikeWrapper {
             assert tag != null;
 
             if (tag.selfContained) {
-                context.addNode(tag.nodeCreator.createTextNode(TextNode.array(), argument,  TextParserV2.this));
+                context.addNode(tag.nodeCreator.createTextNode(TextNode.array(), argument, context.parser()));
             } else {
-                context.push(id, (a) -> tag.nodeCreator.createTextNode(a, argument, TextParserV2.this));
+                context.push(id, (a) -> tag.nodeCreator.createTextNode(a, argument, context.parser()));
             }
         }
     });
@@ -176,7 +177,7 @@ public class TextParserV2 implements NodeParser, TagLikeWrapper {
         }
 
         static NodeCreator bool(BoolNodeArg function) {
-            return (a, b, c) -> function.apply(a, !"false".equals(b));
+            return (a, b, c) -> function.apply(a, SimpleArguments.bool(b, true));
         }
 
         interface BoolNodeArg {

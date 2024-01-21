@@ -186,6 +186,10 @@ public abstract class TagLikeParser implements NodeParser {
         public int size() {
             return this.stack.size() - 1;
         }
+
+        public NodeParser parser() {
+            return this.parser;
+        }
     }
 
     private record Scope(@Nullable String id, List<TextNode> nodes,

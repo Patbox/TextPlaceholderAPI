@@ -33,7 +33,7 @@ public class MultiTagLikeParser extends TagLikeParser {
             if (tag == null) {
                 context.addNode(new LiteralNode(value.substring(pos)));
                 break;
-            } else if (tag.start() != 0) {
+            } else if (tag.start() != 0 && tag.start() != pos) {
                 context.addNode(new LiteralNode(value.substring(pos, tag.start())));
             }
             pos = tag.end();

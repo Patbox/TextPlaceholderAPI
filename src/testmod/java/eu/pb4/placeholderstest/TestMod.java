@@ -36,7 +36,9 @@ public class TestMod implements ModInitializer {
         for (var pair : List.of(
                 Pair.of(TextParserV1.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER),
                 Pair.of(TextParserV2.DEFAULT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
-                        TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER)))
+                        TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER))),
+                Pair.of(NodeParser.merge(TextParserV2.DEFAULT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
+                        TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER))), NodeParser.NOOP)
         )) {
             player.sendMessage(Text.literal("Parser: " + pair), false);
             long placeholderTimeTotal = 0;
@@ -221,18 +223,15 @@ public class TestMod implements ModInitializer {
     }
 
     private static int test5(CommandContext<ServerCommandSource> context) {
-        /*try {
+        try {
             ServerPlayerEntity player = context.getSource().getPlayer();
-            Text text = Placeholders.parseTextCustom(
-                    TextParser.parse(context.getArgument("text", String.class)),
-                    player,
-                    Map.of(new Identifier("player"), (ctx) -> PlaceholderResult.value(Text.literal("").append(player.getName()).setStyle(Style.EMPTY.withColor(TextColor.parse(ctx.getArgument()))))), Placeholders.ALT_PLACEHOLDER_PATTERN_CUSTOM);
-
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
-            player.sendMessage(text, false);
+            var form = context.getArgument("text", String.class);
+            Text text2 = NodeParser.merge(TextParserV2.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER).parseText(form, PlaceholderContext.of(player).asParserContext());
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2)), false);
+            player.sendMessage(text2, false);
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
         return 0;
     }
 

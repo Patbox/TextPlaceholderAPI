@@ -2,6 +2,7 @@ package eu.pb4.placeholders.impl.textparser;
 
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.api.parsers.TextParserV2;
@@ -17,9 +18,6 @@ import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Function;
-
-import static eu.pb4.placeholders.impl.textparser.TextParserImpl.cleanArgument;
-import static eu.pb4.placeholders.impl.textparser.TextParserImpl.restoreOriginalEscaping;
 
 @ApiStatus.Internal
 public final class TextTagsV2 {
@@ -107,7 +105,7 @@ public final class TextTagsV2 {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(cleanArgument(data)).get().left().orElse(null))
+                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(SimpleArguments.unwrap(data)).get().left().orElse(null))
                     )
             );
         }
@@ -117,7 +115,7 @@ public final class TextTagsV2 {
                             "font",
                             "other_formatting",
                             false,
-                            (nodes, data, parser) -> new FontNode(nodes, Identifier.tryParse(cleanArgument(data)))
+                            (nodes, data, parser) -> new FontNode(nodes, Identifier.tryParse(SimpleArguments.unwrap(data)))
                     )
             );
         }
@@ -137,10 +135,10 @@ public final class TextTagsV2 {
                                     skipped = true;
                                     continue;
                                 }
-                                textList.add(parser.parseNode(cleanArgument(part)));
+                                textList.add(parser.parseNode(SimpleArguments.unwrap(part)));
                             }
 
-                            return TranslatedNode.of(cleanArgument(lines[0]), textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.of(SimpleArguments.unwrap(lines[0]), textList.toArray(TextParserImpl.CASTER));
                         }
                         return TextNode.empty();
                     })
@@ -163,10 +161,10 @@ public final class TextTagsV2 {
                                     skipped++;
                                     continue;
                                 }
-                                textList.add(parser.parseNode(cleanArgument(part)));
+                                textList.add(parser.parseNode(SimpleArguments.unwrap(part)));
                             }
 
-                            var out = TranslatedNode.ofFallback(cleanArgument(lines[0]), cleanArgument(lines[1]), textList.toArray(TextParserImpl.CASTER));
+                            var out = TranslatedNode.ofFallback(SimpleArguments.unwrap(lines[0]), SimpleArguments.unwrap(lines[1]), textList.toArray(TextParserImpl.CASTER));
                             return out;
                         }
                         return TextNode.empty();
@@ -179,7 +177,7 @@ public final class TextTagsV2 {
                     List.of("key"),
                     "special",
                     false,
-                    (data) -> new KeybindNode(cleanArgument(data))));
+                    (data) -> new KeybindNode(SimpleArguments.unwrap(data))));
         }
 
         {
@@ -188,8 +186,8 @@ public final class TextTagsV2 {
                         String[] lines = data.split(":", 2);
                         if (lines.length > 1) {
                             for (ClickEvent.Action action : ClickEvent.Action.values()) {
-                                if (action.asString().equals(cleanArgument(lines[0]))) {
-                                    return new ClickActionNode(nodes, action, new LiteralNode(restoreOriginalEscaping(cleanArgument(lines[1]))));
+                                if (action.asString().equals(SimpleArguments.unwrap(lines[0]))) {
+                                    return new ClickActionNode(nodes, action, new LiteralNode(SimpleArguments.unwrap(lines[1])));
                                 }
                             }
                         }
@@ -206,7 +204,7 @@ public final class TextTagsV2 {
                             false,
                             (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, new LiteralNode(restoreOriginalEscaping(cleanArgument(data))));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, new LiteralNode(SimpleArguments.unwrap(data)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -224,7 +222,7 @@ public final class TextTagsV2 {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(restoreOriginalEscaping(cleanArgument(data))));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(SimpleArguments.unwrap(data)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -241,7 +239,7 @@ public final class TextTagsV2 {
                             false, (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, new LiteralNode(restoreOriginalEscaping(cleanArgument(data))));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, new LiteralNode(SimpleArguments.unwrap(data)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -259,7 +257,7 @@ public final class TextTagsV2 {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, new LiteralNode(restoreOriginalEscaping(cleanArgument(data))));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, new LiteralNode(SimpleArguments.unwrap(data)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -275,7 +273,7 @@ public final class TextTagsV2 {
                             "click_action",
                             true, (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, new LiteralNode(restoreOriginalEscaping(cleanArgument(data))));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, new LiteralNode(SimpleArguments.unwrap(data)));
                                 }
                                 return new ParentNode(nodes);
                             }));
@@ -288,40 +286,40 @@ public final class TextTagsV2 {
                             "hover_event",
                             true,
                             (nodes, data, parser) -> {
-                                String[] lines = data.split(":", 2);
+                                var lines = SimpleArguments.split(data, ':');
                                 try {
-                                    if (lines.length > 1) {
-                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).get().left().orElse(null);
+                                    if (lines.size() > 1) {
+                                        // Todo: wtf
+                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC
+                                                .parse(JsonOps.INSTANCE, JsonParser.parseString('"' + lines.get(0).toLowerCase(Locale.ROOT) + '"')).get().left().orElse(null);
                                         if (action == HoverEvent.Action.SHOW_TEXT) {
-                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(cleanArgument(lines[1])));
+                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(lines.get(1)));
                                         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
-                                            lines = lines[1].split(":", 3);
-                                            if (lines.length == 3) {
+                                            if (lines.size() == 4) {
                                                 return new HoverNode<>(nodes,
                                                         HoverNode.Action.ENTITY,
                                                         new HoverNode.EntityNodeContent(
-                                                                EntityType.get(restoreOriginalEscaping(cleanArgument(lines[0]))).orElse(EntityType.PIG),
-                                                                UUID.fromString(cleanArgument(lines[1])),
-                                                                new ParentNode(parser.parseNode(cleanArgument(lines[2])))
+                                                                EntityType.get(lines.get(1)).orElse(EntityType.PIG),
+                                                                UUID.fromString(lines.get(2)),
+                                                                new ParentNode(parser.parseNode(lines.get(3)))
                                                         ));
                                             }
                                         } else if (action == HoverEvent.Action.SHOW_ITEM) {
                                             try {
                                                 return new HoverNode<>(nodes,
                                                         HoverNode.Action.ITEM_STACK,
-                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[1])))))
+                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(lines.get(1))))
                                                 );
                                             } catch (Throwable e) {
-                                                lines = lines[1].split(":", 2);
-                                                if (lines.length > 0) {
-                                                    var stack = Registries.ITEM.get(Identifier.tryParse(lines[0])).getDefaultStack();
+                                                if (lines.size() > 1) {
+                                                    var stack = Registries.ITEM.get(Identifier.tryParse(lines.get(1))).getDefaultStack();
 
-                                                    if (lines.length > 1) {
-                                                        stack.setCount(Integer.parseInt(lines[1]));
+                                                    if (lines.size() > 2) {
+                                                        stack.setCount(Integer.parseInt(lines.get(2)));
                                                     }
 
-                                                    if (lines.length > 2) {
-                                                        stack.setNbt(StringNbtReader.parse(cleanArgument(lines[2])));
+                                                    if (lines.size() > 3) {
+                                                        stack.setNbt(StringNbtReader.parse(SimpleArguments.unwrap(lines.get(3))));
                                                     }
 
                                                     return new HoverNode<>(nodes,
@@ -331,10 +329,10 @@ public final class TextTagsV2 {
                                                 }
                                             }
                                         } else {
-                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(cleanArgument(data)));
+                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(SimpleArguments.unwrap(data)));
                                         }
                                     } else {
-                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(cleanArgument(data)));
+                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(SimpleArguments.unwrap(data)));
                                     }
                                 } catch (Exception e) {
                                     // Shut
@@ -350,7 +348,7 @@ public final class TextTagsV2 {
                             List.of("insertion"),
                             "click_action",
                             false,
-                            (nodes, data, parser) -> new InsertNode(nodes, new LiteralNode(cleanArgument(data)))));
+                            (nodes, data, parser) -> new InsertNode(nodes, new LiteralNode(SimpleArguments.unwrap(data)))));
         }
 
         {
@@ -361,7 +359,7 @@ public final class TextTagsV2 {
                             "special",
                             false,
 
-                            (nodes, data, parser) -> GeneralUtils.removeColors(new ParentNode(nodes))
+                            (nodes, data, parser) -> GeneralUtils.removeColors(TextNode.asSingle(nodes))
                     ));
         }
 
@@ -373,37 +371,37 @@ public final class TextTagsV2 {
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                String[] val = data.split(":");
+                                var val = SimpleArguments.split(data, ':');
                                 float freq = 1;
                                 float saturation = 1;
                                 float offset = 0;
                                 int overriddenLength = -1;
 
-                                if (val.length >= 1) {
+                                if (!val.isEmpty()) {
                                     try {
-                                        freq = Float.parseFloat(val[0]);
+                                        freq = Float.parseFloat(val.get(0));
                                     } catch (Exception e) {
                                         // No u
                                     }
                                 }
-                                if (val.length >= 2) {
+                                if (val.size() >= 2) {
                                     try {
-                                        saturation = Float.parseFloat(val[1]);
+                                        saturation = Float.parseFloat(val.get(1));
                                     } catch (Exception e) {
                                         // Idc
                                     }
                                 }
-                                if (val.length >= 3) {
+                                if (val.size() >= 3) {
                                     try {
-                                        offset = Float.parseFloat(val[2]);
+                                        offset = Float.parseFloat(val.get(2));
                                     } catch (Exception e) {
                                         // Ok float
                                     }
                                 }
 
-                                if (val.length >= 4) {
+                                if (val.size() >= 4) {
                                     try {
-                                        overriddenLength = Integer.parseInt(val[3]);
+                                        overriddenLength = Integer.parseInt(val.get(3));
                                     } catch (Exception e) {
                                         // Ok float
                                     }
@@ -426,9 +424,7 @@ public final class TextTagsV2 {
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                String[] val = data.split(":");
-
-
+                                var val = SimpleArguments.split(data, ':');
                                 List<TextColor> textColors = new ArrayList<>();
                                 for (String string : val) {
                                     TextColor.parse(string).get().ifLeft(textColors::add);
@@ -447,9 +443,7 @@ public final class TextTagsV2 {
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                String[] val = data.split(":");
-
-
+                                var val = SimpleArguments.split(data, ':');
                                 var textColors = new ArrayList<TextColor>();
 
                                 for (String string : val) {
@@ -474,11 +468,9 @@ public final class TextTagsV2 {
                             "special",
                             false,
                             (nodes, data, parser) -> {
-                                String[] val = data.isEmpty() ? new String[0] : data.split(":");
-
+                                var val = SimpleArguments.split(data, ':');
 
                                 return new TransformNode(nodes, getTransform(val));
-
                             }
                     )
             );
@@ -490,9 +482,9 @@ public final class TextTagsV2 {
                             "score",
                             "special",
                             false, (nodes, data, parser) -> {
-                                String[] lines = data.split(":");
-                                if (lines.length == 2) {
-                                    return new ScoreNode(cleanArgument(lines[0]), cleanArgument(lines[1]));
+                                var val = SimpleArguments.split(data, ':');
+                                if (val.size() == 2) {
+                                    return new ScoreNode(val.get(0), val.get(1));
                                 }
                                 return TextNode.empty();
                             }
@@ -507,11 +499,11 @@ public final class TextTagsV2 {
                             "special",
                             false,
                             (nodes, data, parser) -> {
-                                String[] lines = data.split(":");
-                                if (lines.length == 2) {
-                                    return new SelectorNode(cleanArgument(lines[0]), Optional.of(TextNode.of(cleanArgument(lines[1]))));
-                                } else if (lines.length == 1) {
-                                    return new SelectorNode(cleanArgument(lines[0]), Optional.empty());
+                                var lines = SimpleArguments.split(data, ':');
+                                if (lines.size() == 2) {
+                                    return new SelectorNode(lines.get(0), Optional.of(TextNode.of(lines.get(1))));
+                                } else if (lines.size() == 1) {
+                                    return new SelectorNode(lines.get(0), Optional.empty());
                                 }
                                 return TextNode.empty();
                             }
@@ -525,15 +517,15 @@ public final class TextTagsV2 {
                             "nbt",
                             "special",
                             false, (nodes, data, parser) -> {
-                                String[] lines = data.split(":");
+                                var lines = SimpleArguments.split(data, ':');
 
-                                if (lines.length < 3) {
+                                if (lines.size() < 3) {
                                     return TextNode.empty();
                                 }
 
-                                var cleanLine1 = cleanArgument(lines[1]);
+                                var cleanLine1 = lines.get(1);
 
-                                var type = switch (lines[0]) {
+                                var type = switch (lines.get(0)) {
                                     case "block" -> new BlockNbtDataSource(cleanLine1);
                                     case "entity" -> new EntityNbtDataSource(cleanLine1);
                                     case "storage" -> new StorageNbtDataSource(Identifier.tryParse(cleanLine1));
@@ -544,19 +536,19 @@ public final class TextTagsV2 {
                                     return TextNode.empty();
                                 }
 
-                                Optional<TextNode> separator = lines.length > 3 ?
-                                        Optional.of(TextNode.asSingle(parser.parseNode(cleanArgument(lines[3])))) : Optional.empty();
-                                var shouldInterpret = lines.length > 4 && Boolean.parseBoolean(lines[4]);
+                                Optional<TextNode> separator = lines.size() > 3 ?
+                                        Optional.of(TextNode.asSingle(parser.parseNode(lines.get(3)))) : Optional.empty();
+                                var shouldInterpret = lines.size() > 4 && SimpleArguments.bool(lines.get(4));
 
-                                return new NbtNode(lines[2], shouldInterpret, separator, type);
+                                return new NbtNode(lines.get(2), shouldInterpret, separator, type);
                             }
                     )
             );
         }
     }
 
-    private static Function<MutableText, Text> getTransform(String[] val) {
-        if (val.length == 0) {
+    private static Function<MutableText, Text> getTransform(List<String> val) {
+        if (val.isEmpty()) {
             return GeneralUtils.MutableTransformer.CLEAR;
         }
 
@@ -582,6 +574,6 @@ public final class TextTagsV2 {
     }
 
     private static boolean isntFalse(String arg) {
-        return arg.isEmpty() || !arg.equals("false");
+        return SimpleArguments.bool(arg, arg.isEmpty());
     }
 }
