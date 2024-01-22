@@ -3,8 +3,6 @@ package eu.pb4.placeholders.impl.textparser;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.parsers.TagLikeParser;
 
-import java.util.Stack;
-
 public class SingleTagLikeParser extends TagLikeParser {
 
     private final Format format;
@@ -20,7 +18,7 @@ public class SingleTagLikeParser extends TagLikeParser {
         int pos = 0;
 
         while (true) {
-            var tag = this.format.find(value, pos, provider, context);
+            var tag = this.format.findFirst(value, pos, provider, context);
             if (tag == null) {
                 context.addNode(new LiteralNode(value.substring(pos)));
                 break;

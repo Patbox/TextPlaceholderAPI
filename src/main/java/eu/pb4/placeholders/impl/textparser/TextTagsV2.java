@@ -126,8 +126,8 @@ public final class TextTagsV2 {
                     "special",
                     false,
                     (nodes, data, parser) -> {
-                        var lines = data.split(":");
-                        if (lines.length > 0) {
+                        var lines = SimpleArguments.split(data, ':');
+                        if (!lines.isEmpty()) {
                             List<TextNode> textList = new ArrayList<>();
                             boolean skipped = false;
                             for (String part : lines) {
@@ -135,10 +135,10 @@ public final class TextTagsV2 {
                                     skipped = true;
                                     continue;
                                 }
-                                textList.add(parser.parseNode(SimpleArguments.unwrap(part)));
+                                textList.add(parser.parseNode(part));
                             }
 
-                            return TranslatedNode.of(SimpleArguments.unwrap(lines[0]), textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.of(lines.get(0), textList.toArray(TextParserImpl.CASTER));
                         }
                         return TextNode.empty();
                     })
@@ -152,8 +152,8 @@ public final class TextTagsV2 {
                     "special",
                     false,
                     (nodes, data, parser) -> {
-                        var lines = data.split(":");
-                        if (lines.length > 1) {
+                        var lines = SimpleArguments.split(data, ':');
+                        if (lines.size() > 1) {
                             List<TextNode> textList = new ArrayList<>();
                             int skipped = 0;
                             for (String part : lines) {
@@ -161,10 +161,10 @@ public final class TextTagsV2 {
                                     skipped++;
                                     continue;
                                 }
-                                textList.add(parser.parseNode(SimpleArguments.unwrap(part)));
+                                textList.add(parser.parseNode(part));
                             }
 
-                            var out = TranslatedNode.ofFallback(SimpleArguments.unwrap(lines[0]), SimpleArguments.unwrap(lines[1]), textList.toArray(TextParserImpl.CASTER));
+                            var out = TranslatedNode.ofFallback(lines.get(0), lines.get(1), textList.toArray(TextParserImpl.CASTER));
                             return out;
                         }
                         return TextNode.empty();
@@ -183,11 +183,11 @@ public final class TextTagsV2 {
         {
             TextParserV2.registerDefault(TextParserV2.TextTag.enclosing("click", "click_action", false,
                     (nodes, data, parser) -> {
-                        String[] lines = data.split(":", 2);
-                        if (lines.length > 1) {
+                        var lines = SimpleArguments.split(data, ':');
+                        if (lines.size() > 1) {
                             for (ClickEvent.Action action : ClickEvent.Action.values()) {
-                                if (action.asString().equals(SimpleArguments.unwrap(lines[0]))) {
-                                    return new ClickActionNode(nodes, action, new LiteralNode(SimpleArguments.unwrap(lines[1])));
+                                if (action.asString().equals(lines.get(0))) {
+                                    return new ClickActionNode(nodes, action, new LiteralNode(lines.get(1)));
                                 }
                             }
                         }

@@ -18,6 +18,9 @@ import java.util.Map;
 import java.util.function.Function;
 
 /**
+ * Original parser implementing Simple Text Format
+ * <a href="https://placeholders.pb4.eu/user/text-format/">Format documentation</a>
+ * <p>
  * Regex-based text parsing implementation. Should be always used first.
  * Loosely based on MiniMessage, with some degree of compatibility with it.
  *

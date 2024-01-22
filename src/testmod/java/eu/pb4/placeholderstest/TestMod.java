@@ -226,7 +226,11 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var form = context.getArgument("text", String.class);
-            Text text2 = NodeParser.merge(TextParserV2.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER).parseText(form, PlaceholderContext.of(player).asParserContext());
+            Text text2 = NodeParser.builder()
+                    .globalPlaceholders()
+                    .simplifiedTextFormat(false)
+                    .build()
+                    .parseText(form, PlaceholderContext.of(player).asParserContext());
             player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2)), false);
             player.sendMessage(text2, false);
         } catch (Exception e) {

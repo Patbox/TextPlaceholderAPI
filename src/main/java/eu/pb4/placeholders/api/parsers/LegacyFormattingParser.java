@@ -12,9 +12,7 @@ import it.unimi.dsi.fastutil.chars.Char2ObjectOpenHashMap;
 import net.minecraft.text.TextColor;
 import net.minecraft.util.Formatting;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Parser that can read legacy (and legacy like) format and convert it into TextNodes
@@ -31,6 +29,14 @@ public class LegacyFormattingParser implements NodeParser {
         for (var formatting : allowedFormatting) {
             this.map.put(formatting.getCode(), formatting);
         }
+    }
+
+    public boolean allowRGB() {
+        return allowRgb;
+    }
+
+    public Collection<Formatting> formatting() {
+        return Collections.unmodifiableCollection(this.map.values());
     }
 
     @Override

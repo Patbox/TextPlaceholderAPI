@@ -8,6 +8,8 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
+import eu.pb4.placeholders.api.parsers.format.MultiCharacterFormat;
+import eu.pb4.placeholders.api.parsers.format.SingleCharacterFormat;
 import eu.pb4.placeholders.impl.placeholder.PlaceholderNode;
 import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
@@ -21,14 +23,15 @@ import java.util.Map;
 import java.util.Stack;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 @ApiStatus.Experimental
-public abstract class TagLikeParser implements NodeParser {
-    public static final Format TAGS = new Format('<', '>', ' ');
-    public static final Format TAGS_LEGACY = new Format('<', '>', ':');
-    public static final Format PLACEHOLDER = new Format('%', '%', ' ');
-    public static final Format PLACEHOLDER_ALTERNATIVE = new Format('{', '}', ' ');
-    public static final Format PLACEHOLDER_USER = new Format("${", "}", "");
+public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
+    public static final Format TAGS = Format.of('<', '>', ' ');
+    public static final Format TAGS_LEGACY = Format.of('<', '>', ':');
+    public static final Format PLACEHOLDER = Format.of('%', '%', ' ');
+    public static final Format PLACEHOLDER_ALTERNATIVE = Format.of('{', '}', ' ');
+    public static final Format PLACEHOLDER_USER = Format.of("${", "}", "");
     private static final TextNode[] EMPTY = new TextNode[0];
 
     public static TagLikeParser of(Format format, Provider provider) {
@@ -37,6 +40,10 @@ public abstract class TagLikeParser implements NodeParser {
 
     public static TagLikeParser placeholder(Format format, ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter placeholders) {
         return new SingleTagLikeParser(format, Provider.placeholder(contextKey, placeholders));
+    }
+
+    public static TagLikeParser direct(Format format, Function<String, @Nullable TextNode> placeholders) {
+        return new SingleTagLikeParser(format, Provider.direct(placeholders));
     }
 
     public static TagLikeParser of(Pair<Format, Provider>... formatsAndProviders) {
@@ -79,6 +86,11 @@ public abstract class TagLikeParser implements NodeParser {
 
     protected abstract void handleLiteral(String value, Context context);
 
+    @Override
+    public TagLikeParser asTagLikeParser() {
+        return this;
+    }
+
     public interface Provider {
         static Provider placeholder(ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter placeholders) {
             return new Provider() {
@@ -91,6 +103,23 @@ public abstract class TagLikeParser implements NodeParser {
                 public void handleTag(String id, String argument, Context context) {
                     context.addNode(new PlaceholderNode(contextKey, id, placeholders,
                             placeholders.isContextOptional(), argument != null && !argument.isEmpty() ? argument : null));
+                }
+            };
+        }
+
+        static Provider direct(Function<String, @Nullable TextNode> function) {
+            return new Provider() {
+                @Override
+                public boolean isValidTag(String tag, Context context) {
+                    return function.apply(tag) != null;
+                }
+
+                @Override
+                public void handleTag(String id, String argument, Context context) {
+                    var x = function.apply(id);
+                    if (x != null) {
+                        context.addNode(x);
+                    }
                 }
             };
         }
@@ -139,10 +168,30 @@ public abstract class TagLikeParser implements NodeParser {
                 return;
             }
 
-            while (true) {
+            while (this.stack.size() > 1) {
                 var x = this.stack.pop();
                 this.stack.peek().nodes.add(x.collapse(this.parser));
                 if (x.id.equals(id)) {
+                    return;
+                }
+            }
+        }
+
+        public void pop(Predicate<String> stopPredicate) {
+            while (this.stack.size() > 1) {
+                if (stopPredicate.test(this.stack.peek().id)) {
+                    return;
+                }
+                var x = this.stack.pop();
+                this.stack.peek().nodes.add(x.collapse(this.parser));
+            }
+        }
+
+        public void popInclusive(Predicate<String> stopPredicate) {
+            while (this.stack.size() > 1) {
+                var x = this.stack.pop();
+                this.stack.peek().nodes.add(x.collapse(this.parser));
+                if (stopPredicate.test(x.id)) {
                     return;
                 }
             }
@@ -219,127 +268,31 @@ public abstract class TagLikeParser implements NodeParser {
         }
     }
 
-    public record Format(char[] start, char[] end, char[] argument, char[] argumentWrappers) {
-        public Format(char start, char end, char argument) {
-            this(new char[]{start}, new char[]{end}, new char[]{argument}, new char[]{'"', '\'', '`'});
-        }
-
-        public Format(String start, String end, String argument) {
-            this(start.toCharArray(), end.toCharArray(), argument.toCharArray(), new char[]{'"', '\'', '`'});
-        }
-
-        public Format(String start, String end, String argument, String argumentWrappers) {
-            this(start.toCharArray(), end.toCharArray(), argument.toCharArray(), argumentWrappers.toCharArray());
-        }
-
-        @Nullable
-        public TagInfo find(String string, int start, Provider provider, Context context) {
-            int maxLength = string.length() - this.start.length + this.end.length;
-            main:
+    public interface Format {
+        default @Nullable Tag findFirst(String string, int start, Provider provider, Context context) {
+            int maxLength = string.length();
             for (int i = start; i < maxLength; i++) {
-                if (string.charAt(i) == '\\') {
-                    continue;
-                }
-
-                for (int a = 0; a < this.start.length; a++) {
-                    var charc = string.charAt(i + a);
-                    if (charc != this.start[a]) {
-                        continue main;
-                    }
-                }
-
-                String id = null;
-                String argument = "";
-
-                char wrapper = 0;
-                var builder = new StringBuilder();
-                validationLoop:
-                for (int b = i + 1; b < maxLength; b++) {
-                    var curr = string.charAt(b);
-                    var matched = true;
-                    boolean isArgument = false;
-
-                    if (wrapper != 0) {
-                        if (curr == wrapper) {
-                            wrapper = 0;
-                        }
-
-                        builder.append(curr);
-                        continue;
-                    }
-
-                    if (curr == '\\') {
-                        if (b + 1 < maxLength) {
-                            b++;
-                            builder.append(string.charAt(b));
-                        }
-
-                        continue;
-                    }
-
-                    if (id != null) {
-                        for (char argumentWrapper : this.argumentWrappers) {
-                            if (curr == argumentWrapper) {
-                                builder.append(curr);
-                                wrapper = curr;
-                                continue validationLoop;
-                            }
-                        }
-                    }
-
-                    if (id == null && this.argument.length != 0) {
-                        isArgument = true;
-                        for (int a = 0; a < this.argument.length; a++) {
-                            var charc = string.charAt(b + a);
-                            if (charc != this.argument[a]) {
-                                matched = false;
-                                isArgument = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    boolean isEnd = false;
-                    if (!isArgument) {
-                        matched = true;
-                        isEnd = true;
-                        for (int a = 0; a < this.end.length; a++) {
-                            var charc = string.charAt(b + a);
-                            if (charc != this.end[a]) {
-                                matched = false;
-                                isEnd = false;
-                                break;
-                            }
-                        }
-                    }
-
-                    if (matched) {
-                        var str = builder.toString();
-                        if (id == null) {
-                            if (provider.isValidTag(str, context)) {
-                                id = str;
-                                builder = new StringBuilder();
-                                if (!isEnd) {
-                                    continue;
-                                }
-                            } else {
-                                continue main;
-                            }
-                        } else {
-                            argument = str;
-                        }
-
-                        return new TagInfo(i, b + this.end.length, id, argument);
-                    }
-
-                    builder.append(curr);
+                var x = findAt(string, start, provider, context);
+                if (x != null) {
+                    return x;
                 }
             }
-
             return null;
         }
-    }
 
-    protected record TagInfo(int start, int end, String id, String argument) {
+        @Nullable Tag findAt(String string, int start, Provider provider, Context context);
+
+        record Tag(int start, int end, String id, String argument) {}
+
+        static Format of(char start, char end) {
+            return new SingleCharacterFormat(start, end);
+        }
+
+        static Format of(char start, char end, char argumentSplitter) {
+            return new SingleCharacterFormat(start, end, argumentSplitter);
+        }
+        static Format of(String start, String end, String argumentSplitter) {
+            return new MultiCharacterFormat(start, end, argumentSplitter);
+        }
     }
 }

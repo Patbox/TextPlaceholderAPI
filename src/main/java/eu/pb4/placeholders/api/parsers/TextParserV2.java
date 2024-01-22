@@ -13,15 +13,18 @@ import java.util.*;
 import java.util.function.Function;
 
 /**
- * Text parsing implementation. Should be used first.
- * Loosely based on MiniMessage, with some degree of compatibility with it.
+ * Parser implementing Simplified Text Format.
+ * <a href="https://placeholders.pb4.eu/user/text-format/">Format documentation</a>
  */
 public class TextParserV2 implements NodeParser, TagLikeWrapper {
     private final TagLikeParser parser = new SingleTagLikeParser(TagLikeParser.TAGS_LEGACY, new TagLikeParser.Provider() {
         @Override
         public boolean isValidTag(String tag, TagLikeParser.Context context) {
             var peek = context.peekId();
-            return tag.equals("r") || tag.equals("reset") || tag.startsWith("#") || TextParserV2.this.getTag(tag) != null || tag.equals("/") || (peek != null && tag.equals("/" + peek));
+            return tag.equals("r") || tag.equals("reset")
+                    || tag.startsWith("#")
+                    || TextParserV2.this.getTag(tag) != null
+                    || tag.equals("/") || (peek != null && tag.equals("/" + peek));
         }
 
         @Override
