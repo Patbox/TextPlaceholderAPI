@@ -1,6 +1,7 @@
 package eu.pb4.placeholders.api.parsers;
 
 import com.google.common.collect.ImmutableList;
+import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.node.EmptyNode;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
@@ -24,7 +25,7 @@ import java.util.function.Function;
  * Regex-based text parsing implementation. Should be always used first.
  * Loosely based on MiniMessage, with some degree of compatibility with it.
  *
- * @Deprecated Replaced with {@link TextParserV2}
+ * @Deprecated Replaced with {@link TagParser} using Legacy methods/fields
  */
 @Deprecated
 public class TextParserV1 implements NodeParser {
@@ -140,10 +141,10 @@ public class TextParserV1 implements NodeParser {
         }
 
 
-        public static TextTag from(TextParserV2.TextTag tag) {
+        public static TextTag from(eu.pb4.placeholders.api.parsers.tag.TextTag tag) {
             return new TextTag(tag.name(), tag.aliases(), tag.type(), tag.userSafe(), tag.selfContained()
-                    ? TagNodeBuilder.selfClosing((a, b) -> tag.nodeCreator().createTextNode(GeneralUtils.CASTER, a, b))
-                    : TagNodeBuilder.wrapping(tag.nodeCreator()::createTextNode));
+                    ? TagNodeBuilder.selfClosing((a, b) -> tag.nodeCreator().createTextNode(GeneralUtils.CASTER, StringArgs.ordered(a, ':'), b))
+                    : TagNodeBuilder.wrapping((a, b, c) -> tag.nodeCreator().createTextNode(a, StringArgs.ordered(b, ':'), c)));
         }
     }
 

@@ -17,17 +17,8 @@ public class SingleTagLikeParser extends TagLikeParser {
     protected void handleLiteral(String value, Context context) {
         int pos = 0;
 
-        while (true) {
-            var tag = this.format.findFirst(value, pos, provider, context);
-            if (tag == null) {
-                context.addNode(new LiteralNode(value.substring(pos)));
-                break;
-            } else if (tag.start() != 0 && tag.start() != pos) {
-                context.addNode(new LiteralNode(value.substring(pos, tag.start())));
-            }
-            pos = tag.end();
-
-            this.provider.handleTag(tag.id(), tag.argument(), context);
+        while (pos != -1) {
+            pos = this.handleTag(value, pos, this.format.findFirst(value, pos, provider, context), provider, context);
         }
     }
 

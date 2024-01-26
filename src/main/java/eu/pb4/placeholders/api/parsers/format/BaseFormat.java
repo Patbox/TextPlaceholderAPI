@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface BaseFormat extends TagLikeParser.Format {
     char[] DEFAULT_ARGUMENT_WRAPPER = new char[]{'"', '\'', '`'};
+    char[] LEGACY_ARGUMENT_WRAPPER = new char[]{'\''};
 
     boolean matchesStart(String string, int index);
 

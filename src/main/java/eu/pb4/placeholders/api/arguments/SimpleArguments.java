@@ -1,5 +1,7 @@
 package eu.pb4.placeholders.api.arguments;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -72,11 +74,11 @@ public class SimpleArguments {
         return list;
     }
 
-    public static boolean bool(String arg) {
+    public static boolean bool(@Nullable String arg) {
         return bool(arg, false);
     }
-    public static boolean bool(String arg, boolean defaultBool) {
-        if (arg.isBlank()) {
+    public static boolean bool(@Nullable String arg, boolean defaultBool) {
+        if (arg == null || arg.isBlank()) {
             return defaultBool;
         }
 

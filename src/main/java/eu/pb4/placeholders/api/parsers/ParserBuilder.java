@@ -2,14 +2,13 @@ package eu.pb4.placeholders.api.parsers;
 
 import eu.pb4.placeholders.api.*;
 import eu.pb4.placeholders.api.node.TextNode;
+import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
 import net.minecraft.util.Formatting;
-import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class ParserBuilder {
     private final Map<TagLikeParser.Format, TagLikeParser.Provider> tagLike = new HashMap<>();
@@ -17,6 +16,10 @@ public class ParserBuilder {
     private final List<Formatting> legacyFormatting = new ArrayList<>();
     private boolean hasLegacy = false;
     private boolean legacyRGB = false;
+    private boolean simplifiedTextFormat;
+    private boolean quickText;
+    private boolean safeOnly;
+    private TagRegistry customTagRegistry;
 
     public ParserBuilder globalPlaceholders() {
         return add(Placeholders.DEFAULT_PLACEHOLDER_PARSER);
@@ -38,19 +41,24 @@ public class ParserBuilder {
         return customTags(format, TagLikeParser.Provider.direct(function));
     }
 
-    public ParserBuilder simplifiedTextFormat(boolean safe) {
-        return add(safe ? TextParserV2.SAFE : TextParserV2.DEFAULT);
+    public ParserBuilder quickText() {
+        this.quickText = true;
+        return this;
     }
 
-    public ParserBuilder simplifiedTextFormat(Predicate<TextParserV2.TextTag> predicate) {
-        var x = new TextParserV2();
+    public ParserBuilder simplifiedTextFormat() {
+        this.simplifiedTextFormat = true;
+        return this;
+    }
 
-        for (var t : TextParserV2.DEFAULT.getTags()) {
-            if (predicate.test(t)) {
-                x.register(t);
-            }
-        }
-        return add(x);
+    public ParserBuilder requireSafe() {
+        this.safeOnly = true;
+        return this;
+    }
+
+    public ParserBuilder customTagRegistry(TagRegistry registry) {
+        this.customTagRegistry = registry;
+        return this;
     }
 
     public ParserBuilder markdown() {
@@ -114,6 +122,17 @@ public class ParserBuilder {
         if (!this.tagLike.isEmpty()) {
             list.add(TagLikeParser.of(this.tagLike));
         }
+
+        var reg = this.customTagRegistry != null ? this.customTagRegistry : this.safeOnly ? TagRegistry.SAFE : TagRegistry.DEFAULT;
+
+        if (this.quickText && this.simplifiedTextFormat) {
+            list.add(TagParser.createLenient(reg));
+        } else if (this.quickText) {
+            list.add(TagParser.create(reg));
+        } else if (this.simplifiedTextFormat) {
+            list.add(TagParser.createLenient(reg));
+        }
+
         list.addAll(this.parserList);
 
         if (this.hasLegacy) {

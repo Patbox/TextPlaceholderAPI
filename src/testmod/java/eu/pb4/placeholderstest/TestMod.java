@@ -35,9 +35,9 @@ public class TestMod implements ModInitializer {
 
         for (var pair : List.of(
                 Pair.of(TextParserV1.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER),
-                Pair.of(TextParserV2.DEFAULT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
+                Pair.of(TagParser.DEFAULT_LEGACY, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
                         TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER))),
-                Pair.of(NodeParser.merge(TextParserV2.DEFAULT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
+                Pair.of(NodeParser.merge(TagParser.DEFAULT_LEGACY, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
                         TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER))), NodeParser.NOOP)
         )) {
             player.sendMessage(Text.literal("Parser: " + pair), false);
@@ -122,7 +122,7 @@ public class TestMod implements ModInitializer {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var form = context.getArgument("text", String.class);
             Text text = TextParserV1.DEFAULT.parseNode(form).toText();
-            Text text2 = TextParserV2.DEFAULT.parseNode(form).toText();
+            Text text2 = TagParser.DEFAULT_LEGACY.parseNode(form).toText();
             player.sendMessage(Text.literal("v1"), false);
             player.sendMessage(text, false);
             player.sendMessage(Text.literal("v2"), false);
@@ -138,7 +138,7 @@ public class TestMod implements ModInitializer {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var form = context.getArgument("text", String.class);
             Text text = TextParserV1.DEFAULT.parseNode(form).toText();
-            Text text2 = TextParserV2.DEFAULT.parseNode(form).toText();
+            Text text2 = TagParser.DEFAULT_LEGACY.parseNode(form).toText();
             player.sendMessage(Text.literal("v1"), false);
             player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
@@ -226,9 +226,10 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var form = context.getArgument("text", String.class);
+
             Text text2 = NodeParser.builder()
                     .globalPlaceholders()
-                    .simplifiedTextFormat(false)
+                    .simplifiedTextFormat()
                     .build()
                     .parseText(form, PlaceholderContext.of(player).asParserContext());
             player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2)), false);
@@ -240,22 +241,18 @@ public class TestMod implements ModInitializer {
     }
 
     private static int test6x(CommandContext<ServerCommandSource> context) {
-        /*try {
+        try {
             ServerPlayerEntity player = context.getSource().getPlayer();
-            Text text = Placeholders.parseTextCustom(
-                    TextParser.parse(context.getArgument("text", String.class)),
-                    player,
-                    Map.of(new Identifier("player"), (ctx) -> PlaceholderResult.value(Text.literal("").append(player.getName()).setStyle(Style.EMPTY.withColor(TextColor.parse(ctx.getArgument()))))), Placeholders.ALT_PLACEHOLDER_PATTERN_CUSTOM);
-
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
-
-            // Never use it, pls
-            player.sendMessage(Text.literal(eu.pb4.placeholders.old.util.TextParserUtils.convertToString(text)), false);
-
-            player.sendMessage(text, false);
+            var form = context.getArgument("text", String.class);
+            player.sendMessage(Text.literal("------------------------------"), false);
+            player.sendMessage(Text.literal("Input.   | " + form), false);
+            player.sendMessage(Text.literal("STF-V1 | ").append(TextParserV1.DEFAULT.parseText(form, ParserContext.of())), false);
+            player.sendMessage(Text.literal("STF-V2 | ").append(TagParser.DEFAULT_LEGACY.parseText(form, ParserContext.of())), false);
+            player.sendMessage(Text.literal("STF+QT | ").append(TagParser.DEFAULT_LENIENT.parseText(form, ParserContext.of())), false);
+            player.sendMessage(Text.literal("QT       | ").append(TagParser.DEFAULT.parseText(form, ParserContext.of())), false);
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
         return 0;
     }
 

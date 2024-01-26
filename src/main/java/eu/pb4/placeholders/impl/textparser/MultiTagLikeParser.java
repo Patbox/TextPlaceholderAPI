@@ -16,7 +16,7 @@ public class MultiTagLikeParser extends TagLikeParser {
     protected void handleLiteral(String value, Context context) {
         int pos = 0;
 
-        while (true) {
+        while (pos != -1) {
             Provider provider = null;
             Format.Tag tag = null;
 
@@ -35,16 +35,7 @@ public class MultiTagLikeParser extends TagLikeParser {
                     break;
                 }
             }
-
-            if (tag == null) {
-                context.addNode(new LiteralNode(value.substring(pos)));
-                break;
-            } else if (tag.start() != 0 && tag.start() != pos) {
-                context.addNode(new LiteralNode(value.substring(pos, tag.start())));
-            }
-            pos = tag.end();
-
-            provider.handleTag(tag.id(), tag.argument(), context);
+            pos = this.handleTag(value, pos, tag, provider, context);
         }
     }
 

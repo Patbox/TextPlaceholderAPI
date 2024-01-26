@@ -2,10 +2,13 @@ package eu.pb4.placeholders.impl.textparser;
 
 import com.google.gson.JsonParser;
 import com.mojang.serialization.JsonOps;
+import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
-import eu.pb4.placeholders.api.parsers.TextParserV2;
+import eu.pb4.placeholders.api.parsers.tag.NodeCreator;
+import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
+import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
@@ -14,13 +17,14 @@ import net.minecraft.registry.Registries;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.Util;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
 import java.util.function.Function;
 
 @ApiStatus.Internal
-public final class TextTagsV2 {
+public final class BuiltinTags {
     public static void register() {
         {
             Map<String, List<String>> aliases = new HashMap<>();
@@ -34,8 +38,8 @@ public final class TextTagsV2 {
                     continue;
                 }
 
-                TextParserV2.registerDefault(
-                        TextParserV2.TextTag.enclosing(
+                TagRegistry.registerDefault(
+                        TextTag.enclosing(
                                 formatting.getName(),
                                 aliases.containsKey(formatting.getName()) ? aliases.get(formatting.getName()) : List.of(),
                                 "color",
@@ -47,98 +51,97 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "bold",
                             List.of("b"),
                             "formatting",
                             true,
-                            TextParserV2.NodeCreator.bool(BoldNode::new)
+                            NodeCreator.bool(BoldNode::new)
                     )
             );
 
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "underline",
                             List.of("underlined", "u"),
                             "formatting",
                             true,
-                            TextParserV2.NodeCreator.bool(UnderlinedNode::new)
+                            NodeCreator.bool(UnderlinedNode::new)
                     )
             );
 
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "strikethrough", List.of("st"),
                             "formatting",
                             true,
-                            TextParserV2.NodeCreator.bool(StrikethroughNode::new)
+                            NodeCreator.bool(StrikethroughNode::new)
                     )
             );
 
 
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "obfuscated",
                             List.of("obf", "matrix"),
                             "formatting",
                             true,
-                            TextParserV2.NodeCreator.bool(ObfuscatedNode::new)
+                            NodeCreator.bool(ObfuscatedNode::new)
                     )
             );
 
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "italic",
                             List.of("i", "em"),
                             "formatting",
                             true,
-                            TextParserV2.NodeCreator.bool(ItalicNode::new)
+                            NodeCreator.bool(ItalicNode::new)
                     )
             );
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "color",
                             List.of("colour", "c"),
                             "color",
                             true,
-                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(SimpleArguments.unwrap(data)).get().left().orElse(null))
+                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(data.get("value", 0)).get().left().orElse(null))
                     )
             );
         }
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "font",
                             "other_formatting",
                             false,
-                            (nodes, data, parser) -> new FontNode(nodes, Identifier.tryParse(SimpleArguments.unwrap(data)))
+                            (nodes, data, parser) -> new FontNode(nodes, Identifier.tryParse(data.get("value", 0)))
                     )
             );
         }
         {
-            TextParserV2.registerDefault(TextParserV2.TextTag.self(
+            TagRegistry.registerDefault(TextTag.self(
                     "lang",
                     List.of("translate"),
                     "special",
                     false,
                     (nodes, data, parser) -> {
-                        var lines = SimpleArguments.split(data, ':');
-                        if (!lines.isEmpty()) {
+                        if (!data.isEmpty()) {
                             List<TextNode> textList = new ArrayList<>();
-                            boolean skipped = false;
-                            for (String part : lines) {
-                                if (!skipped) {
-                                    skipped = true;
-                                    continue;
+                            int i = 1;
+                            while (true) {
+                                var part = data.get("" + i, i);
+                                if (part == null) {
+                                    break;
                                 }
                                 textList.add(parser.parseNode(part));
                             }
 
-                            return TranslatedNode.of(lines.get(0), textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.of(data.get("key", 0), textList.toArray(TextParserImpl.CASTER));
                         }
                         return TextNode.empty();
                     })
@@ -146,25 +149,26 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(TextParserV2.TextTag.self(
+            TagRegistry.registerDefault(TextTag.self(
                     "lang_fallback",
                     List.of("translatef", "langf", "translate_fallback"),
                     "special",
                     false,
                     (nodes, data, parser) -> {
-                        var lines = SimpleArguments.split(data, ':');
-                        if (lines.size() > 1) {
+                        if (!data.isEmpty()) {
                             List<TextNode> textList = new ArrayList<>();
-                            int skipped = 0;
-                            for (String part : lines) {
-                                if (skipped < 2) {
-                                    skipped++;
-                                    continue;
+                            int i = 1;
+                            while (true) {
+                                var part = data.get("" + i, i + 1);
+                                if (part == null) {
+                                    break;
                                 }
                                 textList.add(parser.parseNode(part));
                             }
 
-                            var out = TranslatedNode.ofFallback(lines.get(0), lines.get(1), textList.toArray(TextParserImpl.CASTER));
+                            var out = TranslatedNode.ofFallback(data.get("key", 0, ""),
+                                    data.get("fallback", 1, ""),
+                                    textList.toArray(TextParserImpl.CASTER));
                             return out;
                         }
                         return TextNode.empty();
@@ -173,21 +177,20 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(TextParserV2.TextTag.self("keybind",
+            TagRegistry.registerDefault(TextTag.self("keybind",
                     List.of("key"),
                     "special",
                     false,
-                    (data) -> new KeybindNode(SimpleArguments.unwrap(data))));
+                    (data) -> new KeybindNode(data.get("value", 0))));
         }
 
         {
-            TextParserV2.registerDefault(TextParserV2.TextTag.enclosing("click", "click_action", false,
+            TagRegistry.registerDefault(TextTag.enclosing("click", "click_action", false,
                     (nodes, data, parser) -> {
-                        var lines = SimpleArguments.split(data, ':');
-                        if (lines.size() > 1) {
+                        if (!data.isEmpty()) {
                             for (ClickEvent.Action action : ClickEvent.Action.values()) {
-                                if (action.asString().equals(lines.get(0))) {
-                                    return new ClickActionNode(nodes, action, new LiteralNode(lines.get(1)));
+                                if (action.asString().equals(data.get("type", 0))) {
+                                    return new ClickActionNode(nodes, action, new LiteralNode(data.get("value", 1, "")));
                                 }
                             }
                         }
@@ -196,15 +199,15 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "run_command",
                             List.of("run_cmd"),
                             "click_action",
                             false,
                             (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, new LiteralNode(SimpleArguments.unwrap(data)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, new LiteralNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -213,8 +216,8 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "suggest_command",
                             List.of("cmd"),
                             "click_action",
@@ -222,7 +225,7 @@ public final class TextTagsV2 {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(SimpleArguments.unwrap(data)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -231,15 +234,15 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "open_url",
                             List.of("url"),
                             "click_action",
                             false, (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, new LiteralNode(SimpleArguments.unwrap(data)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, new LiteralNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -248,8 +251,8 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "copy_to_clipboard",
                             List.of("copy"),
                             "click_action",
@@ -257,7 +260,7 @@ public final class TextTagsV2 {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, new LiteralNode(SimpleArguments.unwrap(data)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, new LiteralNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -266,73 +269,72 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "change_page",
                             List.of("page"),
                             "click_action",
                             true, (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, new LiteralNode(SimpleArguments.unwrap(data)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, new LiteralNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }));
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "hover",
                             "hover_event",
                             true,
                             (nodes, data, parser) -> {
-                                var lines = SimpleArguments.split(data, ':');
                                 try {
-                                    if (lines.size() > 1) {
+                                    if (!data.isEmpty()) {
                                         // Todo: wtf
                                         HoverEvent.Action<?> action = HoverEvent.Action.CODEC
-                                                .parse(JsonOps.INSTANCE, JsonParser.parseString('"' + lines.get(0).toLowerCase(Locale.ROOT) + '"')).get().left().orElse(null);
+                                                .parse(JsonOps.INSTANCE, JsonParser.parseString('"' + data.get("type", 0, "").toLowerCase(Locale.ROOT) + '"')).get().left().orElse(null);
                                         if (action == HoverEvent.Action.SHOW_TEXT) {
-                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(lines.get(1)));
+                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(
+                                                    data.get("value", 1, "")
+                                            ));
                                         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
-                                            if (lines.size() == 4) {
-                                                return new HoverNode<>(nodes,
-                                                        HoverNode.Action.ENTITY,
-                                                        new HoverNode.EntityNodeContent(
-                                                                EntityType.get(lines.get(1)).orElse(EntityType.PIG),
-                                                                UUID.fromString(lines.get(2)),
-                                                                new ParentNode(parser.parseNode(lines.get(3)))
-                                                        ));
-                                            }
+                                            return new HoverNode<>(nodes,
+                                                    HoverNode.Action.ENTITY,
+                                                    new HoverNode.EntityNodeContent(
+                                                            EntityType.get(data.get("entity", 1, "")).orElse(EntityType.PIG),
+                                                            UUID.fromString(data.get("uuid", 2, Util.NIL_UUID.toString())),
+                                                            new ParentNode(parser.parseNode(data.get("name", 3, "")))
+                                                    ));
                                         } else if (action == HoverEvent.Action.SHOW_ITEM) {
                                             try {
                                                 return new HoverNode<>(nodes,
                                                         HoverNode.Action.ITEM_STACK,
-                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(lines.get(1))))
+                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(data.get("value", 1, ""))))
                                                 );
                                             } catch (Throwable e) {
-                                                if (lines.size() > 1) {
-                                                    var stack = Registries.ITEM.get(Identifier.tryParse(lines.get(1))).getDefaultStack();
+                                                var stack = Registries.ITEM.get(Identifier.tryParse(data.get("item", 1, ""))).getDefaultStack();
 
-                                                    if (lines.size() > 2) {
-                                                        stack.setCount(Integer.parseInt(lines.get(2)));
-                                                    }
-
-                                                    if (lines.size() > 3) {
-                                                        stack.setNbt(StringNbtReader.parse(SimpleArguments.unwrap(lines.get(3))));
-                                                    }
-
-                                                    return new HoverNode<>(nodes,
-                                                            HoverNode.Action.ITEM_STACK,
-                                                            new HoverEvent.ItemStackContent(stack)
-                                                    );
+                                                var count = data.get("count", 2);
+                                                if (count != null) {
+                                                    stack.setCount(Integer.parseInt(count));
                                                 }
+
+                                                var nbt = data.get("nbt", 3);
+                                                if (nbt != null) {
+                                                    stack.setNbt(StringNbtReader.parse(nbt));
+                                                }
+
+                                                return new HoverNode<>(nodes,
+                                                        HoverNode.Action.ITEM_STACK,
+                                                        new HoverEvent.ItemStackContent(stack)
+                                                );
                                             }
                                         } else {
-                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(SimpleArguments.unwrap(data)));
+                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", 0)));
                                         }
                                     } else {
-                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(SimpleArguments.unwrap(data)));
+                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", 0)));
                                     }
                                 } catch (Exception e) {
                                     // Shut
@@ -342,18 +344,18 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "insert",
                             List.of("insertion"),
                             "click_action",
                             false,
-                            (nodes, data, parser) -> new InsertNode(nodes, new LiteralNode(SimpleArguments.unwrap(data)))));
+                            (nodes, data, parser) -> new InsertNode(nodes, new LiteralNode(data.get("value", 0)))));
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "clear_color",
                             List.of("uncolor", "colorless"),
                             "special",
@@ -364,44 +366,50 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "rainbow",
                             List.of("rb"),
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                var val = SimpleArguments.split(data, ':');
                                 float freq = 1;
                                 float saturation = 1;
                                 float offset = 0;
                                 int overriddenLength = -1;
 
-                                if (!val.isEmpty()) {
+
+                                var freqs = data.get("frequency", 0, data.get("freq", data.get("f")));
+                                if (freqs != null) {
                                     try {
-                                        freq = Float.parseFloat(val.get(0));
+                                        freq = Float.parseFloat(freqs);
                                     } catch (Exception e) {
                                         // No u
                                     }
                                 }
-                                if (val.size() >= 2) {
+                                var sats = data.get("saturation", 1, data.get("sat", data.get("s")));
+
+                                if (sats != null) {
                                     try {
-                                        saturation = Float.parseFloat(val.get(1));
+                                        saturation = Float.parseFloat(sats);
                                     } catch (Exception e) {
                                         // Idc
                                     }
                                 }
-                                if (val.size() >= 3) {
+                                var offs = data.get("offset", 2, data.get("off", data.get("o")));
+                                if (offs != null) {
                                     try {
-                                        offset = Float.parseFloat(val.get(2));
+                                        offset = Float.parseFloat(offs);
                                     } catch (Exception e) {
                                         // Ok float
                                     }
                                 }
 
-                                if (val.size() >= 4) {
+                                var len = data.get("length", 3, data.get("len", data.get("l")));
+
+                                if (len != null) {
                                     try {
-                                        overriddenLength = Integer.parseInt(val.get(3));
+                                        overriddenLength = Integer.parseInt(len);
                                     } catch (Exception e) {
                                         // Ok float
                                     }
@@ -417,17 +425,22 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "gradient",
                             List.of("gr"),
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                var val = SimpleArguments.split(data, ':');
                                 List<TextColor> textColors = new ArrayList<>();
-                                for (String string : val) {
-                                    TextColor.parse(string).get().ifLeft(textColors::add);
+                                int i = 0;
+                                while (true) {
+                                    var part = data.get("" + i, i);
+                                    if (part == null) {
+                                        break;
+                                    }
+
+                                    TextColor.parse(part).get().ifLeft(textColors::add);
                                 }
                                 return GradientNode.colors(textColors, nodes);
                             }
@@ -436,18 +449,24 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "hard_gradient",
                             List.of("hgr"),
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                var val = SimpleArguments.split(data, ':');
+
                                 var textColors = new ArrayList<TextColor>();
 
-                                for (String string : val) {
-                                    TextColor.parse(string).get().ifLeft(textColors::add);
+                                int i = 0;
+                                while (true) {
+                                    var part = data.get("" + i, i);
+                                    if (part == null) {
+                                        break;
+                                    }
+
+                                    TextColor.parse(part).get().ifLeft(textColors::add);
                                 }
                                 // We cannot have an empty list!
                                 if (textColors.isEmpty()) {
@@ -462,70 +481,55 @@ public final class TextTagsV2 {
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "clear",
                             "special",
                             false,
                             (nodes, data, parser) -> {
-                                var val = SimpleArguments.split(data, ':');
-
-                                return new TransformNode(nodes, getTransform(val));
+                                return new TransformNode(nodes, getTransform(data));
                             }
                     )
             );
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "score",
                             "special",
                             false, (nodes, data, parser) -> {
-                                var val = SimpleArguments.split(data, ':');
-                                if (val.size() == 2) {
-                                    return new ScoreNode(val.get(0), val.get(1));
-                                }
-                                return TextNode.empty();
+
+                                return new ScoreNode(data.get("name", 0, ""), data.get("objective", 1, ""));
                             }
                     )
             );
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "selector",
                             "special",
                             false,
                             (nodes, data, parser) -> {
-                                var lines = SimpleArguments.split(data, ':');
-                                if (lines.size() == 2) {
-                                    return new SelectorNode(lines.get(0), Optional.of(TextNode.of(lines.get(1))));
-                                } else if (lines.size() == 1) {
-                                    return new SelectorNode(lines.get(0), Optional.empty());
-                                }
-                                return TextNode.empty();
+                                var arg = data.get("separator", 1);
+
+                                return new SelectorNode(data.get("pattern", 0, "@p"), arg != null ? Optional.of(TextNode.of(arg)) : Optional.empty());
                             }
                     )
             );
         }
 
         {
-            TextParserV2.registerDefault(
-                    TextParserV2.TextTag.enclosing(
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
                             "nbt",
                             "special",
                             false, (nodes, data, parser) -> {
-                                var lines = SimpleArguments.split(data, ':');
+                                var cleanLine1 = data.get("path", 1, "");
 
-                                if (lines.size() < 3) {
-                                    return TextNode.empty();
-                                }
-
-                                var cleanLine1 = lines.get(1);
-
-                                var type = switch (lines.get(0)) {
+                                var type = switch (data.get("source", 0, "")) {
                                     case "block" -> new BlockNbtDataSource(cleanLine1);
                                     case "entity" -> new EntityNbtDataSource(cleanLine1);
                                     case "storage" -> new StorageNbtDataSource(Identifier.tryParse(cleanLine1));
@@ -536,25 +540,32 @@ public final class TextTagsV2 {
                                     return TextNode.empty();
                                 }
 
-                                Optional<TextNode> separator = lines.size() > 3 ?
-                                        Optional.of(TextNode.asSingle(parser.parseNode(lines.get(3)))) : Optional.empty();
-                                var shouldInterpret = lines.size() > 4 && SimpleArguments.bool(lines.get(4));
+                                var separ = data.get("separator", 2);
 
-                                return new NbtNode(lines.get(2), shouldInterpret, separator, type);
+                                Optional<TextNode> separator = separ != null ?
+                                        Optional.of(TextNode.asSingle(parser.parseNode(separ))) : Optional.empty();
+                                var shouldInterpret = SimpleArguments.bool(data.get("interpret", 3), false);
+
+                                return new NbtNode(cleanLine1, shouldInterpret, separator, type);
                             }
                     )
             );
         }
     }
 
-    private static Function<MutableText, Text> getTransform(List<String> val) {
+    private static Function<MutableText, Text> getTransform(StringArgs val) {
         if (val.isEmpty()) {
             return GeneralUtils.MutableTransformer.CLEAR;
         }
 
         Function<Style, Style> func = (x) -> x;
 
-        for (var arg : val) {
+        int i = 0;
+        while (true) {
+            var arg = val.get("" + i, i);
+            if (arg == null) {
+                break;
+            }
             func = func.andThen(switch (arg) {
                 case "hover" -> x -> x.withHoverEvent(null);
                 case "click" -> x -> x.withClickEvent(null);
