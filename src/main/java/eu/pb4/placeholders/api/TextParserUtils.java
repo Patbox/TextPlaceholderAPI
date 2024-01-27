@@ -6,6 +6,11 @@ import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import net.minecraft.text.Text;
 
+
+/**
+ * You should use {@link eu.pb4.placeholders.api.parsers.ParserBuilder} for stacked parsing
+ * or {@link eu.pb4.placeholders.api.parsers.TagParser} for only tags to text.
+ */
 @Deprecated
 public final class TextParserUtils {
     private TextParserUtils() {}

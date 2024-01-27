@@ -110,7 +110,5 @@ public interface BaseFormat extends TagLikeParser.Format {
 
     int endLength();
 
-    int minLength();
-
     boolean hasArgument();
 }

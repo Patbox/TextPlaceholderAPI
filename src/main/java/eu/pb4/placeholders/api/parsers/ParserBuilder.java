@@ -5,11 +5,15 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
+import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.*;
 import java.util.function.Function;
 
+/**
+ * Allows you to create stacked parser in most "correct" and compatible way.
+ */
 public class ParserBuilder {
     private final Map<TagLikeParser.Format, TagLikeParser.Provider> tagLike = new HashMap<>();
     private final List<NodeParser> parserList = new ArrayList<>();
@@ -21,66 +25,116 @@ public class ParserBuilder {
     private boolean safeOnly;
     private TagRegistry customTagRegistry;
 
+    public static ParserBuilder of() {
+        return new ParserBuilder();
+    }
+
+    /**
+     * Enables parsing of Global Placeholders (aka {@link Placeholders})
+     */
     public ParserBuilder globalPlaceholders() {
         return add(Placeholders.DEFAULT_PLACEHOLDER_PARSER);
     }
-
+    /**
+     * Enables parsing of Global Placeholders, but with a custom format
+     */
     public ParserBuilder globalPlaceholders(TagLikeParser.Format format) {
         return customTags(format, TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER));
     }
-
+    /**
+     * Enables parsing of Global Placeholder, but with a custom format and context source
+     */
     public ParserBuilder globalPlaceholders(TagLikeParser.Format format, ParserContext.Key<PlaceholderContext> contextKey) {
         return customTags(format, TagLikeParser.Provider.placeholder(contextKey, Placeholders.DEFAULT_PLACEHOLDER_GETTER));
     }
-
+    /**
+     * Enables parsing of custom placeholder with a custom format and context source
+     */
     public ParserBuilder placeholders(TagLikeParser.Format format, ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter getter) {
         return customTags(format, TagLikeParser.Provider.placeholder(contextKey, getter));
     }
-
+    /**
+     * Enables parsing of custom placeholder with a functional provider
+     */
     public ParserBuilder placeholders(TagLikeParser.Format format, Function<String, TextNode> function) {
-        return customTags(format, TagLikeParser.Provider.direct(function));
+        return customTags(format, TagLikeParser.Provider.placeholder(function));
     }
 
+    /**
+     * Enables parsing of custom, context dependent placeholders
+     */
+    public ParserBuilder placeholders(TagLikeParser.Format format, ParserContext.Key<Function<String, Text>> key) {
+        return customTags(format, TagLikeParser.Provider.placeholder(key));
+    }
+
+    /**
+     * Enables parsing of custom, context dependent placeholders
+     */
+    public ParserBuilder placeholders(TagLikeParser.Format format, Set<String> tags, ParserContext.Key<Function<String, Text>> key) {
+        return customTags(format, TagLikeParser.Provider.placeholder(tags, key));
+    }
+
+    /**
+     * Enables QuickText format.
+     */
     public ParserBuilder quickText() {
         this.quickText = true;
         return this;
     }
-
+    /**
+     * Enables Simplified Text Format.
+     */
     public ParserBuilder simplifiedTextFormat() {
         this.simplifiedTextFormat = true;
         return this;
     }
-
+    /**
+     * Forces usage of safe tags for tag parsers.
+     */
     public ParserBuilder requireSafe() {
         this.safeOnly = true;
         return this;
     }
-
+    /**
+     * Forces usage of custom registry for tag parsers.
+     */
     public ParserBuilder customTagRegistry(TagRegistry registry) {
         this.customTagRegistry = registry;
         return this;
     }
-
+    /**
+     * Enables Markdown.
+     */
     public ParserBuilder markdown() {
         return add(MarkdownLiteParserV1.ALL);
     }
-
+    /**
+     * Enables Markdown with limited formatting.
+     */
     public ParserBuilder markdown(MarkdownLiteParserV1.MarkdownFormat... formats) {
         return add(new MarkdownLiteParserV1(formats));
     }
-
+    /**
+     * Enables legacy color tags (&X) with rgb extension.
+     */
     public ParserBuilder legacyColor() {
         return add(LegacyFormattingParser.COLORS);
     }
-
+    /**
+     * Enables legacy color tags (&X).
+     */
     public ParserBuilder legacyVanillaColor() {
         return add(LegacyFormattingParser.BASE_COLORS);
     }
-
+    /**
+     * Enables all legacy formatting (&X) with rgb extension.
+     */
     public ParserBuilder legacyAll() {
         return add(LegacyFormattingParser.ALL);
     }
-
+    /**
+     * Enables all legacy formatting.
+     */
     public ParserBuilder legacy(boolean allowRGB, Formatting... formatting) {
         this.hasLegacy = true;
         this.legacyRGB = allowRGB;
@@ -88,7 +142,9 @@ public class ParserBuilder {
 
         return this;
     }
-
+    /**
+     * Adds custom tag like parser
+     */
     public ParserBuilder customTags(TagLikeParser.Format format, TagLikeParser.Provider provider) {
         this.tagLike.put(format, provider);
         return this;

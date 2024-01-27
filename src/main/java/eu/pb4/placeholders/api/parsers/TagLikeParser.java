@@ -3,9 +3,7 @@ package eu.pb4.placeholders.api.parsers;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.node.LiteralNode;
-import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.node.TranslatedNode;
+import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.api.parsers.format.MultiCharacterFormat;
@@ -14,14 +12,12 @@ import eu.pb4.placeholders.impl.placeholder.PlaceholderNode;
 import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.providers.LenientFormat;
+import net.minecraft.text.Text;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -41,8 +37,20 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
         return new SingleTagLikeParser(format, Provider.placeholder(contextKey, placeholders));
     }
 
-    public static TagLikeParser direct(Format format, Function<String, @Nullable TextNode> placeholders) {
-        return new SingleTagLikeParser(format, Provider.direct(placeholders));
+    public static TagLikeParser placeholder(Format format, Function<String, @Nullable TextNode> placeholders) {
+        return new SingleTagLikeParser(format, Provider.placeholder(placeholders));
+    }
+
+    public static TagLikeParser placeholderText(Format format, Function<String, @Nullable Text> placeholders) {
+        return new SingleTagLikeParser(format, Provider.placeholderText(placeholders));
+    }
+
+    public static TagLikeParser placeholderText(Format format, ParserContext.Key<Function<String, @Nullable Text>> key) {
+        return new SingleTagLikeParser(format, Provider.placeholder(key));
+    }
+
+    public static TagLikeParser placeholderText(Format format, Set<String> validIds, ParserContext.Key<Function<String, @Nullable Text>> key) {
+        return new SingleTagLikeParser(format, Provider.placeholder(validIds, key));
     }
 
     public static TagLikeParser of(Format format, Provider provider) {
@@ -126,7 +134,14 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
             };
         }
 
-        static Provider direct(Function<String, @Nullable TextNode> function) {
+        static Provider placeholderText(Function<String, @Nullable Text> function) {
+            return placeholder(x -> {
+                var y = function.apply(x);
+                return y != null ? new DirectTextNode(y) : null;
+            });
+        }
+
+        static Provider placeholder(Function<String, @Nullable TextNode> function) {
             return new Provider() {
                 @Override
                 public boolean isValidTag(String tag, Context context) {
@@ -139,6 +154,33 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
                     if (x != null) {
                         context.addNode(x);
                     }
+                }
+            };
+        }
+
+        static Provider placeholder(Set<String> validTags, ParserContext.Key<Function<String, Text>> key) {
+            return new Provider() {
+                @Override
+                public boolean isValidTag(String tag, Context context) {
+                    return validTags.contains(tag);
+                }
+
+                @Override
+                public void handleTag(String id, String argument, Context context) {
+                    context.addNode(new DynamicTextNode(id, key));
+                }
+            };
+        }
+        static Provider placeholder(ParserContext.Key<Function<String, Text>> key) {
+            return new Provider() {
+                @Override
+                public boolean isValidTag(String tag, Context context) {
+                    return true;
+                }
+
+                @Override
+                public void handleTag(String id, String argument, Context context) {
+                    context.addNode(new DynamicTextNode(id, key));
                 }
             };
         }
@@ -201,8 +243,29 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
             while (this.stack.size() > 1) {
                 var x = this.stack.pop();
                 this.stack.peek().nodes.add(x.collapse(this.parser));
-                if (x.id.equals(id)) {
+                if (id.equals(x.id)) {
                     return;
+                }
+            }
+        }
+
+        public void popOnly(String id) {
+            if (!contains(id)) {
+                return;
+            }
+
+            var list = new Stack<Scope>();
+
+            while (this.stack.size() > 1) {
+                var x = this.stack.pop();
+                this.stack.peek().nodes.add(x.collapse(this.parser));
+                if (id.equals(x.id)) {
+                    while (!list.isEmpty()) {
+                        this.stack.push(list.pop());
+                    }
+                    return;
+                } else {
+                    list.add(new Scope(x.id, new ArrayList<>(), x.merger));
                 }
             }
         }
@@ -226,7 +289,6 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
                 }
             }
         }
-
         @Nullable
         public String peekId() {
             return this.stack.peek().id;
@@ -315,6 +377,10 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
         }
 
         @Nullable Tag findAt(String string, int start, Provider provider, Context context);
+
+        default int index() {
+            return 0;
+        }
 
         record Tag(int start, int end, String id, String argument, @Nullable Object extra) {
             public Tag(int start, int end, String id, String argument) {

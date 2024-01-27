@@ -11,9 +11,15 @@ import eu.pb4.placeholders.impl.textparser.providers.ModernProvider;
 import java.util.function.Function;
 
 /**
- * Parser implementing QuickText and Simplified Text Format.
+ * Parser implementing QuickText and Simplified Text Format (Legacy).
  * Lenient parser can support both at the same time.
  * <a href="https://placeholders.pb4.eu/user/text-format/">Format documentation</a>
+ *
+ * To create pure Quick Text parser, you use methods without Legacy or Lenient in the name.
+ * Lenient methods/parser allow for usage of both Quick Text and Simplified Text Format at the same
+ * time, allowing for better transition between the formats.
+ * Legacy parser refers to Simplified Text Format, which while discouraged, it's still supported.
+ *
  */
 public final class TagParser implements NodeParser, TagLikeWrapper {
     private final TagRegistry registry;

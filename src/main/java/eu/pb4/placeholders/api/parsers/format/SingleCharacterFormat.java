@@ -32,8 +32,8 @@ public record SingleCharacterFormat(char start, char end, char argument, char[] 
     }
 
     @Override
-    public int minLength() {
-        return 2;
+    public int index() {
+        return -1;
     }
 
     @Override

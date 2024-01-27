@@ -52,8 +52,8 @@ public record MultiCharacterFormat(char[] start, char[] end, char[] argument, ch
     }
 
     @Override
-    public int minLength() {
-        return this.start.length + this.end.length;
+    public int index() {
+        return -this.start.length;
     }
 
     @Override

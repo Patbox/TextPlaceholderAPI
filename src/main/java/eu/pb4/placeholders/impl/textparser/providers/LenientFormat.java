@@ -34,8 +34,8 @@ public record LenientFormat() implements BaseFormat {
     }
 
     @Override
-    public int minLength() {
-        return 2;
+    public int index() {
+        return -1;
     }
 
     @Override
