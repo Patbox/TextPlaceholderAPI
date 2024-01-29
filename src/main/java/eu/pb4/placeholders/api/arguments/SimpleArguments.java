@@ -87,4 +87,34 @@ public class SimpleArguments {
             default -> false;
         };
     }
+
+    public static float floatNumber(@Nullable String arg) {
+        return floatNumber(arg, 0);
+    }
+    public static float floatNumber(@Nullable String arg, float defaultFloat) {
+        if (arg == null || arg.isBlank()) {
+            return defaultFloat;
+        }
+
+        try {
+            return Float.parseFloat(arg);
+        } catch (Exception e) {
+            return defaultFloat;
+        }
+    }
+
+    public static int intNumber(@Nullable String arg) {
+        return intNumber(arg, 0);
+    }
+    public static int intNumber(@Nullable String arg, int defaultFloat) {
+        if (arg == null || arg.isBlank()) {
+            return defaultFloat;
+        }
+
+        try {
+            return Integer.parseInt(arg);
+        } catch (Exception e) {
+            return defaultFloat;
+        }
+    }
 }

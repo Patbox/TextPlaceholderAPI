@@ -7,11 +7,11 @@ public interface BaseFormat extends TagLikeParser.Format {
     char[] DEFAULT_ARGUMENT_WRAPPER = new char[]{'"', '\'', '`'};
     char[] LEGACY_ARGUMENT_WRAPPER = new char[]{'\''};
 
-    boolean matchesStart(String string, int index);
+    int matchStart(String string, int index);
 
-    boolean matchesEnd(String string, int index);
+    int matchEnd(String string, int index);
 
-    boolean matchesArgument(String string, int index);
+    int matchArgument(String string, int index);
 
     @Override
     @Nullable
@@ -20,7 +20,9 @@ public interface BaseFormat extends TagLikeParser.Format {
             return null;
         }
 
-        if (!this.matchesStart(string, start)) {
+        var mStart = this.matchStart(string, start);
+
+        if (mStart == 0) {
             return null;
         }
 
@@ -31,10 +33,10 @@ public interface BaseFormat extends TagLikeParser.Format {
         var builder = new StringBuilder();
         int maxLengthEnd = string.length();
         validationLoop:
-        for (int b = start + 1; b < maxLengthEnd; b++) {
+        for (int b = start + mStart; b < maxLengthEnd; b++) {
             var curr = string.charAt(b);
             var matched = true;
-            boolean isArgument = false;
+            int arg = 0;
 
             if (wrapper != 0) {
                 if (curr == wrapper) {
@@ -65,20 +67,20 @@ public interface BaseFormat extends TagLikeParser.Format {
             }
 
             if (id == null && this.hasArgument()) {
-                isArgument = true;
-                if (!this.matchesArgument(string, b)) {
+                arg = this.matchArgument(string, b);
+                if (arg <= 0) {
                     matched = false;
-                    isArgument = false;
+                    arg = 0;
                 }
             }
 
-            boolean isEnd = false;
-            if (!isArgument) {
+            int end = 0;
+            if (arg == 0) {
                 matched = true;
-                isEnd = true;
-                if (!this.matchesEnd(string, b)) {
+                end = this.matchEnd(string, b);
+                if (end <= 0) {
                     matched = false;
-                    isEnd = false;
+                    end = 0;
                 }
             }
 
@@ -88,7 +90,7 @@ public interface BaseFormat extends TagLikeParser.Format {
                     if (provider.isValidTag(str, context)) {
                         id = str;
                         builder = new StringBuilder();
-                        if (!isEnd) {
+                        if (end == 0) {
                             continue;
                         }
                     } else {
@@ -98,7 +100,7 @@ public interface BaseFormat extends TagLikeParser.Format {
                     argument = str;
                 }
 
-                return new Tag(start, b + this.endLength(), id, argument);
+                return new Tag(start, b + end, id, argument);
             }
 
             builder.append(curr);

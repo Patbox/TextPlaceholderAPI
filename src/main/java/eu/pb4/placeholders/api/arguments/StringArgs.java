@@ -10,6 +10,7 @@ public final class StringArgs {
     private final List<String> ordered = new ArrayList<>();
     private final Map<String, String> keyed = new HashMap<>();
     private final String input;
+    private int currentOrdered = 0;
 
     private StringArgs(String input) {
         this.input = input;
@@ -117,11 +118,32 @@ public final class StringArgs {
         return x != null ? x : defaultValue;
     }
 
+    @Nullable
+    public String getNext(String name) {
+        var x = this.keyed.get(name);
+        if (x != null) {
+            return x;
+        }
+        if (this.currentOrdered < this.ordered.size()) {
+            return this.ordered.get(this.currentOrdered++);
+        }
+        return null;
+    }
+
+    public String getNext(String name, String defaultValue) {
+        var x = getNext(name);
+        return x != null ? x : defaultValue;
+    }
+
     public boolean isEmpty() {
         return this.keyed.isEmpty() && this.ordered.isEmpty();
     }
 
     public List<String> ordered() {
         return Collections.unmodifiableList(this.ordered);
+    }
+
+    public int size() {
+        return Math.max(this.keyed.size(), this.ordered.size());
     }
 }

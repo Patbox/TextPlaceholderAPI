@@ -109,7 +109,7 @@ public final class BuiltinTags {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(data.get("value", 0)).get().left().orElse(null))
+                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).get().left().orElse(null))
                     )
             );
         }
@@ -119,7 +119,7 @@ public final class BuiltinTags {
                             "font",
                             "other_formatting",
                             false,
-                            (nodes, data, parser) -> new FontNode(nodes, Identifier.tryParse(data.get("value", 0)))
+                            (nodes, data, parser) -> new FontNode(nodes, Identifier.tryParse(data.get("value", 0, "")))
                     )
             );
         }
@@ -131,17 +131,20 @@ public final class BuiltinTags {
                     false,
                     (nodes, data, parser) -> {
                         if (!data.isEmpty()) {
+                            var key = data.getNext("key");
+                            var fallback = data.get("fallback");
+
                             List<TextNode> textList = new ArrayList<>();
-                            int i = 1;
+                            int i = 0;
                             while (true) {
-                                var part = data.get("" + i, i);
+                                var part = data.getNext("" + (i++));
                                 if (part == null) {
                                     break;
                                 }
                                 textList.add(parser.parseNode(part));
                             }
 
-                            return TranslatedNode.of(data.get("key", 0), textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.ofFallback(key, fallback, textList.toArray(TextParserImpl.CASTER));
                         }
                         return TextNode.empty();
                     })
@@ -156,20 +159,20 @@ public final class BuiltinTags {
                     false,
                     (nodes, data, parser) -> {
                         if (!data.isEmpty()) {
+                            var key = data.getNext("key");
+                            var fallback = data.getNext("fallback");
+
                             List<TextNode> textList = new ArrayList<>();
-                            int i = 1;
+                            int i = 0;
                             while (true) {
-                                var part = data.get("" + i, i + 1);
+                                var part = data.getNext("" + (i++));
                                 if (part == null) {
                                     break;
                                 }
                                 textList.add(parser.parseNode(part));
                             }
 
-                            var out = TranslatedNode.ofFallback(data.get("key", 0, ""),
-                                    data.get("fallback", 1, ""),
-                                    textList.toArray(TextParserImpl.CASTER));
-                            return out;
+                            return TranslatedNode.ofFallback(key, fallback, textList.toArray(TextParserImpl.CASTER));
                         }
                         return TextNode.empty();
                     })
@@ -181,7 +184,7 @@ public final class BuiltinTags {
                     List.of("key"),
                     "special",
                     false,
-                    (data) -> new KeybindNode(data.get("value", 0))));
+                    (data) -> new KeybindNode(data.getNext("value", ""))));
         }
 
         {
@@ -189,8 +192,8 @@ public final class BuiltinTags {
                     (nodes, data, parser) -> {
                         if (!data.isEmpty()) {
                             for (ClickEvent.Action action : ClickEvent.Action.values()) {
-                                if (action.asString().equals(data.get("type", 0))) {
-                                    return new ClickActionNode(nodes, action, new LiteralNode(data.get("value", 1, "")));
+                                if (action.asString().equals(data.getNext("type"))) {
+                                    return new ClickActionNode(nodes, action, new LiteralNode(data.getNext("value", "")));
                                 }
                             }
                         }
@@ -225,7 +228,7 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(data.getNext("value", "")));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -290,37 +293,37 @@ public final class BuiltinTags {
                             true,
                             (nodes, data, parser) -> {
                                 try {
-                                    if (!data.isEmpty()) {
-                                        // Todo: wtf
-                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC
-                                                .parse(JsonOps.INSTANCE, JsonParser.parseString('"' + data.get("type", 0, "").toLowerCase(Locale.ROOT) + '"')).get().left().orElse(null);
-                                        if (action == HoverEvent.Action.SHOW_TEXT) {
+                                    var type = data.getNext("type", "").toLowerCase(Locale.ROOT);
+
+                                    if (data.size() > 1) {
+                                        if (type.equals("show_text") || type.equals("text")) {
                                             return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(
-                                                    data.get("value", 1, "")
+                                                    data.getNext("value", "")
                                             ));
-                                        } else if (action == HoverEvent.Action.SHOW_ENTITY) {
+                                        } else if (type.equals("show_entity") || type.equals("entity")) {
                                             return new HoverNode<>(nodes,
                                                     HoverNode.Action.ENTITY,
                                                     new HoverNode.EntityNodeContent(
-                                                            EntityType.get(data.get("entity", 1, "")).orElse(EntityType.PIG),
-                                                            UUID.fromString(data.get("uuid", 2, Util.NIL_UUID.toString())),
+                                                            EntityType.get(data.getNext("entity", "")).orElse(EntityType.PIG),
+                                                            UUID.fromString(data.getNext("uuid", Util.NIL_UUID.toString())),
                                                             new ParentNode(parser.parseNode(data.get("name", 3, "")))
                                                     ));
-                                        } else if (action == HoverEvent.Action.SHOW_ITEM) {
+                                        } else if (type.equals("show_item") || type.equals("item")) {
+                                            var value = data.getNext("value", "");
                                             try {
                                                 return new HoverNode<>(nodes,
                                                         HoverNode.Action.ITEM_STACK,
-                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(data.get("value", 1, ""))))
+                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(value)))
                                                 );
                                             } catch (Throwable e) {
-                                                var stack = Registries.ITEM.get(Identifier.tryParse(data.get("item", 1, ""))).getDefaultStack();
+                                                var stack = Registries.ITEM.get(Identifier.tryParse(data.get("item", value))).getDefaultStack();
 
-                                                var count = data.get("count", 2);
+                                                var count = data.getNext("count");
                                                 if (count != null) {
                                                     stack.setCount(Integer.parseInt(count));
                                                 }
 
-                                                var nbt = data.get("nbt", 3);
+                                                var nbt = data.getNext("nbt");
                                                 if (nbt != null) {
                                                     stack.setNbt(StringNbtReader.parse(nbt));
                                                 }
@@ -331,10 +334,10 @@ public final class BuiltinTags {
                                                 );
                                             }
                                         } else {
-                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", 0)));
+                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", type)));
                                         }
                                     } else {
-                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", 0)));
+                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", type)));
                                     }
                                 } catch (Exception e) {
                                     // Shut
@@ -373,48 +376,10 @@ public final class BuiltinTags {
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                float freq = 1;
-                                float saturation = 1;
-                                float offset = 0;
-                                int overriddenLength = -1;
-
-
-                                var freqs = data.get("frequency", 0, data.get("freq", data.get("f")));
-                                if (freqs != null) {
-                                    try {
-                                        freq = Float.parseFloat(freqs);
-                                    } catch (Exception e) {
-                                        // No u
-                                    }
-                                }
-                                var sats = data.get("saturation", 1, data.get("sat", data.get("s")));
-
-                                if (sats != null) {
-                                    try {
-                                        saturation = Float.parseFloat(sats);
-                                    } catch (Exception e) {
-                                        // Idc
-                                    }
-                                }
-                                var offs = data.get("offset", 2, data.get("off", data.get("o")));
-                                if (offs != null) {
-                                    try {
-                                        offset = Float.parseFloat(offs);
-                                    } catch (Exception e) {
-                                        // Ok float
-                                    }
-                                }
-
-                                var len = data.get("length", 3, data.get("len", data.get("l")));
-
-                                if (len != null) {
-                                    try {
-                                        overriddenLength = Integer.parseInt(len);
-                                    } catch (Exception e) {
-                                        // Ok float
-                                    }
-                                }
-
+                                float freq = SimpleArguments.floatNumber(data.getNext("frequency", data.get("freq", data.get("f"))), 1);
+                                float saturation = SimpleArguments.floatNumber(data.getNext("saturation", data.get("sat", data.get("s"))), 1);
+                                float offset = SimpleArguments.floatNumber(data.getNext("offset", data.get("off", data.get("o"))), 0);
+                                int overriddenLength = SimpleArguments.intNumber(data.getNext("length", data.get("len", data.get("l"))), -1);
 
                                 return overriddenLength < 0
                                         ? GradientNode.rainbow(saturation, 1, freq, offset, nodes)
@@ -432,10 +397,10 @@ public final class BuiltinTags {
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
-                                List<TextColor> textColors = new ArrayList<>();
+                                var textColors = new ArrayList<TextColor>();
                                 int i = 0;
                                 while (true) {
-                                    var part = data.get("" + i, i);
+                                    var part = data.getNext("" + i);
                                     if (part == null) {
                                         break;
                                     }
@@ -461,7 +426,7 @@ public final class BuiltinTags {
 
                                 int i = 0;
                                 while (true) {
-                                    var part = data.get("" + i, i);
+                                    var part = data.getNext("" + i);
                                     if (part == null) {
                                         break;
                                     }
@@ -500,7 +465,7 @@ public final class BuiltinTags {
                             "special",
                             false, (nodes, data, parser) -> {
 
-                                return new ScoreNode(data.get("name", 0, ""), data.get("objective", 1, ""));
+                                return new ScoreNode(data.getNext("name", ""), data.getNext("objective", ""));
                             }
                     )
             );
@@ -513,9 +478,10 @@ public final class BuiltinTags {
                             "special",
                             false,
                             (nodes, data, parser) -> {
-                                var arg = data.get("separator", 1);
+                                var sel = data.getNext("pattern", "@p");
+                                var arg = data.getNext("separator");
 
-                                return new SelectorNode(data.get("pattern", 0, "@p"), arg != null ? Optional.of(TextNode.of(arg)) : Optional.empty());
+                                return new SelectorNode(sel, arg != null ? Optional.of(TextNode.of(arg)) : Optional.empty());
                             }
                     )
             );
@@ -527,9 +493,10 @@ public final class BuiltinTags {
                             "nbt",
                             "special",
                             false, (nodes, data, parser) -> {
-                                var cleanLine1 = data.get("path", 1, "");
+                                var source = data.getNext("source", "");
+                                var cleanLine1 = data.getNext("path", "");
 
-                                var type = switch (data.get("source", 0, "")) {
+                                var type = switch (source) {
                                     case "block" -> new BlockNbtDataSource(cleanLine1);
                                     case "entity" -> new EntityNbtDataSource(cleanLine1);
                                     case "storage" -> new StorageNbtDataSource(Identifier.tryParse(cleanLine1));
@@ -540,11 +507,11 @@ public final class BuiltinTags {
                                     return TextNode.empty();
                                 }
 
-                                var separ = data.get("separator", 2);
+                                var separ = data.getNext("separator");
 
                                 Optional<TextNode> separator = separ != null ?
                                         Optional.of(TextNode.asSingle(parser.parseNode(separ))) : Optional.empty();
-                                var shouldInterpret = SimpleArguments.bool(data.get("interpret", 3), false);
+                                var shouldInterpret = SimpleArguments.bool(data.getNext("interpret"), false);
 
                                 return new NbtNode(cleanLine1, shouldInterpret, separator, type);
                             }
@@ -560,12 +527,7 @@ public final class BuiltinTags {
 
         Function<Style, Style> func = (x) -> x;
 
-        int i = 0;
-        while (true) {
-            var arg = val.get("" + i, i);
-            if (arg == null) {
-                break;
-            }
+        for (var arg : val.ordered()) {
             func = func.andThen(switch (arg) {
                 case "hover" -> x -> x.withHoverEvent(null);
                 case "click" -> x -> x.withClickEvent(null);

@@ -9,6 +9,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -24,6 +25,7 @@ public class ParserBuilder {
     private boolean quickText;
     private boolean safeOnly;
     private TagRegistry customTagRegistry;
+    private boolean staticPreParsing;
 
     public static ParserBuilder of() {
         return new ParserBuilder();
@@ -114,6 +116,33 @@ public class ParserBuilder {
     public ParserBuilder markdown(MarkdownLiteParserV1.MarkdownFormat... formats) {
         return add(new MarkdownLiteParserV1(formats));
     }
+
+    /**
+     * Enables Markdown with limited formatting.
+     */
+    public ParserBuilder markdown(Collection<MarkdownLiteParserV1.MarkdownFormat> formats) {
+        return add(new MarkdownLiteParserV1(formats.toArray(new MarkdownLiteParserV1.MarkdownFormat[0])));
+    }
+
+    /**
+     * Enables Markdown with limited formatting.
+     */
+    public ParserBuilder markdown(Function<TextNode[], TextNode> spoilerFormatting,
+                                  Function<TextNode[], TextNode> quoteFormatting,
+                                  BiFunction<TextNode[], TextNode, TextNode> urlFormatting,
+                                  MarkdownLiteParserV1.MarkdownFormat... formatting) {
+        return add(new MarkdownLiteParserV1(spoilerFormatting, quoteFormatting, urlFormatting, formatting));
+    }
+
+    /**
+     * Enables Markdown with limited formatting.
+     */
+    public ParserBuilder markdown(Function<TextNode[], TextNode> spoilerFormatting,
+                                  Function<TextNode[], TextNode> quoteFormatting,
+                                  BiFunction<TextNode[], TextNode, TextNode> urlFormatting,
+                                  Collection<MarkdownLiteParserV1.MarkdownFormat> formatting) {
+        return add(new MarkdownLiteParserV1(spoilerFormatting, quoteFormatting, urlFormatting, formatting.toArray(new MarkdownLiteParserV1.MarkdownFormat[0])));
+    }
     /**
      * Enables legacy color tags (&X) with rgb extension.
      */
@@ -133,7 +162,7 @@ public class ParserBuilder {
         return add(LegacyFormattingParser.ALL);
     }
     /**
-     * Enables all legacy formatting.
+     * Enables legacy formatting.
      */
     public ParserBuilder legacy(boolean allowRGB, Formatting... formatting) {
         this.hasLegacy = true;
@@ -142,11 +171,32 @@ public class ParserBuilder {
 
         return this;
     }
+
+    /**
+     * Enables legacy formatting.
+     */
+    public ParserBuilder legacy(boolean allowRGB, Collection<Formatting> formatting) {
+        this.hasLegacy = true;
+        this.legacyRGB = allowRGB;
+        this.legacyFormatting.addAll(formatting);
+
+        return this;
+    }
     /**
      * Adds custom tag like parser
      */
     public ParserBuilder customTags(TagLikeParser.Format format, TagLikeParser.Provider provider) {
         this.tagLike.put(format, provider);
+        return this;
+    }
+
+    /**
+     * Enables pre-parsing for static elements.
+     * This should only be used if you don't convert to {@link Text} right away, but also don't transform
+     * it further yourself (aka you use TextNode's as a template with custom placeholders)
+     */
+    public ParserBuilder staticPreParsing() {
+        this.staticPreParsing = true;
         return this;
     }
 
@@ -193,6 +243,10 @@ public class ParserBuilder {
 
         if (this.hasLegacy) {
             list.add(new LegacyFormattingParser(this.legacyRGB, this.legacyFormatting.toArray(new Formatting[0])));
+        }
+
+        if (this.staticPreParsing) {
+            list.add(StaticPreParser.INSTANCE);
         }
 
         return NodeParser.merge(list);

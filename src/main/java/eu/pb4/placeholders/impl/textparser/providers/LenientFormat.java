@@ -6,21 +6,20 @@ public record LenientFormat() implements BaseFormat {
     public static final LenientFormat INSTANCE = new LenientFormat();
 
     @Override
-    public boolean matchesStart(String string, int index) {
-        return string.charAt(index) == '<';
+    public int matchStart(String string, int index) {
+        return string.charAt(index) == '<' ? 1 : 0;
     }
 
     @Override
-    public boolean matchesEnd(String string, int index) {
-        return string.charAt(index) == '>';
+    public int matchEnd(String string, int index) {
+        return string.charAt(index) == '>' ? 1 : 0;
 
     }
 
     @Override
-    public boolean matchesArgument(String string, int index) {
+    public int matchArgument(String string, int index) {
         var c = string.charAt(index);
-        return c == ':' || c == ' ';
-
+        return c == ':' || c == ' ' ? 1 : 0;
     }
 
     @Override

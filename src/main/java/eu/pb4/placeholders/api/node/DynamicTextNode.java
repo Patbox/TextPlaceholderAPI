@@ -20,9 +20,13 @@ public record DynamicTextNode(String id, ParserContext.Key<Function<String, Text
     public Text toText(ParserContext context, boolean removeBackslashes) {
         var x = context.get(key);
         if (x != null) {
-            return x.apply(id);
+            var t = x.apply(id);
+            if (t != null) {
+                return t;
+            }
+            return Text.literal("[INVALID KEY " + this.key.key() + " | " + this.id + "]").formatted(Formatting.ITALIC).withColor(0xFF0000);
         }
-        return Text.literal("[MISSING CONTEXT FOR " + this.key.key() + "]").formatted(Formatting.ITALIC).withColor(0xFF0000);
+        return Text.literal("[MISSING CONTEXT FOR " + this.key.key() + " | " + this.id + "]").formatted(Formatting.ITALIC).withColor(0xFF0000);
     }
 
     @Override

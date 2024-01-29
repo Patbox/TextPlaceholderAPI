@@ -22,7 +22,6 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
-@ApiStatus.Experimental
 public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
     public static final Format TAGS = Format.of('<', '>', ' ');
     public static final Format TAGS_LENIENT = new LenientFormat();

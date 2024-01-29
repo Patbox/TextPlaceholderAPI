@@ -10,20 +10,19 @@ public record SingleCharacterFormat(char start, char end, char argument, char[] 
     }
 
     @Override
-    public boolean matchesStart(String string, int index) {
-        return string.charAt(index) == this.start;
+    public int matchStart(String string, int index) {
+        return string.charAt(index) == this.start ? 1 : 0;
     }
 
     @Override
-    public boolean matchesEnd(String string, int index) {
-        return string.charAt(index) == this.end;
+    public int matchEnd(String string, int index) {
+        return string.charAt(index) == this.end ? 1 : 0;
 
     }
 
     @Override
-    public boolean matchesArgument(String string, int index) {
-        return string.charAt(index) == this.argument;
-
+    public int matchArgument(String string, int index) {
+        return string.charAt(index) == this.argument ? 1 : 0;
     }
 
     @Override

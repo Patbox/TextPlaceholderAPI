@@ -10,40 +10,40 @@ public record MultiCharacterFormat(char[] start, char[] end, char[] argument, ch
     }
 
     @Override
-    public boolean matchesStart(String string, int index) {
+    public int matchStart(String string, int index) {
         for (int a = 0; a < this.start.length; a++) {
             var charc = string.charAt(index + a);
             if (charc != this.start[a]) {
-                return false;
+                return 0;
             }
         }
-        return true;
+        return this.start.length;
     }
 
     @Override
-    public boolean matchesEnd(String string, int index) {
+    public int matchEnd(String string, int index) {
         for (int a = 0; a < this.end.length; a++) {
             var charc = string.charAt(index + a);
             if (charc != this.end[a]) {
-                return false;
+                return 0;
             }
         }
-        return true;
+        return this.end.length;
     }
 
     @Override
-    public boolean matchesArgument(String string, int index) {
+    public int matchArgument(String string, int index) {
         if (this.argument.length == 0) {
-            return false;
+            return 0;
         }
 
         for (int a = 0; a < this.argument.length; a++) {
             var charc = string.charAt(index + a);
             if (charc != this.argument[a]) {
-                return false;
+                return 0;
             }
         }
-        return true;
+        return this.argument.length;
     }
 
     @Override
