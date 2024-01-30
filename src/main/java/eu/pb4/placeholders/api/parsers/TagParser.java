@@ -11,26 +11,22 @@ import eu.pb4.placeholders.impl.textparser.providers.ModernProvider;
 import java.util.function.Function;
 
 /**
- * Parser implementing QuickText and Simplified Text Format (Legacy).
- * Lenient parser can support both at the same time.
- * <a href="https://placeholders.pb4.eu/user/text-format/">Format documentation</a>
- *
- * To create pure Quick Text parser, you use methods without Legacy or Lenient in the name.
- * Lenient methods/parser allow for usage of both Quick Text and Simplified Text Format at the same
- * time, allowing for better transition between the formats.
- * Legacy parser refers to Simplified Text Format, which while discouraged, it's still supported.
- *
+ * Parser implementing QuickText (Recommended) and Simplified Text Format (Legacy).
+ * QuickText with STF parser can support both at the same time.
+ * <a href="https://placeholders.pb4.eu/user/text-format/">Format documentation for QuckText</a>
+ * <a href="https://placeholders.pb4.eu/user/text-format/">Format documentation for Simplified Text Format</a>
  */
 public final class TagParser implements NodeParser, TagLikeWrapper {
     private final TagRegistry registry;
     private final TagLikeParser parser;
-
     public static final TagParser DEFAULT = new TagParser(TagLikeParser.TAGS, TagRegistry.DEFAULT, ModernProvider::new);
-    public static final TagParser SAFE = new TagParser(TagLikeParser.TAGS, TagRegistry.SAFE, ModernProvider::new);
-    public static final TagParser DEFAULT_LENIENT = new TagParser(TagLikeParser.TAGS_LENIENT, TagRegistry.DEFAULT, LenientProvider::new);
-    public static final TagParser SAFE_LENIENT = new TagParser(TagLikeParser.TAGS_LENIENT, TagRegistry.SAFE, LenientProvider::new);
-    public static final TagParser DEFAULT_LEGACY = new TagParser(TagLikeParser.TAGS_LEGACY, TagRegistry.DEFAULT, LegacyProvider::new);
-    public static final TagParser SAFE_LEGACY = new TagParser(TagLikeParser.TAGS_LEGACY, TagRegistry.SAFE, LegacyProvider::new);
+    public static final TagParser DEFAULT_SAFE = new TagParser(TagLikeParser.TAGS, TagRegistry.SAFE, ModernProvider::new);
+    public static final TagParser QUICK_TEXT = new TagParser(TagLikeParser.TAGS, TagRegistry.DEFAULT, ModernProvider::new);
+    public static final TagParser QUICK_TEXT_SAFE = new TagParser(TagLikeParser.TAGS, TagRegistry.SAFE, ModernProvider::new);
+    public static final TagParser QUICK_TEXT_WITH_STF = new TagParser(TagLikeParser.TAGS_LENIENT, TagRegistry.DEFAULT, LenientProvider::new);
+    public static final TagParser QUICK_TEXT_WITH_STF_SAFE = new TagParser(TagLikeParser.TAGS_LENIENT, TagRegistry.SAFE, LenientProvider::new);
+    public static final TagParser SIMPLIFIED_TEXT_FORMAT = new TagParser(TagLikeParser.TAGS_LEGACY, TagRegistry.DEFAULT, LegacyProvider::new);
+    public static final TagParser SIMPLIFIED_TEXT_FORMAT_SAFE = new TagParser(TagLikeParser.TAGS_LEGACY, TagRegistry.SAFE, LegacyProvider::new);
     private final TagLikeParser.Format format;
     private final Function<TagRegistry, TagLikeParser.Provider> providerCreator;
 
@@ -41,52 +37,28 @@ public final class TagParser implements NodeParser, TagLikeWrapper {
         this.format = format;
     }
 
-    public static TagParser create() {
+    public static TagParser createQuickText() {
         return new TagParser(TagLikeParser.TAGS, TagRegistry.create(), ModernProvider::new);
     }
 
-    public static TagParser createLenient() {
+    public static TagParser createQuickTextWithSTF() {
         return new TagParser(TagLikeParser.TAGS_LENIENT, TagRegistry.create(), LenientProvider::new);
     }
 
-    public static TagParser createLegacy() {
+    public static TagParser createSimplifiedTextFormat() {
         return new TagParser(TagLikeParser.TAGS_LEGACY, TagRegistry.create(), LegacyProvider::new);
     }
 
-    public static TagParser create(TagRegistry registry) {
+    public static TagParser createQuickText(TagRegistry registry) {
         return new TagParser(TagLikeParser.TAGS, registry, ModernProvider::new);
     }
 
-    public static TagParser createLenient(TagRegistry registry) {
+    public static TagParser createQuickTextWithSTF(TagRegistry registry) {
         return new TagParser(TagLikeParser.TAGS_LENIENT, registry, LenientProvider::new);
     }
 
-    public static TagParser createLegacy(TagRegistry registry) {
+    public static TagParser createSimplifiedTextFormat(TagRegistry registry) {
         return new TagParser(TagLikeParser.TAGS_LEGACY, registry, LegacyProvider::new);
-    }
-
-    public static TagParser createDefault() {
-        return DEFAULT.copy();
-    }
-
-    public static TagParser createSafe() {
-        return SAFE.copy();
-    }
-
-    public static TagParser createDefaultLenient() {
-        return DEFAULT_LENIENT.copy();
-    }
-
-    public static TagParser createSafeLenient() {
-        return SAFE_LENIENT.copy();
-    }
-
-    public static TagParser createDefaultLegacy() {
-        return DEFAULT_LEGACY.copy();
-    }
-
-    public static TagParser createSafeLegacy() {
-        return SAFE_LEGACY.copy();
     }
 
     public void register(TextTag tag) {
@@ -103,7 +75,7 @@ public final class TagParser implements NodeParser, TagLikeWrapper {
     }
 
     public TagParser copy() {
-        return new TagParser(this.format, registry.copy(), this.providerCreator);
+        return new TagParser(this.format, this.registry.copy(), this.providerCreator);
     }
 
 

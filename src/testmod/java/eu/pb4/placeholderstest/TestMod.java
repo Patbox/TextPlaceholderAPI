@@ -35,9 +35,9 @@ public class TestMod implements ModInitializer {
 
         for (var pair : List.of(
                 Pair.of(TextParserV1.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER),
-                Pair.of(TagParser.DEFAULT_LEGACY, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
+                Pair.of(TagParser.SIMPLIFIED_TEXT_FORMAT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
                         TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER))),
-                Pair.of(NodeParser.merge(TagParser.DEFAULT_LEGACY, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
+                Pair.of(NodeParser.merge(TagParser.SIMPLIFIED_TEXT_FORMAT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
                         TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER))), NodeParser.NOOP)
         )) {
             player.sendMessage(Text.literal("Parser: " + pair), false);
@@ -122,7 +122,7 @@ public class TestMod implements ModInitializer {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var form = context.getArgument("text", String.class);
             Text text = TextParserV1.DEFAULT.parseNode(form).toText();
-            Text text2 = TagParser.DEFAULT_LEGACY.parseNode(form).toText();
+            Text text2 = TagParser.SIMPLIFIED_TEXT_FORMAT.parseNode(form).toText();
             player.sendMessage(Text.literal("v1"), false);
             player.sendMessage(text, false);
             player.sendMessage(Text.literal("v2"), false);
@@ -138,7 +138,7 @@ public class TestMod implements ModInitializer {
             ServerPlayerEntity player = context.getSource().getPlayer();
             var form = context.getArgument("text", String.class);
             Text text = TextParserV1.DEFAULT.parseNode(form).toText();
-            Text text2 = TagParser.DEFAULT_LEGACY.parseNode(form).toText();
+            Text text2 = TagParser.SIMPLIFIED_TEXT_FORMAT.parseNode(form).toText();
             player.sendMessage(Text.literal("v1"), false);
             player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
             player.sendMessage(text, false);
@@ -247,9 +247,9 @@ public class TestMod implements ModInitializer {
             player.sendMessage(Text.literal("------------------------------"), false);
             player.sendMessage(Text.literal("Input.   | " + form), false);
             player.sendMessage(Text.literal("STF-V1 | ").append(TextParserV1.DEFAULT.parseText(form, ParserContext.of())), false);
-            player.sendMessage(Text.literal("STF-V2 | ").append(TagParser.DEFAULT_LEGACY.parseText(form, ParserContext.of())), false);
-            player.sendMessage(Text.literal("STF+QT | ").append(TagParser.DEFAULT_LENIENT.parseText(form, ParserContext.of())), false);
-            player.sendMessage(Text.literal("QT       | ").append(TagParser.DEFAULT.parseText(form, ParserContext.of())), false);
+            player.sendMessage(Text.literal("STF-V2 | ").append(TagParser.SIMPLIFIED_TEXT_FORMAT.parseText(form, ParserContext.of())), false);
+            player.sendMessage(Text.literal("STF+QT | ").append(TagParser.QUICK_TEXT_WITH_STF.parseText(form, ParserContext.of())), false);
+            player.sendMessage(Text.literal("QT       | ").append(TagParser.QUICK_TEXT.parseText(form, ParserContext.of())), false);
         } catch (Exception e) {
             e.printStackTrace();
         }

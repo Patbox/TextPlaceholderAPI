@@ -232,11 +232,11 @@ public class ParserBuilder {
         var reg = this.customTagRegistry != null ? this.customTagRegistry : this.safeOnly ? TagRegistry.SAFE : TagRegistry.DEFAULT;
 
         if (this.quickText && this.simplifiedTextFormat) {
-            list.add(TagParser.createLenient(reg));
+            list.add(TagParser.createQuickTextWithSTF(reg));
         } else if (this.quickText) {
-            list.add(TagParser.create(reg));
+            list.add(TagParser.createQuickText(reg));
         } else if (this.simplifiedTextFormat) {
-            list.add(TagParser.createLenient(reg));
+            list.add(TagParser.createQuickTextWithSTF(reg));
         }
 
         list.addAll(this.parserList);

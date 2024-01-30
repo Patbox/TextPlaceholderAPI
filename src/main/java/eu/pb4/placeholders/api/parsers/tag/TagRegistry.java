@@ -6,14 +6,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public final class TagRegistry {
-    public static final TagRegistry DEFAULT = new TagRegistry();
-    public static final TagRegistry SAFE = new TagRegistry();
+    public static final TagRegistry DEFAULT = new TagRegistry(true);
+    public static final TagRegistry SAFE = new TagRegistry(true);
 
     static {
         BuiltinTags.register();
     }
 
-    private TagRegistry() {}
+    private final boolean global;
+
+    private TagRegistry(boolean global) {
+        this.global = global;
+    }
 
     private final List<TextTag> tags = new ArrayList<>();
     private final Map<String, TextTag> byName = new HashMap<>();
@@ -21,7 +25,7 @@ public final class TagRegistry {
     private final boolean allowOverrides = false;
 
     public static TagRegistry create() {
-        return new TagRegistry();
+        return new TagRegistry(false);
     }
 
     public static TagRegistry createDefault() {
@@ -66,7 +70,7 @@ public final class TagRegistry {
     }
 
     public TagRegistry copy() {
-        var parser = new TagRegistry();
+        var parser = new TagRegistry(false);
         for (var tag : this.tags) {
             parser.register(tag);
         }
@@ -79,5 +83,9 @@ public final class TagRegistry {
 
     public List<TextTag> getTags() {
         return Collections.unmodifiableList(this.tags);
+    }
+
+    public boolean isGlobal() {
+        return this.global;
     }
 }
