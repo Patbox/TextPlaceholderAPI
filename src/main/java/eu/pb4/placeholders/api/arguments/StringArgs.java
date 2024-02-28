@@ -72,6 +72,7 @@ public final class StringArgs {
                 consumer.accept(key, value);
                 key = null;
                 value = null;
+                b = new StringBuilder();
             } else {
                 b.append(chr);
             }

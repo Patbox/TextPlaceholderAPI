@@ -2,24 +2,23 @@ package eu.pb4.placeholders.impl.color;
 
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.util.math.ColorHelper;
+import net.minecraft.util.math.MathHelper;
 
 // https://bottosson.github.io/posts/oklab/
 public record OkLab(float l, float a, float b) {
     public static OkLab fromRgb(int rgb) {
-        return fromLinearSRGB(f(ColorHelper.Argb.getRed(rgb) / 255f), f(ColorHelper.Argb.getGreen(rgb) / 255f),
-                f(ColorHelper.Argb.getBlue(rgb) / 255f));
+        return fromLinearSRGB(ColorHelper.Argb.getRed(rgb) / 255f, ColorHelper.Argb.getGreen(rgb) / 255f,
+                ColorHelper.Argb.getBlue(rgb) / 255f);
     }
 
-    static float f(float x)
-    {
+    static float f(float x) {
         if (x >= 0.0031308)
             return (float) ((1.055) * Math.pow(x, (1.0/2.4)) - 0.055);
         else
             return (float) (12.92 * x);
     }
 
-    static float f_inv(float x)
-    {
+    static float f_inv(float x) {
         if (x >= 0.04045)
             return (float) Math.pow((x + 0.055)/(1 + 0.055), 2.4);
         else
@@ -57,9 +56,9 @@ public record OkLab(float l, float a, float b) {
         float s = s_*s_*s_;
 
         return GeneralUtils.rgbToInt(
-                f_inv(+4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s),
-                f_inv(-1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s),
-                f_inv(-0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s)
-                );
+                 MathHelper.clamp(+4.0767416621f * l - 3.3077115913f * m + 0.2309699292f * s, 0, 1),
+                 MathHelper.clamp(-1.2684380046f * l + 2.6097574011f * m - 0.3413193965f * s, 0, 1),
+                 MathHelper.clamp(-0.0041960863f * l - 0.7034186147f * m + 1.7076147010f * s, 0, 1)
+        );
     }
 }

@@ -20,7 +20,19 @@ public class SimpleArguments {
         var c2 = string.charAt(string.length() - 1);
 
         if (c1 == c2 && isWrapCharacter(c1)) {
-            return string.substring(1, string.length() - 1);
+            var builder = new StringBuilder(string.length() - 2);
+
+            for (var i = 1; i < string.length() - 2; i++) {
+                var chr = string.charAt(i);
+
+                if (chr == c1 && string.charAt(i + 1) == c1) {
+                    i++;
+                }
+                builder.append(chr);
+            }
+
+
+            return builder.toString();
         }
         return string;
     }
@@ -53,13 +65,17 @@ public class SimpleArguments {
                 continue;
             }
 
-            if (isWrapCharacter(character)) {
-                if (wrap == 0) {
-                    wrap = character;
-                } else {
+            if (wrap == character && wrap != 0) {
+                if (i + 1 >= string.length() || string.charAt(i + 1) != wrap) {
                     wrap = 0;
+                    if (removeWrapping) {
+                        continue;
+                    }
+                } else if (removeWrapping) {
+                    i++;
                 }
-
+            } else if (wrap == 0 && isWrapCharacter(character)) {
+                wrap = character;
                 if (removeWrapping) {
                     continue;
                 }

@@ -399,6 +399,8 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
                                 var textColors = new ArrayList<TextColor>();
                                 int i = 0;
+                                var type = data.get("type", "");
+
                                 while (true) {
                                     var part = data.getNext("" + i);
                                     if (part == null) {
@@ -407,7 +409,12 @@ public final class BuiltinTags {
 
                                     TextColor.parse(part).get().ifLeft(textColors::add);
                                 }
-                                return GradientNode.colors(textColors, nodes);
+                                return new GradientNode(nodes, switch (type) {
+                                    case "oklab" -> GradientNode.GradientProvider.colorsOkLab(textColors);
+                                    case "hvs" -> GradientNode.GradientProvider.colorsHvs(textColors);
+                                    case "hard" -> GradientNode.GradientProvider.colorsHard(textColors);
+                                    default -> GradientNode.GradientProvider.colors(textColors);
+                                });
                             }
                     )
             );

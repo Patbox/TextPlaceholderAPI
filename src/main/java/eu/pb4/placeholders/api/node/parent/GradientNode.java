@@ -90,7 +90,7 @@ public final class GradientNode extends ParentNode {
 
 
         static GradientProvider colors(List<TextColor> colors) {
-            return colorsHvs(colors);
+            return colorsOkLab(colors);
         }
 
         static GradientProvider colorsOkLab(List<TextColor> colors) {
@@ -113,9 +113,9 @@ public final class GradientNode extends ParentNode {
                 OkLab colorA = hvs.get(Math.min((int) (pos / sectionSize), colorSize - 1));
                 OkLab colorB = hvs.get(Math.min((int) (pos / sectionSize) + 1, colorSize - 1));
 
-                float l = colorB.l() * progress + colorA.l() * (1 - progress);
-                float a = colorB.a() * progress + colorA.a() * (1 - progress);
-                float b = colorB.b() * progress + colorA.b() * (1 - progress);
+                float l = MathHelper.lerp(progress, colorA.l(), colorB.l());
+                float a = MathHelper.lerp(progress, colorA.a(), colorB.a());
+                float b = MathHelper.lerp(progress, colorA.b(), colorB.b());
 
                 return TextColor.fromRgb(OkLab.toRgb(l, a, b));
             };
@@ -148,7 +148,7 @@ public final class GradientNode extends ParentNode {
                     float h = colorB.h() - colorA.h();
                     float delta = (h + ((Math.abs(h) > 0.50001) ? ((h < 0) ? 1 : -1) : 0));
 
-                    float futureHue = (float) (colorA.h() + delta * step * pos);
+                    float futureHue = (float) (colorA.h() + delta * step * (pos % sectionSize));
                     if (futureHue < 0) {
                         futureHue += 1;
                     } else if (futureHue > 1) {

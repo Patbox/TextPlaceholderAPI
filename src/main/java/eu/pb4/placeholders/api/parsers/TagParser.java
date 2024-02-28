@@ -82,4 +82,8 @@ public final class TagParser implements NodeParser, TagLikeWrapper {
     public TagRegistry tagRegistry() {
         return registry;
     }
+
+    public Function<TagRegistry, TagLikeParser.Provider> providerCreator() {
+        return providerCreator;
+    }
 }

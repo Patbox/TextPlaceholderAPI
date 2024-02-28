@@ -1,5 +1,10 @@
 # Simplified Text Format
 
+!!! warn inline end
+
+    Having issues with formatted arguments not working? It's possible the version of mod you use uses
+    [QuickText](/user/quicktext/) instead! Check it's documentation for more information!
+
 It's a simple, string format inspired by formats like HTML or MiniMessage.
 It was created to allow quick and readable way of formatting Minecraft Text Components
 while still providing all of its functionality as opposed for legacy &/§ formatting
