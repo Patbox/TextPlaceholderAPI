@@ -8,6 +8,7 @@ import net.fabricmc.loader.api.VersionParsingException;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.math.ColorHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,56 +112,8 @@ public class GeneralUtils {
         return new TextLengthPair(base.copy(), pos + base.getString().length());
     }
 
-    public static int hvsToRgb(float hue, float saturation, float value) {
-        int h = (int) (hue * 6) % 6;
-        float f = hue * 6 - h;
-        float p = value * (1 - saturation);
-        float q = value * (1 - f * saturation);
-        float t = value * (1 - (1 - f) * saturation);
-
-        return switch (h) {
-            case 0 -> rgbToInt(value, t, p);
-            case 1 -> rgbToInt(q, value, p);
-            case 2 -> rgbToInt(p, value, t);
-            case 3 -> rgbToInt(p, q, value);
-            case 4 -> rgbToInt(t, p, value);
-            case 5 -> rgbToInt(value, p, q);
-            default -> 0;
-        };
-    }
-
     public static int rgbToInt(float r, float g, float b) {
         return (((int) (r * 0xff)) & 0xFF) << 16 | (((int) (g * 0xff)) & 0xFF) << 8 | (((int) (b * 0xff) & 0xFF));
-    }
-
-    public static HSV rgbToHsv(int rgb) {
-        float b = (float) (rgb % 256) / 255;
-        rgb = rgb >> 8;
-        float g = (float) (rgb % 256) / 255;
-        rgb = rgb >> 8;
-        float r = (float) (rgb % 256) / 255;
-
-        float cmax = Math.max(r, Math.max(g, b));
-        float cmin = Math.min(r, Math.min(g, b));
-        float diff = cmax - cmin;
-        float h = -1, s = -1;
-
-        if (cmax == cmin) {
-            h = 0;
-        } else if (cmax == r) {
-            h = (0.1666f * ((g - b) / diff) + 1) % 1;
-        } else if (cmax == g) {
-            h = (0.1666f * ((b - r) / diff) + 0.333f) % 1;
-        } else if (cmax == b) {
-            h = (0.1666f * ((r - g) / diff) + 0.666f) % 1;
-        }
-        if (cmax == 0) {
-            s = 0;
-        } else {
-            s = (diff / cmax);
-        }
-
-        return new HSV(h, s, cmax);
     }
 
     public static Text deepTransform(Text input) {
@@ -336,9 +289,6 @@ public class GeneralUtils {
         } else {
             return node;
         }
-    }
-
-    public record HSV(float h, float s, float v) {
     }
 
     public record TextLengthPair(MutableText text, int length) {

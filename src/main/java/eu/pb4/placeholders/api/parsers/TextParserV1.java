@@ -25,7 +25,7 @@ import java.util.function.Function;
  * Regex-based text parsing implementation. Should be always used first.
  * Loosely based on MiniMessage, with some degree of compatibility with it.
  *
- * @Deprecated Replaced with {@link TagParser} using Legacy methods/fields
+ * @Deprecated Replaced with {@link TagParser}
  */
 @Deprecated
 public class TextParserV1 implements NodeParser {
