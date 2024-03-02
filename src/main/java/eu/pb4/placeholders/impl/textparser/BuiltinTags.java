@@ -1,7 +1,5 @@
 package eu.pb4.placeholders.impl.textparser;
 
-import com.google.gson.JsonParser;
-import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.api.node.*;
@@ -13,6 +11,7 @@ import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -313,7 +312,7 @@ public final class BuiltinTags {
                                             try {
                                                 return new HoverNode<>(nodes,
                                                         HoverNode.Action.ITEM_STACK,
-                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(value)))
+                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbtOrEmpty(DynamicRegistryManager.EMPTY, StringNbtReader.parse(value)))
                                                 );
                                             } catch (Throwable e) {
                                                 var stack = Registries.ITEM.get(Identifier.tryParse(data.get("item", value))).getDefaultStack();
@@ -321,11 +320,6 @@ public final class BuiltinTags {
                                                 var count = data.getNext("count");
                                                 if (count != null) {
                                                     stack.setCount(Integer.parseInt(count));
-                                                }
-
-                                                var nbt = data.getNext("nbt");
-                                                if (nbt != null) {
-                                                    stack.setNbt(StringNbtReader.parse(nbt));
                                                 }
 
                                                 return new HoverNode<>(nodes,

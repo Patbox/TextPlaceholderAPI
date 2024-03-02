@@ -9,6 +9,7 @@ import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -318,7 +319,7 @@ public final class TextTagsV1 {
                                             try {
                                                 return out.value(new HoverNode<>(out.nodes(),
                                                         HoverNode.Action.ITEM_STACK,
-                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[1])))))
+                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbtOrEmpty(DynamicRegistryManager.EMPTY, StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[1])))))
                                                 ));
                                             } catch (Throwable e) {
                                                 lines = lines[1].split(":", 2);
@@ -327,10 +328,6 @@ public final class TextTagsV1 {
 
                                                     if (lines.length > 1) {
                                                         stack.setCount(Integer.parseInt(lines[1]));
-                                                    }
-
-                                                    if (lines.length > 2) {
-                                                        stack.setNbt(StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[2]))));
                                                     }
 
                                                     return out.value(new HoverNode<>(out.nodes(),
@@ -509,7 +506,7 @@ public final class TextTagsV1 {
                             "raw_style",
                             "special",
                             false,
-                            (tag, data, input, handlers, endAt) -> new TextParserV1.TagNodeValue(new DirectTextNode(Text.Serialization.fromLenientJson(restoreOriginalEscaping(cleanArgument(data)))), 0)
+                            (tag, data, input, handlers, endAt) -> new TextParserV1.TagNodeValue(new DirectTextNode(Text.Serialization.fromLenientJson(restoreOriginalEscaping(cleanArgument(data)), DynamicRegistryManager.EMPTY)), 0)
                     )
             );
         }

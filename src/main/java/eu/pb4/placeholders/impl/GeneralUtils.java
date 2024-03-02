@@ -5,6 +5,8 @@ import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.Version;
 import net.fabricmc.loader.api.VersionParsingException;
+import net.minecraft.component.DataComponentType;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -203,7 +205,7 @@ public class GeneralUtils {
     public static Text getItemText(ItemStack stack, boolean rarity) {
         if (!stack.isEmpty()) {
             MutableText mutableText = Text.empty().append(stack.getName());
-            if (stack.hasCustomName()) {
+            if (stack.contains(DataComponentTypes.CUSTOM_NAME)) {
                 mutableText.formatted(Formatting.ITALIC);
             }
 
