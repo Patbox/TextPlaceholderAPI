@@ -210,7 +210,7 @@ public class GeneralUtils {
             }
 
             if (rarity) {
-                mutableText.formatted(stack.getRarity().formatting);
+                mutableText.formatted(stack.getRarity().getFormatting());
             }
             mutableText.styled((style) -> {
                 return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemStackContent(stack)));
