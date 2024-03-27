@@ -1,42 +1,56 @@
 package eu.pb4.placeholders.api.parsers.tag;
 
-import eu.pb4.placeholders.impl.textparser.BuiltinTags;
+import eu.pb4.placeholders.impl.textparser.tagreg.SimpleTagRegistry;
+import eu.pb4.placeholders.impl.textparser.tagreg.WrappingTagRegistry;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.List;
 
-public final class TagRegistry {
-    public static final TagRegistry DEFAULT = new TagRegistry(true);
-    public static final TagRegistry SAFE = new TagRegistry(true);
+public interface TagRegistry {
+    TagRegistry DEFAULT = new SimpleTagRegistry(true);
+    TagRegistry SAFE = new SimpleTagRegistry(true);
 
-    static {
-        BuiltinTags.register();
+    static TagRegistry create() {
+        return new SimpleTagRegistry(false);
     }
 
-    private final boolean global;
-
-    private TagRegistry(boolean global) {
-        this.global = global;
+    static Builder builder() {
+        return new Builder(create());
     }
 
-    private final List<TextTag> tags = new ArrayList<>();
-    private final Map<String, TextTag> byName = new HashMap<>();
-    private final Map<String, TextTag> byNameAlias = new HashMap<>();
-    private final boolean allowOverrides = false;
-
-    public static TagRegistry create() {
-        return new TagRegistry(false);
-    }
-
-    public static TagRegistry createDefault() {
+    static TagRegistry copyDefault() {
         return DEFAULT.copy();
     }
 
-    public static TagRegistry createSafe() {
+    static Builder builderCopyDefault() {
+        return new Builder(copyDefault());
+    }
+
+    static TagRegistry copySafe() {
         return SAFE.copy();
     }
 
-    public static void registerDefault(TextTag tag) {
+    static Builder builderCopySafe() {
+        return new Builder(copySafe());
+    }
+
+    static TagRegistry createDefault() {
+        return WrappingTagRegistry.of(DEFAULT);
+    }
+
+    static Builder builderWithDefault() {
+        return new Builder(createDefault());
+    }
+
+    static TagRegistry createSafe() {
+        return WrappingTagRegistry.of(SAFE);
+    }
+
+    static Builder builderWithSafe() {
+        return new Builder(createSafe());
+    }
+
+    static void registerDefault(TextTag tag) {
         DEFAULT.register(tag);
 
         if (tag.userSafe()) {
@@ -44,48 +58,46 @@ public final class TagRegistry {
         }
     }
 
-    public void register(TextTag tag) {
-        if (this.byName.containsKey(tag.name())) {
-            if (allowOverrides) {
-                this.tags.removeIf((t) -> t.name().equals(tag.name()));
-            } else {
-                throw new RuntimeException("Duplicate tag identifier!");
-            }
+    void register(TextTag tag);
+
+    void remove(TextTag tag);
+
+    TagRegistry copy();
+
+    @Nullable TextTag getTag(String name);
+
+    List<TextTag> getTags();
+
+    boolean isGlobal();
+
+    final class Builder {
+        private final TagRegistry registry;
+        Builder(TagRegistry tagRegistry) {
+            this.registry = tagRegistry;
         }
 
-        this.byName.put(tag.name(), tag);
-        this.tags.add(tag);
-
-        this.byNameAlias.put(tag.name(), tag);
-
-        if (tag.aliases() != null) {
-            for (int i = 0; i < tag.aliases().length; i++) {
-                var alias = tag.aliases()[i];
-                var old = this.byNameAlias.get(alias);
-                if (old == null || !old.name().equals(alias)) {
-                    this.byNameAlias.put(alias, tag);
-                }
-            }
+        public Builder add(TextTag tag) {
+            this.registry.register(tag);
+            return this;
         }
-    }
 
-    public TagRegistry copy() {
-        var parser = new TagRegistry(false);
-        for (var tag : this.tags) {
-            parser.register(tag);
+        public Builder remove(TextTag tag) {
+            this.registry.remove(tag);
+            return this;
         }
-        return parser;
-    }
 
-    public @Nullable TextTag getTag(String name) {
-        return this.byNameAlias.get(name);
-    }
+        public Builder remove(String tag) {
+            this.registry.remove(this.registry.getTag(tag));
+            return this;
+        }
 
-    public List<TextTag> getTags() {
-        return Collections.unmodifiableList(this.tags);
-    }
+        public Builder copy(TagRegistry registry) {
+            registry.getTags().forEach(this.registry::register);
+            return this;
+        }
 
-    public boolean isGlobal() {
-        return this.global;
+        public TagRegistry build() {
+            return this.registry;
+        }
     }
 }
