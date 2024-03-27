@@ -376,14 +376,25 @@ public final class BuiltinTags {
                             "gradient",
                             true,
                             (nodes, data, parser) -> {
+                                var type = data.get("type", "");
+
                                 float freq = SimpleArguments.floatNumber(data.getNext("frequency", data.get("freq", data.get("f"))), 1);
                                 float saturation = SimpleArguments.floatNumber(data.getNext("saturation", data.get("sat", data.get("s"))), 1);
                                 float offset = SimpleArguments.floatNumber(data.getNext("offset", data.get("off", data.get("o"))), 0);
                                 int overriddenLength = SimpleArguments.intNumber(data.getNext("length", data.get("len", data.get("l"))), -1);
+                                int value = SimpleArguments.intNumber(data.get("value", data.get("val", data.get("v"))), 1);
 
-                                return overriddenLength < 0
-                                        ? GradientNode.rainbow(saturation, 1, freq, offset, nodes)
-                                        : GradientNode.rainbow(saturation, 1, freq, offset, overriddenLength, nodes);
+                                return new GradientNode(nodes, switch (type) {
+                                    case "oklab", "okhcl" -> overriddenLength < 0
+                                            ? GradientNode.GradientProvider.rainbowOkLch(saturation, value, freq, offset)
+                                            : GradientNode.GradientProvider.rainbowOkLch(saturation, value, freq, offset, overriddenLength);
+                                    case "hvs" -> overriddenLength < 0
+                                            ? GradientNode.GradientProvider.rainbowHvs(saturation, value, freq, offset)
+                                            : GradientNode.GradientProvider.rainbowHvs(saturation, value, freq, offset, overriddenLength);
+                                    default -> overriddenLength < 0
+                                            ? GradientNode.GradientProvider.rainbow(saturation, value, freq, offset)
+                                            : GradientNode.GradientProvider.rainbow(saturation, value, freq, offset, overriddenLength);
+                                });
                             }
                     )
             );
