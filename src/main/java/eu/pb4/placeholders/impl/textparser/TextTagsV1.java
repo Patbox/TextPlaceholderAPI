@@ -108,7 +108,7 @@ public final class TextTagsV1 {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            wrap((nodes, data) -> new ColorNode(nodes, TextColor.parse(cleanArgument(data)).get().left().orElse(null)))
+                            wrap((nodes, data) -> new ColorNode(nodes, TextColor.parse(cleanArgument(data)).result().orElse(null)))
                     )
             );
         }
@@ -301,7 +301,7 @@ public final class TextTagsV1 {
 
                                 try {
                                     if (lines.length > 1) {
-                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).get().left().orElse(null);
+                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).result().orElse(null);
                                         if (action == HoverEvent.Action.SHOW_TEXT) {
                                             return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT, new ParentNode(parse(restoreOriginalEscaping(cleanArgument(lines[1])), handlers))));
                                         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
@@ -446,7 +446,7 @@ public final class TextTagsV1 {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 List<TextColor> textColors = new ArrayList<>();
                                 for (String string : val) {
-                                    TextColor.parse(string).get().ifLeft(textColors::add);
+                                    TextColor.parse(string).result().ifPresent(textColors::add);
                                 }
                                 return out.value(GradientNode.colors(textColors, out.nodes()));
                             }
@@ -469,7 +469,7 @@ public final class TextTagsV1 {
                                 var textColors = new ArrayList<TextColor>();
 
                                 for (String string : val) {
-                                    TextColor.parse(string).get().ifLeft(textColors::add);
+                                    TextColor.parse(string).result().ifPresent(textColors::add);
                                 }
                                 // We cannot have an empty list!
                                 if (textColors.isEmpty()) {

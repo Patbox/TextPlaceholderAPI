@@ -108,7 +108,7 @@ public final class BuiltinTags {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).get().left().orElse(null))
+                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).result().orElse(null))
                     )
             );
         }
@@ -401,7 +401,7 @@ public final class BuiltinTags {
                                         break;
                                     }
 
-                                    TextColor.parse(part).get().ifLeft(textColors::add);
+                                    TextColor.parse(part).result().ifPresent(textColors::add);
                                 }
                                 return new GradientNode(nodes, switch (type) {
                                     case "oklab" -> GradientNode.GradientProvider.colorsOkLab(textColors);
@@ -432,7 +432,7 @@ public final class BuiltinTags {
                                         break;
                                     }
 
-                                    TextColor.parse(part).get().ifLeft(textColors::add);
+                                    TextColor.parse(part).result().ifPresent(textColors::add);
                                 }
                                 // We cannot have an empty list!
                                 if (textColors.isEmpty()) {
