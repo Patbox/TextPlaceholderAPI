@@ -2,6 +2,7 @@ package eu.pb4.placeholders.impl.placeholder.builtin;
 
 import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.scoreboard.ScoreboardEntry;
@@ -19,6 +20,9 @@ import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.ref.WeakReference;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Date;
 import java.util.Objects;
@@ -68,6 +72,13 @@ public class ServerPlaceholders {
         Placeholders.register(new Identifier("server", "time"), (ctx, arg) -> {
             SimpleDateFormat format = new SimpleDateFormat(arg != null ? arg : "HH:mm:ss");
             return PlaceholderResult.value(format.format(new Date(System.currentTimeMillis())));
+        });
+
+        Placeholders.register(new Identifier("server", "time_new"), (ctx, arg) -> {
+            var args = arg == null ? StringArgs.empty() : StringArgs.full(arg, ' ', ':');
+            var format = DateTimeFormatter.ofPattern(args.get("format", "HH:mm:ss"));
+            var date = args.get("") != null ? LocalDateTime.now(ZoneId.of(args.get("zone", ""))) : LocalDateTime.now();
+            return PlaceholderResult.value(format.format(date));
         });
 
         {
