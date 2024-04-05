@@ -77,7 +77,7 @@ public class ServerPlaceholders {
         Placeholders.register(new Identifier("server", "time_new"), (ctx, arg) -> {
             var args = arg == null ? StringArgs.empty() : StringArgs.full(arg, ' ', ':');
             var format = DateTimeFormatter.ofPattern(args.get("format", "HH:mm:ss"));
-            var date = args.get("") != null ? LocalDateTime.now(ZoneId.of(args.get("zone", ""))) : LocalDateTime.now();
+            var date = args.get("zone") != null ? LocalDateTime.now(ZoneId.of(args.get("zone", ""))) : LocalDateTime.now();
             return PlaceholderResult.value(format.format(date));
         });
 
