@@ -1,5 +1,6 @@
 package eu.pb4.placeholders.api.arguments;
 
+import net.minecraft.util.function.CharPredicate;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -12,6 +13,9 @@ public class SimpleArguments {
     }
 
     public static String unwrap(String string) {
+        return unwrap(string, SimpleArguments::isWrapCharacter);
+    }
+    public static String unwrap(String string, CharPredicate isWrap) {
         if (string.length() < 2) {
             return string;
         }
@@ -19,10 +23,10 @@ public class SimpleArguments {
         var c1 = string.charAt(0);
         var c2 = string.charAt(string.length() - 1);
 
-        if (c1 == c2 && isWrapCharacter(c1)) {
+        if (c1 == c2 && isWrap.test(c1)) {
             var builder = new StringBuilder(string.length() - 2);
 
-            for (var i = 1; i < string.length() - 2; i++) {
+            for (var i = 1; i < string.length() - 1; i++) {
                 var chr = string.charAt(i);
 
                 if (chr == c1 && string.charAt(i + 1) == c1) {

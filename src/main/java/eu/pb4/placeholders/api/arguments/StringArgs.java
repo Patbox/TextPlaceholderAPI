@@ -1,5 +1,6 @@
 package eu.pb4.placeholders.api.arguments;
 
+import net.minecraft.util.function.CharPredicate;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -22,10 +23,13 @@ public final class StringArgs {
     }
 
     public static StringArgs keyed(String input, char separator, char map) {
+        return keyed(input, separator, map, SimpleArguments::isWrapCharacter);
+    }
+    public static StringArgs keyed(String input, char separator, char map, CharPredicate wrapCharacters) {
         var args = new StringArgs(input);
-        keyDecomposition(input, separator, map, (key, value) -> {
+        keyDecomposition(input, separator, map, wrapCharacters, (key, value) -> {
             if (key != null) {
-                args.keyed.put(key, value != null ? SimpleArguments.unwrap(value) : "");
+                args.keyed.put(key, value != null ? SimpleArguments.unwrap(value, wrapCharacters) : "");
             }
         });
 
@@ -33,13 +37,16 @@ public final class StringArgs {
     }
 
     public static StringArgs full(String input, char separator, char map) {
+        return full(input, separator, map, SimpleArguments::isWrapCharacter);
+    }
+    public static StringArgs full(String input, char separator, char map, CharPredicate wrapCharacters) {
         var args = new StringArgs(input);
-        keyDecomposition(input, separator, map, (key, value) -> {
+        keyDecomposition(input, separator, map, wrapCharacters, (key, value) -> {
             if (key != null) {
-                args.keyed.put(key, value != null ? SimpleArguments.unwrap(value) : "");
+                args.keyed.put(key, value != null ? SimpleArguments.unwrap(value, wrapCharacters) : "");
 
                 if (value == null) {
-                    args.ordered.add(SimpleArguments.unwrap(key));
+                    args.ordered.add(SimpleArguments.unwrap(key, wrapCharacters));
                 }
             }
         });
@@ -47,17 +54,24 @@ public final class StringArgs {
         return args;
     }
 
-    private static void keyDecomposition(String input, char separator, char map, BiConsumer<@Nullable String, @Nullable String> consumer) {
+    private static void keyDecomposition(String input, char separator, char map, CharPredicate isWrap, BiConsumer<@Nullable String, @Nullable String> consumer) {
         String key = null;
         String value = null;
         var b = new StringBuilder();
+        char wrap = 0;
         for (int i = 0; i < input.length(); i++) {
             var chr = input.charAt(i);
+            var chrN = i != input.length() - 1 ? input.charAt(i + 1) : 0;
 
             if (chr == map && key == null) {
                 key = b.toString();
                 b = new StringBuilder();
-            } else if (chr == separator) {
+            } else if ((chr == '\\' && chrN != 0) || (chrN != 0 && chr == chrN && isWrap.test(chr))) {
+                b.append(chrN);
+                i++;
+            } else if (isWrap.test(chr) && (wrap == 0 || wrap == chr)) {
+                wrap = wrap == 0 ? chr : 0;
+            } else if (chr == separator && wrap == 0) {
                 if (b.isEmpty() && key == null) {
                     consumer.accept(null, null);
                     continue;
@@ -134,6 +148,10 @@ public final class StringArgs {
     public String getNext(String name, String defaultValue) {
         var x = getNext(name);
         return x != null ? x : defaultValue;
+    }
+
+    public boolean contains(String key) {
+        return this.keyed.containsKey(key);
     }
 
     public boolean isEmpty() {
