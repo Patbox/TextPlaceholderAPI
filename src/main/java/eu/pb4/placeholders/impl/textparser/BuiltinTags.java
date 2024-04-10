@@ -1,15 +1,16 @@
 package eu.pb4.placeholders.impl.textparser;
 
-import com.google.gson.JsonParser;
-import com.mojang.serialization.JsonOps;
+import com.mojang.datafixers.util.Either;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
+import eu.pb4.placeholders.api.parsers.tag.SimpleTags;
 import eu.pb4.placeholders.api.parsers.tag.NodeCreator;
 import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import eu.pb4.placeholders.impl.GeneralUtils;
+import eu.pb4.placeholders.impl.StringArgOps;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
@@ -25,13 +26,15 @@ import java.util.function.Function;
 
 @ApiStatus.Internal
 public final class BuiltinTags {
+    public static final TextColor DEFAULT_COLOR = TextColor.fromFormatting(Formatting.WHITE);
     public static void register() {
         {
-            Map<String, List<String>> aliases = new HashMap<>();
-            aliases.put("gold", List.of("orange"));
-            aliases.put("gray", List.of("grey"));
-            aliases.put("light_purple", List.of("pink"));
-            aliases.put("dark_gray", List.of("dark_grey"));
+            Map<Formatting, List<String>> aliases = new HashMap<>();
+            aliases.put(Formatting.GOLD, List.of("orange"));
+            aliases.put(Formatting.GRAY, List.of("grey", "light_gray", "light_grey"));
+            aliases.put(Formatting.LIGHT_PURPLE, List.of("pink"));
+            aliases.put(Formatting.DARK_PURPLE, List.of("purple"));
+            aliases.put(Formatting.DARK_GRAY, List.of("dark_grey"));
 
             for (Formatting formatting : Formatting.values()) {
                 if (formatting.isModifier()) {
@@ -39,12 +42,10 @@ public final class BuiltinTags {
                 }
 
                 TagRegistry.registerDefault(
-                        TextTag.enclosing(
+                        SimpleTags.color(
                                 formatting.getName(),
-                                aliases.containsKey(formatting.getName()) ? aliases.get(formatting.getName()) : List.of(),
-                                "color",
-                                true,
-                                (nodes, arg, parser) -> new FormattingNode(nodes, formatting)
+                                aliases.containsKey(formatting) ? aliases.get(formatting) : List.of(),
+                                formatting
                         )
                 );
             }
@@ -109,7 +110,9 @@ public final class BuiltinTags {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            (nodes, data, parser) -> new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).get().left().orElse(null))
+                            (nodes, data, parser) -> {
+                                return new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).result().orElse(DEFAULT_COLOR));
+                            }
                     )
             );
         }
@@ -479,6 +482,24 @@ public final class BuiltinTags {
         {
             TagRegistry.registerDefault(
                     TextTag.enclosing(
+                            "rawstyle",
+                            "special",
+                            false,
+                            (nodes, data, parser) -> {
+                                var x = Style.Codecs.CODEC.decode(StringArgOps.INSTANCE, Either.right(data));
+                                if (x.error().isPresent()) {
+                                    System.out.println(x.error().get().message());
+                                    return TextNode.asSingle(nodes);
+                                }
+                                return new StyledNode(nodes, x.result().get().getFirst(), null, null, null);
+                            }
+                    )
+            );
+        }
+
+        {
+            TagRegistry.registerDefault(
+                    TextTag.self(
                             "score",
                             "special",
                             false, (nodes, data, parser) -> {
@@ -491,7 +512,7 @@ public final class BuiltinTags {
 
         {
             TagRegistry.registerDefault(
-                    TextTag.enclosing(
+                    TextTag.self(
                             "selector",
                             "special",
                             false,
@@ -507,11 +528,11 @@ public final class BuiltinTags {
 
         {
             TagRegistry.registerDefault(
-                    TextTag.enclosing(
+                    TextTag.self(
                             "nbt",
                             "special",
                             false, (nodes, data, parser) -> {
-                                var source = data.getNext("source", "");
+                                String source = data.getNext("source", "");
                                 var cleanLine1 = data.getNext("path", "");
 
                                 var type = switch (source) {

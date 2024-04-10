@@ -41,7 +41,6 @@ public record LegacyProvider(TagRegistry registry) implements TagLikeParser.Prov
         var tag = registry.getTag(id);
 
         assert tag != null;
-
         if (tag.selfContained()) {
             context.addNode(tag.nodeCreator().createTextNode(TextNode.array(), StringArgs.ordered(argument, ':'), context.parser()));
         } else {

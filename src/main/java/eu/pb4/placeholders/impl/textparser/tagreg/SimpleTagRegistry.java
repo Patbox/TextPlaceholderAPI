@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public final class SimpleTagRegistry implements TagRegistry {
+    public static final TagRegistry DEFAULT = new SimpleTagRegistry(true);
+    public static final TagRegistry SAFE = new SimpleTagRegistry(true);
 
     static {
         BuiltinTags.register();

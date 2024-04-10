@@ -1,15 +1,18 @@
 package eu.pb4.placeholders.api.arguments;
 
 import net.minecraft.util.function.CharPredicate;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public final class StringArgs {
     private static final StringArgs EMPTY = new StringArgs("");
     private final List<String> ordered = new ArrayList<>();
     private final Map<String, String> keyed = new HashMap<>();
+    private Map<String, StringArgs> keyedMaps = new HashMap<>();
     private final String input;
     private int currentOrdered = 0;
 
@@ -23,25 +26,25 @@ public final class StringArgs {
     }
 
     public static StringArgs keyed(String input, char separator, char map) {
-        return keyed(input, separator, map, SimpleArguments::isWrapCharacter);
+        return keyed(input, separator, map, true, SimpleArguments::isWrapCharacter);
     }
-    public static StringArgs keyed(String input, char separator, char map, CharPredicate wrapCharacters) {
+    public static StringArgs keyed(String input, char separator, char map, boolean hasMaps, CharPredicate wrapCharacters) {
         var args = new StringArgs(input);
-        keyDecomposition(input, separator, map, wrapCharacters, (key, value) -> {
+        keyDecomposition(input, 0, separator, map, wrapCharacters, hasMaps, (char) 0, (key, value) -> {
             if (key != null) {
                 args.keyed.put(key, value != null ? SimpleArguments.unwrap(value, wrapCharacters) : "");
             }
-        });
+        }, args.keyedMaps::put);
 
         return args;
     }
 
     public static StringArgs full(String input, char separator, char map) {
-        return full(input, separator, map, SimpleArguments::isWrapCharacter);
+        return full(input, separator, map, true, SimpleArguments::isWrapCharacter);
     }
-    public static StringArgs full(String input, char separator, char map, CharPredicate wrapCharacters) {
+    public static StringArgs full(String input, char separator, char map, boolean hasMaps, CharPredicate wrapCharacters) {
         var args = new StringArgs(input);
-        keyDecomposition(input, separator, map, wrapCharacters, (key, value) -> {
+        keyDecomposition(input, 0, separator, map, wrapCharacters, hasMaps, (char) 0, (key, value) -> {
             if (key != null) {
                 args.keyed.put(key, value != null ? SimpleArguments.unwrap(value, wrapCharacters) : "");
 
@@ -49,21 +52,42 @@ public final class StringArgs {
                     args.ordered.add(SimpleArguments.unwrap(key, wrapCharacters));
                 }
             }
-        });
+        }, args.keyedMaps::put);
 
         return args;
     }
 
-    private static void keyDecomposition(String input, char separator, char map, CharPredicate isWrap, BiConsumer<@Nullable String, @Nullable String> consumer) {
+    private static int keyDecomposition(String input, int offset, char separator, char map, CharPredicate isWrap, boolean hasMaps, char stopAt, BiConsumer<@Nullable String, @Nullable String> consumer, BiConsumer<String, StringArgs> mapConsumer) {
         String key = null;
         String value = null;
         var b = new StringBuilder();
         char wrap = 0;
-        for (int i = 0; i < input.length(); i++) {
+        int i = offset;
+        for (; i < input.length(); i++) {
             var chr = input.charAt(i);
             var chrN = i != input.length() - 1 ? input.charAt(i + 1) : 0;
+            if (chr == stopAt && wrap == 0) {
+                break;
+            } else if (key != null && b.isEmpty() && hasMaps && (chr == '{' || chr == '[')) {
+                var arg = new StringArgs("");
+                var ti = keyDecomposition(input, i + 1, separator, map, isWrap, true,
+                        chr == '{' ? '}' : ']', (keyx, valuex) -> {
+                            if (keyx != null) {
+                                arg.keyed.put(keyx, valuex != null ? SimpleArguments.unwrap(valuex, isWrap) : "");
 
-            if (chr == map && key == null) {
+                                if (valuex == null) {
+                                    arg.ordered.add(SimpleArguments.unwrap(keyx, isWrap));
+                                }
+                            }
+                        }, arg.keyedMaps::put);
+                if (ti == input.length()) {
+                    b.append(chr);
+                } else {
+                    mapConsumer.accept(key, arg);
+                    key = null;
+                    i = ti;
+                }
+            } else if (chr == map && key == null) {
                 key = b.toString();
                 b = new StringBuilder();
             } else if ((chr == '\\' && chrN != 0) || (chrN != 0 && chr == chrN && isWrap.test(chr))) {
@@ -97,10 +121,16 @@ public final class StringArgs {
         } else if (!b.isEmpty()) {
             consumer.accept(b.toString(), null);
         }
+
+        return i;
     }
 
     public static StringArgs empty() {
         return EMPTY;
+    }
+
+    public static StringArgs emptyNew() {
+        return new StringArgs("");
     }
 
     public String input() {
@@ -150,6 +180,13 @@ public final class StringArgs {
         return x != null ? x : defaultValue;
     }
 
+    public void ifPresent(String key, Consumer<String> valueConsumer) {
+        var val = get(key);
+        if (val != null) {
+            valueConsumer.accept(val);
+        }
+    }
+
     public boolean contains(String key) {
         return this.keyed.containsKey(key);
     }
@@ -164,5 +201,30 @@ public final class StringArgs {
 
     public int size() {
         return Math.max(this.keyed.size(), this.ordered.size());
+    }
+
+    @ApiStatus.Internal
+    public List<String> unsafeOrdered() {
+        return this.ordered;
+    }
+
+    @ApiStatus.Internal
+    public Map<String, String> unsafeKeyed() {
+        return this.keyed;
+    }
+
+
+    @ApiStatus.Internal
+    public Map<String, StringArgs> unsafeKeyedMap() {
+        return this.keyedMaps;
+    }
+
+    @Override
+    public String toString() {
+        return "StringArgs{" +
+                "ordered=" + ordered +
+                ", keyed=" + keyed +
+                ", keyedMaps=" + keyedMaps +
+                '}';
     }
 }

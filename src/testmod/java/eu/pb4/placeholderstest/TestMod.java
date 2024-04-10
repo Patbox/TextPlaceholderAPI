@@ -6,6 +6,7 @@ import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.TextParserUtils;
+import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.*;
@@ -92,6 +93,12 @@ public class TestMod implements ModInitializer {
                 e.printStackTrace();
             }
         }
+        return 0;
+    }
+
+    private static int argTest(CommandContext<ServerCommandSource> context) {
+        context.getSource().sendMessage(Text.literal(
+                StringArgs.full(context.getArgument("arg", String.class), ' ', ':').toString()));
         return 0;
     }
 
@@ -250,7 +257,7 @@ public class TestMod implements ModInitializer {
             player.sendMessage(Text.literal("STF-V2 | ").append(TagParser.SIMPLIFIED_TEXT_FORMAT.parseText(form, ParserContext.of())), false);
             player.sendMessage(Text.literal("STF+QT | ").append(TagParser.QUICK_TEXT_WITH_STF.parseText(form, ParserContext.of())), false);
             player.sendMessage(Text.literal("QT       | ").append(TagParser.QUICK_TEXT.parseText(form, ParserContext.of())), false);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             e.printStackTrace();
         }
         return 0;
@@ -273,7 +280,9 @@ public class TestMod implements ModInitializer {
             dispatcher.register(
                     literal("test").then(argument("text", TextArgumentType.text()).executes(TestMod::test))
             );
-
+            dispatcher.register(
+                    literal("argtest").then(argument("arg", StringArgumentType.greedyString()).executes(TestMod::argTest))
+            );
             dispatcher.register(
                     literal("test2").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2))
             );

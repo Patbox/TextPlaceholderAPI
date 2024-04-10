@@ -7,8 +7,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public interface TagRegistry {
-    TagRegistry DEFAULT = new SimpleTagRegistry(true);
-    TagRegistry SAFE = new SimpleTagRegistry(true);
+    TagRegistry DEFAULT =  SimpleTagRegistry.DEFAULT;
+    TagRegistry SAFE =  SimpleTagRegistry.SAFE;
 
     static TagRegistry create() {
         return new SimpleTagRegistry(false);
@@ -51,10 +51,10 @@ public interface TagRegistry {
     }
 
     static void registerDefault(TextTag tag) {
-        DEFAULT.register(tag);
+        SimpleTagRegistry.DEFAULT.register(tag);
 
         if (tag.userSafe()) {
-            SAFE.register(tag);
+            SimpleTagRegistry.SAFE.register(tag);
         }
     }
 
