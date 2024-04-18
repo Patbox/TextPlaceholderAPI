@@ -25,19 +25,6 @@ public class GeneralUtils {
     public static final boolean IS_DEV = FabricLoader.getInstance().isDevelopmentEnvironment();
     public static final TextNode[] CASTER = new TextNode[0];
 
-    public static final boolean IS_LEGACY_TRANSLATION;
-
-    static {
-        boolean IS_LEGACY1;
-        try {
-            IS_LEGACY1 = FabricLoader.getInstance().getModContainer("minecraft").get().getMetadata().getVersion().compareTo(Version.parse("1.19.4")) < 0;
-        } catch (VersionParsingException e) {
-            IS_LEGACY1 = false;
-            e.printStackTrace();
-        }
-        IS_LEGACY_TRANSLATION = IS_LEGACY1;
-    }
-
     public static String durationToString(long x) {
         long seconds = x % 60;
         long minutes = (x / 60) % 60;
@@ -239,11 +226,8 @@ public class GeneralUtils {
                 }
             }
 
-            if (IS_LEGACY_TRANSLATION) {
-                list.add(TranslatedNode.of(content.getKey(), args.toArray()));
-            } else {
-                list.add(TranslatedNode.ofFallback(content.getKey(), content.getFallback(), args.toArray()));
-            }
+
+            list.add(TranslatedNode.ofFallback(content.getKey(), content.getFallback(), args.toArray()));
         } else if (input.getContent() instanceof ScoreTextContent content) {
             list.add(new ScoreNode(content.getName(), content.getObjective()));
         } else if (input.getContent() instanceof KeybindTextContent content) {

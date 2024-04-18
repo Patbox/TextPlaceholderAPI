@@ -116,7 +116,7 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             Text text = TextParserUtils.formatText(context.getArgument("text", String.class));
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -147,10 +147,10 @@ public class TestMod implements ModInitializer {
             Text text = TextParserV1.DEFAULT.parseNode(form).toText();
             Text text2 = TagParser.SIMPLIFIED_TEXT_FORMAT.parseNode(form).toText();
             player.sendMessage(Text.literal("v1"), false);
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
             player.sendMessage(Text.literal("v2"), false);
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2, context.getSource().getRegistryManager())), false);
             player.sendMessage(text2, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -183,7 +183,7 @@ public class TestMod implements ModInitializer {
             Text text = placeholders.toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
             var textTime = System.nanoTime() - time;
 
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(Texts.parse(context.getSource(), text, context.getSource().getEntity(), 0), false);
             player.sendMessage(Text.literal(
                       "Tag: " + ((tagTime / 1000) / 1000d) + " ms | " +
@@ -205,7 +205,7 @@ public class TestMod implements ModInitializer {
                     Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
                     Map.of("player", player.getName())
             );
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -221,7 +221,7 @@ public class TestMod implements ModInitializer {
                     Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
                     Map.of("player", player.getName())
             ).toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -239,7 +239,7 @@ public class TestMod implements ModInitializer {
                     .simplifiedTextFormat()
                     .build()
                     .parseText(form, PlaceholderContext.of(player).asParserContext());
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2)), false);
+            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2, context.getSource().getRegistryManager())), false);
             player.sendMessage(text2, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -278,7 +278,7 @@ public class TestMod implements ModInitializer {
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) -> {
             dispatcher.register(
-                    literal("test").then(argument("text", TextArgumentType.text()).executes(TestMod::test))
+                    literal("test").then(argument("text", TextArgumentType.text(registryAccess)).executes(TestMod::test))
             );
             dispatcher.register(
                     literal("argtest").then(argument("arg", StringArgumentType.greedyString()).executes(TestMod::argTest))

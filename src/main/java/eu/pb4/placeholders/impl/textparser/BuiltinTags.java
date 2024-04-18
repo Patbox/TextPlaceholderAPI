@@ -114,7 +114,7 @@ public final class BuiltinTags {
                             true,
                             (nodes, data, parser) -> {
                                 return new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).result().orElse(DEFAULT_COLOR));
-                            }
+                            })
             );
         }
         {
