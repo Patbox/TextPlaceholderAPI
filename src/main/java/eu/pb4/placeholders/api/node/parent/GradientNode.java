@@ -5,6 +5,7 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.color.HSV;
 import eu.pb4.placeholders.impl.color.OkLab;
+import eu.pb4.placeholders.impl.color.OkLch;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
@@ -182,6 +183,9 @@ public final class GradientNode extends ParentNode {
         }
 
         static GradientProvider rainbow(float saturation, float value, float frequency, float offset, int gradientLength) {
+            return rainbowHvs(saturation, value, frequency, offset, gradientLength);
+        }
+        static GradientProvider rainbowHvs(float saturation, float value, float frequency, float offset, int gradientLength) {
             final float finalFreqLength = (frequency < 0 ? -frequency : 0);
 
             return (pos, length) ->
@@ -190,11 +194,29 @@ public final class GradientNode extends ParentNode {
                             value));
         }
 
-        static GradientProvider rainbow(float saturation, float value, float frequency, float offset) {
+        static GradientProvider rainbowOkLch(float saturation, float value, float frequency, float offset, int gradientLength) {
             final float finalFreqLength = (frequency < 0 ? -frequency : 0);
 
-            return (pos, length) -> TextColor.fromRgb(HSV.toRgb((((pos * frequency) + (finalFreqLength * length)) / (length + 1) + offset) % 1,
-                    saturation, 1));
+            return (pos, length) ->
+                    TextColor.fromRgb(OkLch.toRgb(value, saturation / 2, (((pos * frequency * MathHelper.TAU) + (finalFreqLength * length)) / (gradientLength + 1) + offset) % 1));
+        }
+
+        static GradientProvider rainbow(float saturation, float value, float frequency, float offset) {
+            return rainbowHvs(saturation, value, frequency, offset);
+        }
+
+        static GradientProvider rainbowHvs(float saturation, float value, float frequency, float offset) {
+            final float finalFreqLength = (frequency < 0 ? -frequency : 0);
+
+            return (pos, length) -> TextColor.fromRgb(HSV.toRgb((((pos * frequency) + (finalFreqLength * length)) / (length + 1) + offset),
+                    saturation, value));
+        }
+
+        static GradientProvider rainbowOkLch(float saturation, float value, float frequency, float offset) {
+            final float finalFreqLength = (frequency < 0 ? -frequency : 0);
+
+            return (pos, length) ->
+                    TextColor.fromRgb(OkLch.toRgb(value, saturation / 2, (((pos * frequency * MathHelper.TAU) + (finalFreqLength * length)) / (length) + offset)));
         }
     }
 }

@@ -236,7 +236,7 @@ public class ParserBuilder {
         } else if (this.quickText) {
             list.add(TagParser.createQuickText(reg));
         } else if (this.simplifiedTextFormat) {
-            list.add(TagParser.createQuickTextWithSTF(reg));
+            list.add(TagParser.createSimplifiedTextFormat(reg));
         }
 
         list.addAll(this.parserList);
