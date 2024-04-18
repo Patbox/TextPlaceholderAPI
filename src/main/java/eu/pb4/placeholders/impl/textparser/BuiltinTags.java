@@ -1,5 +1,6 @@
 package eu.pb4.placeholders.impl.textparser;
 
+
 import com.mojang.datafixers.util.Either;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.arguments.SimpleArguments;
@@ -14,6 +15,7 @@ import eu.pb4.placeholders.impl.StringArgOps;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
@@ -113,7 +115,6 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
                                 return new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).result().orElse(DEFAULT_COLOR));
                             }
-                    )
             );
         }
         {
@@ -316,7 +317,7 @@ public final class BuiltinTags {
                                             try {
                                                 return new HoverNode<>(nodes,
                                                         HoverNode.Action.ITEM_STACK,
-                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbt(StringNbtReader.parse(value)))
+                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbtOrEmpty(DynamicRegistryManager.EMPTY, StringNbtReader.parse(value)))
                                                 );
                                             } catch (Throwable e) {
                                                 var stack = Registries.ITEM.get(Identifier.tryParse(data.get("item", value))).getDefaultStack();
@@ -324,11 +325,6 @@ public final class BuiltinTags {
                                                 var count = data.getNext("count");
                                                 if (count != null) {
                                                     stack.setCount(Integer.parseInt(count));
-                                                }
-
-                                                var nbt = data.getNext("nbt");
-                                                if (nbt != null) {
-                                                    stack.setNbt(StringNbtReader.parse(nbt));
                                                 }
 
                                                 return new HoverNode<>(nodes,
@@ -421,7 +417,7 @@ public final class BuiltinTags {
                                         break;
                                     }
 
-                                    TextColor.parse(part).get().ifLeft(textColors::add);
+                                    TextColor.parse(part).result().ifPresent(textColors::add);
                                 }
                                 return new GradientNode(nodes, switch (type) {
                                     case "oklab" -> GradientNode.GradientProvider.colorsOkLab(textColors);
@@ -452,7 +448,7 @@ public final class BuiltinTags {
                                         break;
                                     }
 
-                                    TextColor.parse(part).get().ifLeft(textColors::add);
+                                    TextColor.parse(part).result().ifPresent(textColors::add);
                                 }
                                 // We cannot have an empty list!
                                 if (textColors.isEmpty()) {
