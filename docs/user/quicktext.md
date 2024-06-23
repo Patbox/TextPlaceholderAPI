@@ -1,4 +1,4 @@
-# QuickText Format (Beta)
+# QuickText Format
 
 !!! warn inline end
 
@@ -169,7 +169,7 @@ There 2 types of gradients:
 - `#!xml <rainbow [frequency] [saturation] [offset]>`/`<rainbow f:[frequency] s:[saturation] o:[offset]>`/`#!xml <rb [...]>` - It's simple rainbow gradient. All arguments are
   optional (`#!xml <ranbow>` is still valid) and they take numbers between 0 and 1 (`0.3` for example)
 
-### Clear (2.1.3+)
+### Clear
 
 !!! note inline end
 

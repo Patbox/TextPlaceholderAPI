@@ -15,6 +15,7 @@ generators.
 - [Using placeholders](user/general)
 - [Default placeholder list](user/default-placeholders)
 - [Mod placeholder list](user/mod-placeholders)
+- [QuickText Format](user/quicktext)
 - [Simplified Text Format](user/text-format)
 
 ## For developers

@@ -167,7 +167,7 @@ public class TestMod implements ModInitializer {
                             TextNode.asSingle(
                                     MarkdownLiteParserV1.ALL.parseNodes(
                                             TextNode.asSingle(
-                                                    TextParserV1.DEFAULT.parseNodes(new LiteralNode(context.getArgument("text", String.class)))
+                                                    TagParser.DEFAULT.parseNodes(new LiteralNode(context.getArgument("text", String.class)))
                                             )
                                     )
                             )

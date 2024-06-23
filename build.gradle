@@ -2,6 +2,7 @@ plugins {
 	id 'fabric-loom' version '1.6.+'
 	id 'maven-publish'
 	id "com.modrinth.minotaur" version "2.+"
+	id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_21
@@ -149,5 +150,34 @@ if (System.getenv("MODRINTH")) {
 
 	remapJar {
 		finalizedBy project.tasks.modrinth
+	}
+}
+
+
+curseforge {
+	if (System.getenv("CURSEFORGE")) {
+		apiKey = System.getenv("CURSEFORGE")
+
+		project {
+			id = "1037459"
+			releaseType = "release"
+			changelog = System.getenv("CHANGELOG")
+			changelogType = "markdown"
+			addGameVersion((project.minecraft_version.contains("-") ? ((String) project.minecraft_version.split("-")[0] + "-Snapshot") : project.minecraft_version))
+			addGameVersion "Fabric"
+			addGameVersion "Quilt"
+			mainArtifact(remapJar)
+
+			afterEvaluate {
+				uploadTask.dependsOn("remapJar")
+			}
+		}
+	}
+
+	options {
+		forgeGradleIntegration = false
+	}
+	remapJar {
+		finalizedBy project.tasks.curseforge
 	}
 }

@@ -10,6 +10,7 @@ nav:
             - user/general.md
             - user/default-placeholders.md
             - user/mod-placeholders.md
+            - user/quicktext.md
             - user/text-format.md
     -   For Developers:
             - dev/getting-started.md

@@ -195,9 +195,11 @@ public final class BuiltinTags {
             TagRegistry.registerDefault(TextTag.enclosing("click", "click_action", false,
                     (nodes, data, parser) -> {
                         if (!data.isEmpty()) {
+                            var type = data.getNext("type");
+                            var value = data.getNext("value", "");
                             for (ClickEvent.Action action : ClickEvent.Action.values()) {
-                                if (action.asString().equals(data.getNext("type"))) {
-                                    return new ClickActionNode(nodes, action, new LiteralNode(data.getNext("value", "")));
+                                if (action.asString().equals(type)) {
+                                    return new ClickActionNode(nodes, action, new LiteralNode(value));
                                 }
                             }
                         }
@@ -297,9 +299,13 @@ public final class BuiltinTags {
                             true,
                             (nodes, data, parser) -> {
                                 try {
-                                    var type = data.getNext("type", "").toLowerCase(Locale.ROOT);
+                                    var type = data.get("type");
 
-                                    if (data.size() > 1) {
+                                    if (type != null || data.size() > 1) {
+                                        if (type == null) {
+                                            type = data.getNext("type", "");
+                                        }
+                                        type = type.toLowerCase(Locale.ROOT);
                                         if (type.equals("show_text") || type.equals("text")) {
                                             return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(
                                                     data.getNext("value", "")
@@ -336,7 +342,7 @@ public final class BuiltinTags {
                                             return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", type)));
                                         }
                                     } else {
-                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", type)));
+                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.getNext("value")));
                                     }
                                 } catch (Exception e) {
                                     // Shut

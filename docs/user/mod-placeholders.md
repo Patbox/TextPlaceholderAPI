@@ -107,6 +107,18 @@ These placeholders are provided by other mods. Some are build in directly, while
 
 - `%styled-nicknames:display_name%` - Either nickname or default player name. (skips other formatting mods)
 
+### [Text Placeholder API Expressions](https://modrinth.com/mod/text-placeholder-api-expr)
+- `%expr:math [Math expressions and ${placeholder}s]%` - See mod page for list of available expressions and functions.
+- `%expr:ifeq [aIsMath] [a] [bIsMath] [b] [cIsMath] [c] [dIsMath] [d]%` - Compare if `a` and `b` are equal, and return `c` or `d` accordingly.
+- `%expr:iflt [a] [b] [cIsMath] [c] [dIsMath] [d]%` - Compare if `a` is less than `b`, and return `c` or `d` accordingly.
+- `%expr:math [a] [b] [cIsMath] [c] [dIsMath] [d]%` - Compare if `a` is greater than `b`, and return `c` or `d` accordingly.
+- `%expr:pad [length] [str] [c]%` - Pad both sides of `str` with `c` until it is `length` long.
+- `%expr:padleft [length] [str] [c]%` - Pad left side of `str` with `c` until it is `length` long.
+- `%expr:padright [length] [str] [c]%` - Pad right side of `str` with `c` until it is `length` long.
+- `%expr:padmatch [match] [str] [c]%` - Pad both sides of `str` with `c` until it is the same length as `match`.
+- `%expr:padmatchleft [match] [str] [c]%` - Pad left side of `str` with `c` until it is the same length as `match`.
+- `%expr:padmatchright [match] [str] [c]%` - Pad right side of `str` with `c` until it is the same length as `match`.
+
 ### [Vanish](https://modrinth.com/mod/vanish)
 
 - `%vanish:vanished%` - Displays a text (configurable via config) if a player is vanished.

@@ -68,7 +68,7 @@ public final class StringArgs {
             var chrN = i != input.length() - 1 ? input.charAt(i + 1) : 0;
             if (chr == stopAt && wrap == 0) {
                 break;
-            } else if (key != null && b.isEmpty() && hasMaps && (chr == '{' || chr == '[')) {
+            } else if (key != null && b.isEmpty() && hasMaps && (chr == '{' || chr == '[') && wrap == 0) {
                 var arg = new StringArgs("");
                 var ti = keyDecomposition(input, i + 1, separator, map, isWrap, true,
                         chr == '{' ? '}' : ']', (keyx, valuex) -> {
@@ -87,7 +87,7 @@ public final class StringArgs {
                     key = null;
                     i = ti;
                 }
-            } else if (chr == map && key == null) {
+            } else if (chr == map && wrap == 0 && key == null) {
                 key = b.toString();
                 b = new StringBuilder();
             } else if ((chr == '\\' && chrN != 0) || (chrN != 0 && chr == chrN && isWrap.test(chr))) {
