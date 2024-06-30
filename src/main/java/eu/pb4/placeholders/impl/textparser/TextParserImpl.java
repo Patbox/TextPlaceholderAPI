@@ -7,7 +7,6 @@ import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
-import io.netty.util.internal.UnstableApi;
 import net.minecraft.text.*;
 import org.jetbrains.annotations.ApiStatus;
 

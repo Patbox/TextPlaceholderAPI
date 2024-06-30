@@ -1,14 +1,12 @@
 plugins {
-	id 'fabric-loom' version '1.6.+'
+	id 'java'
 	id 'maven-publish'
-	id "com.modrinth.minotaur" version "2.+"
-	id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
 sourceCompatibility = JavaVersion.VERSION_21
 targetCompatibility = JavaVersion.VERSION_21
 
-archivesBaseName = project.archives_base_name
+archivesBaseName = project.archives_base_name + "-standalone"
 version = project.mod_version
 group = project.maven_group
 
@@ -22,54 +20,28 @@ repositories {
 
 	maven { url "https://maven.nucleoid.xyz" }
 	maven { url "https://jitpack.io" }
+	maven {
+		url "https://libraries.minecraft.net"
+	}
+
+	mavenCentral()
 }
 
 sourceSets {
-	testmod {
-		runtimeClasspath += main.runtimeClasspath
-		compileClasspath += main.compileClasspath
-	}
 }
 
-loom {
-	runs {
-		testmodClient {
-			client()
-			ideConfigGenerated project.rootProject == project
-			name = "Test Mod Client"
-			source sourceSets.testmod
-		}
-		testmodServer {
-			server()
-			ideConfigGenerated project.rootProject == project
-			name = "Test Mod Server"
-			source sourceSets.testmod
-		}
-	}
-}
 
 dependencies {
-	// To change the versions see the gradle.properties file
-	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
-
-	// Fabric API. This is technically optional, but you probably want it anyway.
-	//modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modCompileOnly("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
-	modLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
-
-	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
-	// You may need to force-disable transitiveness on them.
-	testmodImplementation sourceSets.main.output
+	compileOnly 'org.jetbrains:annotations:24.1.0'
+	compileOnly 'com.mojang:datafixerupper:8.0.16'
 }
 
 processResources {
 	inputs.property "version", project.version
 
-	filesMatching("fabric.mod.json") {
+	/*filesMatching("fabric.mod.json") {
 		expand "version": project.version
-	}
+	}*/
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -104,13 +76,7 @@ def env = System.getenv()
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
-			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
-			}
-			artifact(sourcesJar) {
-				builtBy remapSourcesJar
-			}
+
 		}
 	}
 
@@ -133,51 +99,5 @@ publishing {
 				mavenLocal()
 			}
 		}
-	}
-}
-
-if (System.getenv("MODRINTH")) {
-	modrinth {
-		token = System.getenv("MODRINTH")
-		projectId = 'eXts2L7r'// The ID of your modrinth project, slugs will not work.
-		versionNumber = "" + version // The version of the mod to upload.
-		versionType = "release"
-		uploadFile = remapJar // This links to a task that builds your mod jar and sets "uploadFile" to the mod jar.
-		gameVersions = [((String) project.minecraft_version)]
-		changelog = System.getenv("CHANGELOG")
-		loaders = ["fabric", "quilt"]
-	}
-
-	remapJar {
-		finalizedBy project.tasks.modrinth
-	}
-}
-
-
-curseforge {
-	if (System.getenv("CURSEFORGE")) {
-		apiKey = System.getenv("CURSEFORGE")
-
-		project {
-			id = "1037459"
-			releaseType = "release"
-			changelog = System.getenv("CHANGELOG")
-			changelogType = "markdown"
-			addGameVersion((project.minecraft_version.contains("-") ? ((String) project.minecraft_version.split("-")[0] + "-Snapshot") : project.minecraft_version))
-			addGameVersion "Fabric"
-			addGameVersion "Quilt"
-			mainArtifact(remapJar)
-
-			afterEvaluate {
-				uploadTask.dependsOn("remapJar")
-			}
-		}
-	}
-
-	options {
-		forgeGradleIntegration = false
-	}
-	remapJar {
-		finalizedBy project.tasks.curseforge
 	}
 }

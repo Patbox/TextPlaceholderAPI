@@ -77,7 +77,7 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
         public static final Action<TextNode, Text> TEXT = new Action<>(HoverEvent.Action.SHOW_TEXT);
     }
 
-    public record EntityNodeContent(EntityType<?>entityType, UUID uuid, @Nullable TextNode name) {
+    public record EntityNodeContent(EntityType<?> entityType, UUID uuid, @Nullable TextNode name) {
         public HoverEvent.EntityContent toVanilla(ParserContext context) {
             return new HoverEvent.EntityContent(this.entityType, this.uuid, this.name != null ? this.name.toText(context, true) : null);
         }
