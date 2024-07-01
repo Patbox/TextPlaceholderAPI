@@ -8,10 +8,25 @@ import java.util.function.Function;
 
 public class MutableText implements Text {
     private Style style = Style.EMPTY;
-    private List<Text> siblings = new ArrayList<>();
+    private final List<Text> siblings = new ArrayList<>();
+    private final TextContent contant;
+    public MutableText(TextContent contant) {
+        this.contant = contant;
+    }
 
+    public MutableText(TextContent contant, Style style, List<Text> siblings) {
+        this.contant = contant;
+        this.style = style;
+        this.siblings.addAll(siblings);
+    }
 
     public MutableText formatted(Formatting... formattings) {
+        this.setStyle(this.getStyle().withFormatting(formattings));
+        return this;
+    }
+
+    public Text withColor(int i) {
+        this.setStyle(this.getStyle().withColor(i));
         return this;
     }
     public MutableText setStyle(Style style) {
@@ -25,27 +40,32 @@ public class MutableText implements Text {
 
     @Override
     public MutableText copyContentOnly() {
-        return this;
+        return new MutableText(this.contant).setStyle(this.style);
     }
 
     @Override
     public MutableText copy() {
-        return this;
+        var c = copyContentOnly();
+        c.siblings.addAll(this.siblings);
+        return c;
     }
 
     @Override
     public String getString() {
-        return "";
+        var b = new StringBuilder();
+        b.append(this.contant.getString());
+        this.siblings.forEach(x -> b.append(x.getString()));
+        return b.toString();
     }
 
     @Override
     public TextContent getContent() {
-        return null;
+        return this.contant;
     }
 
     @Override
     public List<Text> getSiblings() {
-        return null;
+        return this.siblings;
     }
 
     public MutableText append(Text mutableText) {
@@ -53,12 +73,8 @@ public class MutableText implements Text {
         return this;
     }
 
-    public void styled(Function<Style, Style> styled) {
+    public MutableText styled(Function<Style, Style> styled) {
         this.setStyle(styled.apply(this.getStyle()));
-    }
-
-    public Text withColor(int i) {
-        this.setStyle(this.getStyle().withColor(i));
         return this;
     }
 }

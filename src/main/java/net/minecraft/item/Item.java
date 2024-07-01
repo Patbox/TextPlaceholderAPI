@@ -1,7 +1,9 @@
 package net.minecraft.item;
 
-public class Item {
+import net.minecraft.util.Identifier;
+
+public record Item(Identifier id) {
     public ItemStack getDefaultStack() {
-        return new ItemStack();
+        return id.equals(ItemStack.EMPTY.getItemId()) ? ItemStack.EMPTY : new ItemStack(id, 1);
     }
 }

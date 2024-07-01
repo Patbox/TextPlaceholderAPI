@@ -18,4 +18,9 @@ public record NbtTextContent(String path, boolean shouldInterpret, Optional<Text
     public NbtDataSource getDataSource() {
         return dataSource;
     }
+
+    @Override
+    public String getString() {
+        return "<nbt>";
+    }
 }

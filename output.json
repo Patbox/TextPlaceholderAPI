@@ -1,0 +1,66 @@
+{
+  "text": "",
+  "extra": [
+    {
+      "text": "Hello world!",
+      "bold": true,
+      "color": "red"
+    },
+    {
+      "text": "\n\nTesting standalone build of "
+    },
+    {
+      "text": "Text Placeholder API",
+      "bold": true,
+      "color": "gold"
+    },
+    {
+      "text": " by "
+    },
+    {
+      "text": "Patbox"
+    },
+    {
+      "text": "!\n\n"
+    },
+    {
+      "text": "Base stuff works, but more is needed! The Placeholder API part isn't even\nmodified, instead it mocks rest of used MC code!",
+      "italic": true
+    },
+    {
+      "text": "\n\n"
+    },
+    {
+      "text": "Was it bad idea? Maybe.",
+      "color": "yellow"
+    },
+    {
+      "text": "\n\n"
+    },
+    {
+      "text": "",
+      "extra": [
+        {
+          "text": "T",
+          "color": "#ff0000"
+        },
+        {
+          "text": "a",
+          "color": "#ffff00"
+        },
+        {
+          "text": "t",
+          "color": "#ff00"
+        },
+        {
+          "text": "e",
+          "color": "#ffff"
+        },
+        {
+          "text": "r",
+          "color": "#ff"
+        }
+      ]
+    }
+  ]
+}

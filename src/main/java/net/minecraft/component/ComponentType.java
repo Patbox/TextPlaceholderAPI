@@ -1,4 +1,6 @@
 package net.minecraft.component;
 
-public record ComponentType() {
+import net.minecraft.util.Identifier;
+
+public record ComponentType(Identifier id) {
 }

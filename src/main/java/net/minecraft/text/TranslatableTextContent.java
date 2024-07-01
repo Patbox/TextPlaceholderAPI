@@ -16,4 +16,9 @@ public record TranslatableTextContent(String key, @Nullable String fallback, Obj
     public String getFallback() {
         return this.fallback;
     }
+
+    @Override
+    public String getString() {
+        return "<lang " + key + ">";
+    }
 }

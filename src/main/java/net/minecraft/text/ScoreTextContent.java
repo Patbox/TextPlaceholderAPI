@@ -8,4 +8,9 @@ public record ScoreTextContent(String name, String objective) implements TextCon
     public String getObjective() {
         return objective;
     }
+
+    @Override
+    public String getString() {
+        return "<score " + name + " " + objective + ">";
+    }
 }
