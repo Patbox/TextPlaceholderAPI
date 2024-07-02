@@ -6,37 +6,42 @@
       "bold": true,
       "color": "red"
     },
-    {
-      "text": "\n\nTesting standalone build of "
-    },
+    "\n\nTesting standalone build of ",
     {
       "text": "Text Placeholder API",
       "bold": true,
       "color": "gold"
     },
-    {
-      "text": " by "
-    },
-    {
-      "text": "Patbox"
-    },
-    {
-      "text": "!\n\n"
-    },
+    " by ",
+    "Patbox",
+    "!\n\n",
     {
       "text": "Base stuff works, but more is needed! The Placeholder API part isn't even\nmodified, instead it mocks rest of used MC code!",
       "italic": true
     },
+    "\n\n",
     {
-      "text": "\n\n"
+      "translate": "item.minecraft.apple",
+      "fallback": "Apple",
+      "with": [],
+      "hoverEvent": {
+        "contents": {
+          "text": "Attack with ",
+          "extra": [
+            {
+              "keybind": "key.attack"
+            }
+          ]
+        },
+        "action": "show_text"
+      }
     },
+    "\n",
     {
       "text": "Was it bad idea? Maybe.",
       "color": "yellow"
     },
-    {
-      "text": "\n\n"
-    },
+    "\n\n",
     {
       "text": "",
       "extra": [

@@ -23,7 +23,7 @@ public class Main {
             var text = node.toText(PlaceholderContext.of(new ServerPlayerEntity("Patbox")));
             var gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
-            Files.writeString(Path.of("output.json"), gson.toJson(TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, text).result().get()), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            Files.writeString(Path.of("output.json"), gson.toJson(TextCodecs.CODEC.encodeStart(JsonOps.INSTANCE, text).getOrThrow()), StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
         } catch (Throwable e) {
             e.printStackTrace();
         }

@@ -1,4 +1,4 @@
 package net.minecraft.text;
 
-public class NbtDataSource {
+public interface NbtDataSource {
 }

@@ -8,7 +8,6 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Rarity;
-import org.checkerframework.checker.units.qual.N;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
@@ -16,23 +15,23 @@ import java.util.Map;
 
 public class ItemStack {
     public static final ItemStack EMPTY = new ItemStack(Identifier.of("air"), 0);
+    private final Identifier identifier;
+    private final Map<Identifier, JsonElement> components = new HashMap<>();
+    private int count = 1;
+
 
     public ItemStack(Identifier air, int i) {
         this.identifier = air;
         this.count = i;
     }
+    public ItemStack(Identifier air, int i, Map<Identifier, JsonElement> components) {
+        this.identifier = air;
+        this.count = i;
+        this.components.putAll(components);
+    }
 
     public static ItemStack fromNbtOrEmpty(DynamicRegistryManager empty, StringNbtReader parse) {
         return EMPTY;
-    }
-
-
-    private int count = 1;
-    private final Identifier identifier;
-    private final Map<Identifier, JsonElement> components = new HashMap<>();
-
-    public void setCount(int i) {
-        this.count = count;
     }
 
     public boolean isEmpty() {
@@ -46,6 +45,7 @@ public class ItemStack {
     public boolean contains(ComponentType type) {
         return components.containsKey(type.id());
     }
+
     public boolean contains(Identifier type) {
         return components.containsKey(type);
     }
@@ -69,5 +69,17 @@ public class ItemStack {
 
     public Identifier getItemId() {
         return this.identifier;
+    }
+
+    public int getCount() {
+        return this.count;
+    }
+
+    public void setCount(int i) {
+        this.count = i;
+    }
+
+    public Map<Identifier, JsonElement> getComponents() {
+        return this.components;
     }
 }
