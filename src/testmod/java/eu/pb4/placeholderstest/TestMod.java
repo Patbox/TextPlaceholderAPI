@@ -275,6 +275,16 @@ public class TestMod implements ModInitializer {
         return 0;
     }
 
+    private static int test8(CommandContext<ServerCommandSource> context) {
+        try {
+            var parser = NodeParser.builder().quickText().globalPlaceholders().build();
+            context.getSource().sendMessage(parser.parseText(StringArgumentType.getString(context, "text"), PlaceholderContext.of(context.getSource()).asParserContext()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
     public void onInitialize() {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, dedicated) -> {
             dispatcher.register(
@@ -319,6 +329,11 @@ public class TestMod implements ModInitializer {
             dispatcher.register(
                     literal("test7").executes(TestMod::test7)
             );
+
+            dispatcher.register(
+                    literal("test8").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test8))
+            );
+
         });
     }
 

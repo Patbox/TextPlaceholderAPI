@@ -113,7 +113,7 @@ public final class BuiltinTags {
                             "color",
                             true,
                             (nodes, data, parser) -> {
-                                return new ColorNode(nodes, TextColor.parse(data.get("value", 0, "white")).result().orElse(DEFAULT_COLOR));
+                                return new DynamicColorNode(nodes, parser.parseNode(data.get("value", 0, "white")));
                             })
             );
         }
@@ -199,7 +199,7 @@ public final class BuiltinTags {
                             var value = data.getNext("value", "");
                             for (ClickEvent.Action action : ClickEvent.Action.values()) {
                                 if (action.asString().equals(type)) {
-                                    return new ClickActionNode(nodes, action, new LiteralNode(value));
+                                    return new ClickActionNode(nodes, action, parser.parseNode(value));
                                 }
                             }
                         }
@@ -216,7 +216,7 @@ public final class BuiltinTags {
                             false,
                             (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, new LiteralNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -234,7 +234,7 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(data.getNext("value", "")));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, parser.parseNode(data.getNext("value", "")));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -251,7 +251,7 @@ public final class BuiltinTags {
                             false, (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, new LiteralNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -269,7 +269,7 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, new LiteralNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -285,7 +285,7 @@ public final class BuiltinTags {
                             "click_action",
                             true, (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, new LiteralNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }));
@@ -358,7 +358,7 @@ public final class BuiltinTags {
                             List.of("insertion"),
                             "click_action",
                             false,
-                            (nodes, data, parser) -> new InsertNode(nodes, new LiteralNode(data.get("value", 0)))));
+                            (nodes, data, parser) -> new InsertNode(nodes, parser.parseNode(data.get("value", 0)))));
         }
 
         {
