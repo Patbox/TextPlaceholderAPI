@@ -6,6 +6,7 @@ import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.impl.GeneralUtils;
+import net.minecraft.class_10104;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
@@ -534,10 +535,15 @@ public final class TextTagsV1 {
                             "special",
                             false, (tag, data, input, handlers, endAt) -> {
                                 String[] lines = data.split(":");
+                                String pattern = restoreOriginalEscaping(cleanArgument(lines[0]));
+                                Optional<class_10104> optional = class_10104.method_62667(pattern).result();
+                                if (optional.isEmpty()) {
+                                    return TextParserV1.TagNodeValue.EMPTY;
+                                }
                                 if (lines.length == 2) {
-                                    return new TextParserV1.TagNodeValue(new SelectorNode(restoreOriginalEscaping(cleanArgument(lines[0])), Optional.of(TextNode.asSingle(recursiveParsing(restoreOriginalEscaping(cleanArgument(lines[1])), handlers, null).nodes()))), 0);
+                                    return new TextParserV1.TagNodeValue(new SelectorNode(optional.get(), Optional.of(TextNode.asSingle(recursiveParsing(restoreOriginalEscaping(cleanArgument(lines[1])), handlers, null).nodes()))), 0);
                                 } else if (lines.length == 1) {
-                                    return new TextParserV1.TagNodeValue(new SelectorNode(restoreOriginalEscaping(cleanArgument(lines[0])), Optional.empty()), 0);
+                                    return new TextParserV1.TagNodeValue(new SelectorNode(optional.get(), Optional.empty()), 0);
                                 }
                                 return TextParserV1.TagNodeValue.EMPTY;
                             }

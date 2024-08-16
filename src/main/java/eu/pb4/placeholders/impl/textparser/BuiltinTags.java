@@ -12,6 +12,7 @@ import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.StringArgOps;
+import net.minecraft.class_10104;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
@@ -522,7 +523,11 @@ public final class BuiltinTags {
                                 var sel = data.getNext("pattern", "@p");
                                 var arg = data.getNext("separator");
 
-                                return new SelectorNode(sel, arg != null ? Optional.of(TextNode.of(arg)) : Optional.empty());
+                                Optional<class_10104> selector = class_10104.method_62667(sel).result();
+                                if (selector.isEmpty()) {
+                                    return TextNode.empty();
+                                }
+                                return new SelectorNode(selector.get(), arg != null ? Optional.of(TextNode.of(arg)) : Optional.empty());
                             }
                     )
             );
