@@ -17,6 +17,21 @@ These placeholders are provided by other mods. Some are build in directly, while
 - `%afkplus:invulnerable%` - Returns a basic tag to display the status if a player is marked as "invulnerable" using the "disableDamage"
   features.  It is also used internally under the default "[AFK]" tag method, with "[AFK:I]", for example.
 
+### [Fuji](https://modrinth.com/mod/fuji)
+- `%fuji:player_mined%` - Sum of mining blocks of a player.
+- `%fuji:server_mined%` - Sum of mining blocks of a server.
+- `%fuji:player_placed%` - Sum of placed blocks of a player.
+- `%fuji:server_placed%` - Sum of placed blocks of a server.
+- `%fuji:player_killed%` - Sum of killed entities of a player.
+- `%fuji:server_killed%` - Sum of killed entities of a server.
+- `%fuji:player_moved%` - Sum of moved distance of a player.
+- `%fuji:server_moved%` - Sum of moved distance of a server.
+- `%fuji:player_playtime%` - Sum of playtime of a player.
+- `%fuji:server_playtime%` - Sum of playtime of a server.
+- `%fuji:item%` - Create the display of main-hand item.
+- `%fuji:inv%` - Create the display of inventory.
+- `%fuji:ender%` - Create the display of ender-chest.
+
 ### [Get Off My Lawn ReServed](https://pb4.eu/#get-off-my-lawn)
 
 - `%goml:claim_owners%`/`%goml:claim_owners [no owners text]%` - Returns a list of claim owners.
