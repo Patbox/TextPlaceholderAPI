@@ -44,3 +44,6 @@ and [placeholders from mods here](/user/mod-placeholders).
   [Modrinth](https://modrinth.com/mod/discord4fabric),
   [Github](https://github.com/Reimnop/Discord4Fabric)
 
+- Fuji -
+  [Modrinth](https://modrinth.com/mod/fuji),
+  [Github](https://github.com/sakurawald/fuji-fabric/)
