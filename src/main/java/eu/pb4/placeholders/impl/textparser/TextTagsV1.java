@@ -6,7 +6,6 @@ import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.impl.GeneralUtils;
-import net.minecraft.class_10104;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.StringNbtReader;
@@ -536,7 +535,7 @@ public final class TextTagsV1 {
                             false, (tag, data, input, handlers, endAt) -> {
                                 String[] lines = data.split(":");
                                 String pattern = restoreOriginalEscaping(cleanArgument(lines[0]));
-                                Optional<class_10104> optional = class_10104.method_62667(pattern).result();
+                                Optional<ParsedSelector> optional = ParsedSelector.parse(pattern).result();
                                 if (optional.isEmpty()) {
                                     return TextParserV1.TagNodeValue.EMPTY;
                                 }
