@@ -522,7 +522,11 @@ public final class BuiltinTags {
                                 var sel = data.getNext("pattern", "@p");
                                 var arg = data.getNext("separator");
 
-                                return new SelectorNode(sel, arg != null ? Optional.of(TextNode.of(arg)) : Optional.empty());
+                                Optional<ParsedSelector> selector = ParsedSelector.parse(sel).result();
+                                if (selector.isEmpty()) {
+                                    return TextNode.empty();
+                                }
+                                return new SelectorNode(selector.get(), arg != null ? Optional.of(TextNode.of(arg)) : Optional.empty());
                             }
                     )
             );

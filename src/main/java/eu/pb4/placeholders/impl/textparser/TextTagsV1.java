@@ -534,10 +534,15 @@ public final class TextTagsV1 {
                             "special",
                             false, (tag, data, input, handlers, endAt) -> {
                                 String[] lines = data.split(":");
+                                String pattern = restoreOriginalEscaping(cleanArgument(lines[0]));
+                                Optional<ParsedSelector> optional = ParsedSelector.parse(pattern).result();
+                                if (optional.isEmpty()) {
+                                    return TextParserV1.TagNodeValue.EMPTY;
+                                }
                                 if (lines.length == 2) {
-                                    return new TextParserV1.TagNodeValue(new SelectorNode(restoreOriginalEscaping(cleanArgument(lines[0])), Optional.of(TextNode.asSingle(recursiveParsing(restoreOriginalEscaping(cleanArgument(lines[1])), handlers, null).nodes()))), 0);
+                                    return new TextParserV1.TagNodeValue(new SelectorNode(optional.get(), Optional.of(TextNode.asSingle(recursiveParsing(restoreOriginalEscaping(cleanArgument(lines[1])), handlers, null).nodes()))), 0);
                                 } else if (lines.length == 1) {
-                                    return new TextParserV1.TagNodeValue(new SelectorNode(restoreOriginalEscaping(cleanArgument(lines[0])), Optional.empty()), 0);
+                                    return new TextParserV1.TagNodeValue(new SelectorNode(optional.get(), Optional.empty()), 0);
                                 }
                                 return TextParserV1.TagNodeValue.EMPTY;
                             }
