@@ -20,7 +20,7 @@ While closing ones are technically optional, without them formatting will contin
 an input text or special `#!xml </*>` tag. Some tags support arguments, which are defined
 after the name in ordered inline fashion (for example `#!xml <color #FF3333>`) or as key-value pair (for example `#!xml <hover value:'Hello!'>`).
 You are allowed to mix inline and key-value defined arguments (in `KEY:VALUE` format). In that case, any key defined argument will be skipped from being read as ordered one.
-Arguments spaces are required to be wrapped in a `'`, `"` or ``` symbols, with starting and ending symbols matching
+Arguments spaces are required to be wrapped in a `'`, `"` or ``` ` ``` symbols, with starting and ending symbols matching
 (for example `#!xml <hover show_text '<red>Hello!'>...`, `#!xml <hover type:show_text value:'<red>Hello!'>...`).
 If you want to use character used for wrapping, you can prefix it with backslash (for example as `\'`) or type it twice).
 
