@@ -13,7 +13,7 @@ used by bukkit and bukkit-based plugins.
 
 ## Structure
 
-Formatting is build on concept of tags, comparable to html.
+Formatting is built on concept of tags, comparable to HTML.
 
 Most of them come in pairs of a starting (`#!xml <tag>`) and closing one (`#!xml </tag>` for closing last tag of selected type or `#!xml <‍/‍>` for last opened one.
 While closing ones are technically optional, without them formatting will continue until end of

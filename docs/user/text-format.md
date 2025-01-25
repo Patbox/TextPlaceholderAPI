@@ -12,7 +12,7 @@ used by bukkit and bukkit-based plugins.
 
 ## Structure
 
-Formatting is build on concept of tags.
+Formatting is built on concept of tags.
 
 ??? warning inline end "Nesting Quotations"
 
@@ -120,10 +120,10 @@ Hover tag allows adding simple hover on text. It can be used to display addition
 
       This tag should be closed.
 
-This tag allows you to change font to any build in one or one provided by resource pack.
+This tag allows you to change font to any built in one or one provided by resource pack.
 
 You can use it by simply adding `#!xml <font:[value]>`, where `[value]` is just a font name.
-Minecraft has 3 build-in fonts: `default`, `uniform` and `alt`.
+Minecraft has 3 built-in fonts: `default`, `uniform` and `alt`.
 
 ### Inserting
 

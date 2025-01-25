@@ -1,6 +1,6 @@
 # Mod placeholders list
 
-These placeholders are provided by other mods. Some are build in directly, while others require an addon.
+These placeholders are provided by other mods. Some are built-in directly, while others require an addon.
 
 ## List of placeholders
 
