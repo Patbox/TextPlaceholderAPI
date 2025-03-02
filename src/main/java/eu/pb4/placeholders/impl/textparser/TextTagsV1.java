@@ -325,10 +325,10 @@ public final class TextTagsV1 {
                                                 var nbt = StringNbtReader.readCompound(restoreOriginalEscaping(cleanArgument(lines[1])));
                                                 return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.LAZY_ITEM_STACK,
                                                                                  new HoverNode.LazyItemStackNodeContent<>(
-                                                                                         Identifier.of(nbt.getString("id")),
-                                                                                         nbt.contains("count") ? nbt.getInt("count") : 1,
+                                                                                         Identifier.of(nbt.getString("id", "")),
+                                                                                         nbt.contains("count") ? nbt.getInt("count", 1) : 1,
                                                                                          NbtOps.INSTANCE,
-                                                                                         nbt.contains("components") ? nbt.getCompound("components") : null
+                                                                                         nbt.contains("components") ? nbt.getCompound("components").orElse(null) : null
                                                                                  )
                                                 ));
                                             } catch (Throwable e) {

@@ -367,10 +367,10 @@ public final class BuiltinTags {
                                                     var nbt = StringNbtReader.readCompound(value);
 
                                                     return new HoverNode<>(nodes, HoverNode.Action.LAZY_ITEM_STACK,
-                                                                           new HoverNode.LazyItemStackNodeContent<>(Identifier.of(nbt.getString("id")),
-                                                                                                                    nbt.contains("count") ? nbt.getInt("count") : 1,
+                                                                           new HoverNode.LazyItemStackNodeContent<>(Identifier.of(nbt.getString("id", "")),
+                                                                                                                    nbt.contains("count") ? nbt.getInt("count", 1) : 1,
                                                                                                                     NbtOps.INSTANCE,
-                                                                                                                    nbt.contains("components") ? nbt.getCompound("components") : null
+                                                                                                                    nbt.contains("components") ? nbt.getCompound("components").orElse(null) : null
                                                                            )
                                                     );
                                                 }
