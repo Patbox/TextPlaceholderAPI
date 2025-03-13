@@ -14,7 +14,7 @@ You can check list of [build in placeholders here](/user/default-placeholders)
 and [placeholders from mods here](/user/mod-placeholders).
 
 ### List of mods supporting displaying Placeholder API's placeholders:
-
+ 
 !!! question inline end "Missing Your Mod?"
 
     Are you a mod dev, and your mod is missing?
