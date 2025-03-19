@@ -16,7 +16,7 @@ import java.util.function.Function;
  * Allows you to create stacked parser in most "correct" and compatible way.
  */
 public class ParserBuilder {
-    private final Map<TagLikeParser.Format, TagLikeParser.Provider> tagLike = new HashMap<>();
+    private final Map<TagLikeParser.Format, TagLikeParser.Provider> tagLike = new LinkedHashMap<>();
     private final List<NodeParser> parserList = new ArrayList<>();
     private final List<Formatting> legacyFormatting = new ArrayList<>();
     private boolean hasLegacy = false;
