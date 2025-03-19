@@ -7,7 +7,7 @@ import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registries;
@@ -142,7 +142,7 @@ public final class TextTagsV1 {
                                 textList.add(new ParentNode(parse(removeEscaping(cleanArgument(part)), handlers)));
                             }
 
-                            var out = TranslatedNode.of(removeEscaping(cleanArgument(lines[0])), textList.toArray(TextParserImpl.CASTER));
+                            var out = TranslatedNode.of(removeEscaping(cleanArgument(lines[0])), (Object[]) textList.toArray(TextParserImpl.CASTER));
                             return new TextParserV1.TagNodeValue(out, 0);
                         }
                         return TextParserV1.TagNodeValue.EMPTY;
@@ -168,7 +168,7 @@ public final class TextTagsV1 {
                                 textList.add(new ParentNode(parse(removeEscaping(cleanArgument(part)), handlers)));
                             }
 
-                            var out = TranslatedNode.ofFallback(removeEscaping(cleanArgument(lines[0])), removeEscaping(cleanArgument(lines[1])), textList.toArray(TextParserImpl.CASTER));
+                            var out = TranslatedNode.ofFallback(removeEscaping(cleanArgument(lines[0])), removeEscaping(cleanArgument(lines[1])), (Object[]) textList.toArray(TextParserImpl.CASTER));
                             return new TextParserV1.TagNodeValue(out, 0);
                         }
                         return TextParserV1.TagNodeValue.EMPTY;
@@ -188,6 +188,8 @@ public final class TextTagsV1 {
                     }));
         }
 
+        // Broken
+        /*
         {
             TextParserV1.registerDefault(TextParserV1.TextTag.of("click", "click_action", false, (tag, data, input, handlers, endAt) -> {
                 String[] lines = data.split(":", 2);
@@ -202,6 +204,7 @@ public final class TextTagsV1 {
                 return out.value(new ParentNode(out.nodes()));
             }));
         }
+         */
 
         {
             TextParserV1.registerDefault(
@@ -213,7 +216,7 @@ public final class TextTagsV1 {
                             (tag, data, input, handlers, endAt) -> {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 if (!data.isEmpty()) {
-                                    return out.value(new ClickActionNode(out.nodes(), ClickEvent.Action.RUN_COMMAND, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
+                                    return out.value(new ClickActionNode(out.nodes(), ClickActionNode.Action.RUN_COMMAND, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
                                 }
                                 return out.value(new ParentNode(out.nodes()));
                             }
@@ -231,7 +234,7 @@ public final class TextTagsV1 {
                             (tag, data, input, handlers, endAt) -> {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 if (!data.isEmpty()) {
-                                    return out.value(new ClickActionNode(out.nodes(), ClickEvent.Action.SUGGEST_COMMAND, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
+                                    return out.value(new ClickActionNode(out.nodes(), ClickActionNode.Action.SUGGEST_COMMAND, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
                                 }
                                 return out.value(new ParentNode(out.nodes()));
                             }
@@ -248,7 +251,7 @@ public final class TextTagsV1 {
                             false, (tag, data, input, handlers, endAt) -> {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 if (!data.isEmpty()) {
-                                    return out.value(new ClickActionNode(out.nodes(), ClickEvent.Action.OPEN_URL, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
+                                    return out.value(new ClickActionNode(out.nodes(), ClickActionNode.Action.OPEN_URL, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
                                 }
                                 return out.value(new ParentNode(out.nodes()));
                             }
@@ -266,7 +269,7 @@ public final class TextTagsV1 {
                             (tag, data, input, handlers, endAt) -> {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 if (!data.isEmpty()) {
-                                    return out.value(new ClickActionNode(out.nodes(), ClickEvent.Action.COPY_TO_CLIPBOARD, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
+                                    return out.value(new ClickActionNode(out.nodes(), ClickActionNode.Action.COPY_TO_CLIPBOARD, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
                                 }
                                 return out.value(new ParentNode(out.nodes()));
                             }
@@ -283,7 +286,7 @@ public final class TextTagsV1 {
                             true, (tag, data, input, handlers, endAt) -> {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 if (!data.isEmpty()) {
-                                    return out.value(new ClickActionNode(out.nodes(), ClickEvent.Action.CHANGE_PAGE, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
+                                    return out.value(new ClickActionNode(out.nodes(), ClickActionNode.Action.CHANGE_PAGE, new LiteralNode(restoreOriginalEscaping(cleanArgument(data)))));
                                 }
                                 return out.value(new ParentNode(out.nodes()));
                             }));
@@ -301,46 +304,57 @@ public final class TextTagsV1 {
 
                                 try {
                                     if (lines.length > 1) {
-                                        HoverEvent.Action<?> action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).result().orElse(null);
+                                        HoverEvent.Action action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).result().orElse(null);
                                         if (action == HoverEvent.Action.SHOW_TEXT) {
-                                            return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT, new ParentNode(parse(restoreOriginalEscaping(cleanArgument(lines[1])), handlers))));
+                                            return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT_NODE,
+                                                                             new ParentNode(parse(restoreOriginalEscaping(cleanArgument(lines[1])), handlers)
+                                                                             )
+                                            ));
                                         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
                                             lines = lines[1].split(":", 3);
                                             if (lines.length == 3) {
-                                                return out.value(new HoverNode<>(out.nodes(),
-                                                        HoverNode.Action.ENTITY,
-                                                        new HoverNode.EntityNodeContent(
-                                                                EntityType.get(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[0])))).orElse(EntityType.PIG),
-                                                                UUID.fromString(cleanArgument(lines[1])),
-                                                                new ParentNode(parse(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[2]))), handlers)))
+                                                return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.ENTITY_NODE,
+                                                                                 new HoverNode.EntityNodeContent(
+                                                                                         EntityType.get(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[0])))).orElse(EntityType.PIG),
+                                                                                         UUID.fromString(cleanArgument(lines[1])),
+                                                                                         new ParentNode(parse(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[2]))), handlers)))
                                                 ));
                                             }
                                         } else if (action == HoverEvent.Action.SHOW_ITEM) {
                                             try {
-                                                return out.value(new HoverNode<>(out.nodes(),
-                                                        HoverNode.Action.ITEM_STACK,
-                                                        new HoverEvent.ItemStackContent(ItemStack.fromNbtOrEmpty(DynamicRegistryManager.EMPTY, StringNbtReader.parse(restoreOriginalEscaping(cleanArgument(lines[1])))))
+                                                var nbt = StringNbtReader.readCompound(restoreOriginalEscaping(cleanArgument(lines[1])));
+                                                return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.LAZY_ITEM_STACK,
+                                                                                 new HoverNode.LazyItemStackNodeContent<>(
+                                                                                         Identifier.of(nbt.getString("id", "")),
+                                                                                         nbt.contains("count") ? nbt.getInt("count", 1) : 1,
+                                                                                         NbtOps.INSTANCE,
+                                                                                         nbt.contains("components") ? nbt.getCompound("components").orElse(null) : null
+                                                                                 )
                                                 ));
                                             } catch (Throwable e) {
                                                 lines = lines[1].split(":", 2);
                                                 if (lines.length > 0) {
-                                                    var stack = Registries.ITEM.get(Identifier.tryParse(lines[0])).getDefaultStack();
+                                                    var stack = Registries.ITEM.get(Identifier.of(lines[0])).getDefaultStack();
 
                                                     if (lines.length > 1) {
                                                         stack.setCount(Integer.parseInt(lines[1]));
                                                     }
 
-                                                    return out.value(new HoverNode<>(out.nodes(),
-                                                            HoverNode.Action.ITEM_STACK,
-                                                            new HoverEvent.ItemStackContent(stack)
+                                                    return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.VANILLA_ITEM_STACK,
+                                                                                     new HoverEvent.ShowItem(stack)
                                                     ));
                                                 }
                                             }
                                         } else {
-                                            return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT, new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers))));
+                                            return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT_NODE,
+                                                                             new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers))
+                                            ));
                                         }
                                     } else {
-                                        return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT, new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers))));
+                                        return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT_NODE,
+                                                                         new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers)
+                                                                         )
+                                        ));
                                     }
                                 } catch (Exception e) {
                                     // Shut
@@ -606,7 +620,7 @@ public final class TextTagsV1 {
                 case "all" -> x -> Style.EMPTY;
                 default -> x -> x;
             });
-        };
+        }
 
         return new GeneralUtils.MutableTransformer(func);
     }

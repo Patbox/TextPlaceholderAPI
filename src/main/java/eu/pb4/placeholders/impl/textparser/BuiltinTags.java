@@ -183,7 +183,7 @@ public final class BuiltinTags {
                                 textList.add(parser.parseNode(part));
                             }
 
-                            return TranslatedNode.ofFallback(key, fallback, textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.ofFallback(key, fallback, (Object[]) textList.toArray(TextParserImpl.CASTER));
                         }
                         return TextNode.empty();
                     })
@@ -211,7 +211,7 @@ public final class BuiltinTags {
                                 textList.add(parser.parseNode(part));
                             }
 
-                            return TranslatedNode.ofFallback(key, fallback, textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.ofFallback(key, fallback, (Object[]) textList.toArray(TextParserImpl.CASTER));
                         }
                         return TextNode.empty();
                     })
@@ -226,6 +226,8 @@ public final class BuiltinTags {
                     (data) -> new KeybindNode(data.getNext("value", ""))));
         }
 
+        // Broken
+        /*
         {
             TagRegistry.registerDefault(TextTag.enclosing("click", "click_action", false,
                     (nodes, data, parser) -> {
@@ -241,6 +243,7 @@ public final class BuiltinTags {
                         return new ParentNode(nodes);
                     }));
         }
+         */
 
         {
             TagRegistry.registerDefault(
@@ -251,7 +254,7 @@ public final class BuiltinTags {
                             false,
                             (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickActionNode.Action.RUN_COMMAND, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -269,7 +272,7 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, parser.parseNode(data.getNext("value", "")));
+                                    return new ClickActionNode(nodes, ClickActionNode.Action.SUGGEST_COMMAND, parser.parseNode(data.getNext("value", "")));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -286,7 +289,7 @@ public final class BuiltinTags {
                             false, (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickActionNode.Action.OPEN_URL, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -304,7 +307,7 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickActionNode.Action.COPY_TO_CLIPBOARD, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -320,7 +323,7 @@ public final class BuiltinTags {
                             "click_action",
                             true, (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickActionNode.Action.CHANGE_PAGE, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }));
@@ -335,55 +338,70 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
                                 try {
                                     var type = data.get("type");
-
                                     if (type != null || data.size() > 1) {
                                         if (type == null) {
                                             type = data.getNext("type", "");
                                         }
                                         type = type.toLowerCase(Locale.ROOT);
-                                        if (type.equals("show_text") || type.equals("text")) {
-                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(
-                                                    data.getNext("value", "")
-                                            ));
-                                        } else if (type.equals("show_entity") || type.equals("entity")) {
-                                            return new HoverNode<>(nodes,
-                                                    HoverNode.Action.ENTITY,
-                                                    new HoverNode.EntityNodeContent(
-                                                            EntityType.get(data.getNext("entity", "")).orElse(EntityType.PIG),
-                                                            UUID.fromString(data.getNext("uuid", Util.NIL_UUID.toString())),
-                                                            new ParentNode(parser.parseNode(data.get("name", 3, "")))
-                                                    ));
-                                        } else if (type.equals("show_item") || type.equals("item")) {
-                                            var value = data.getNext("value", "");
-                                            try {
-                                                var nbt = StringNbtReader.parse(value);
-                                                var id = Identifier.of(nbt.getString("id"));
-                                                var count = nbt.contains("count") ? nbt.getInt("count") : 1;
-
-                                                var comps = nbt.getCompound("components");
-                                                return new HoverNode<>(nodes,
-                                                        HoverNode.Action.LAZY_ITEM_STACK,
-                                                        new HoverNode.LazyItemStackNodeContent<>(id, count, NbtOps.INSTANCE, comps));
-                                            } catch (Throwable ignored) {}
-                                            try {
-                                                var item = Identifier.of(data.get("item", value));
-                                                var count = 1;
-                                                var countTxt = data.getNext("count");
-                                                if (countTxt != null) {
-                                                    count = Integer.parseInt(countTxt);
-                                                }
-
-                                                return new HoverNode<>(nodes,
-                                                        HoverNode.Action.LAZY_ITEM_STACK,
-                                                        new HoverNode.LazyItemStackNodeContent<>(item, count,
-                                                                StringArgOps.INSTANCE, Either.right(data.getNestedOrEmpty("components")))
+                                        switch (type) {
+                                            case "show_text", "text" -> {
+                                                return new HoverNode<>(nodes, HoverNode.Action.TEXT_NODE,
+                                                                       parser.parseNode(data.getNext("value", ""))
                                                 );
-                                            } catch (Throwable ignored) {}
-                                        } else {
-                                            return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.get("value", type)));
+                                            }
+                                            case "show_entity", "entity" -> {
+                                                var entType = data.getNext("entity", "");
+                                                var uuid = data.getNext("uuid", Util.NIL_UUID.toString());
+
+                                                return new HoverNode<>(nodes, HoverNode.Action.ENTITY_NODE,
+                                                                       new HoverNode.EntityNodeContent(EntityType.get(entType).orElse(EntityType.PIG),
+                                                                                                       UUID.fromString(uuid),
+                                                                                                       new ParentNode(parser.parseNode(data.get("name", 3, "")))
+                                                                       )
+                                                );
+                                            }
+                                            case "show_item", "item" -> {
+                                                var value = data.getNext("value", "");
+                                                try
+                                                {
+                                                    var nbt = StringNbtReader.readCompound(value);
+
+                                                    return new HoverNode<>(nodes, HoverNode.Action.LAZY_ITEM_STACK,
+                                                                           new HoverNode.LazyItemStackNodeContent<>(Identifier.of(nbt.getString("id", "")),
+                                                                                                                    nbt.contains("count") ? nbt.getInt("count", 1) : 1,
+                                                                                                                    NbtOps.INSTANCE,
+                                                                                                                    nbt.contains("components") ? nbt.getCompound("components").orElse(null) : null
+                                                                           )
+                                                    );
+                                                }
+                                                catch (Throwable ignored) { }
+                                                try {
+                                                    var id = Identifier.of(data.get("item", value));
+                                                    var count = 1;
+                                                    var countTxt = data.getNext("count", "1");
+                                                    if (countTxt != null) {
+                                                        count = Integer.parseInt(countTxt);
+                                                    }
+
+                                                    return new HoverNode<>(nodes, HoverNode.Action.LAZY_ITEM_STACK,
+                                                                           new HoverNode.LazyItemStackNodeContent<>(id, count,
+                                                                                                                    StringArgOps.INSTANCE,
+                                                                                                                    Either.right(data.getNestedOrEmpty("components"))
+                                                                           )
+                                                    );
+                                                }
+                                                catch (Throwable ignored) { }
+                                            }
+                                            default -> {
+                                                return new HoverNode<>(nodes, HoverNode.Action.TEXT_NODE,
+                                                                       parser.parseNode(data.get("value", type))
+                                                );
+                                            }
                                         }
                                     } else {
-                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT, parser.parseNode(data.getNext("value")));
+                                        return new HoverNode<>(nodes, HoverNode.Action.TEXT_NODE,
+                                                               parser.parseNode(data.getNext("value"))
+                                        );
                                     }
                                 } catch (Exception e) {
                                     // Shut

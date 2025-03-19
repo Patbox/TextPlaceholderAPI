@@ -6,7 +6,6 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.impl.textparser.TextParserImpl;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
@@ -59,7 +58,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                         TextNode.array(TextNode.of("["), TranslatedNode.of("options.hidden"), TextNode.of("]")),
                         Formatting.GRAY, Formatting.ITALIC
                 )
-        ), HoverNode.Action.TEXT, TextNode.asSingle(textNodes));
+        ), HoverNode.Action.TEXT_NODE, TextNode.asSingle(textNodes));
     }
 
     public static TextNode defaultQuoteFormatting(TextNode[] textNodes) {
@@ -67,7 +66,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
     }
 
     public static TextNode defaultUrlFormatting(TextNode[] textNodes, TextNode url) {
-        return new ClickActionNode(TextNode.array(new FormattingNode(textNodes, Formatting.BLUE, Formatting.UNDERLINE)), ClickEvent.Action.OPEN_URL, url);
+        return new ClickActionNode(TextNode.array(new FormattingNode(textNodes, Formatting.BLUE, Formatting.UNDERLINE)), ClickActionNode.Action.OPEN_URL, url);
     }
 
     @Override

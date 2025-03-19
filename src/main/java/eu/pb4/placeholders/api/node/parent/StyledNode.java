@@ -1,10 +1,14 @@
 package eu.pb4.placeholders.api.node.parent;
 
-import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.ParserContext;
+import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import net.minecraft.text.*;
+import net.minecraft.text.ClickEvent;
+import net.minecraft.text.HoverEvent;
+import net.minecraft.text.Style;
 import org.jetbrains.annotations.Nullable;
+
+import java.net.URI;
 
 public final class StyledNode extends SimpleStylingNode {
     private final Style style;
@@ -24,15 +28,30 @@ public final class StyledNode extends SimpleStylingNode {
     public Style style(ParserContext context) {
         var style = this.style;
 
-        if (hoverValue != null && style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
-            style = style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, this.hoverValue.toText(context, true)));
+        if (this.hoverValue != null && style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
+            style = style.withHoverEvent(new HoverEvent.ShowText(this.hoverValue.toText(context, true)));
         }
 
-        if (clickValue != null && style.getClickEvent() != null) {
-            style = style.withClickEvent(new ClickEvent(style.getClickEvent().getAction(), this.clickValue.toText(context, true).getString()));
+        if (this.clickValue != null && style.getClickEvent() != null) {
+            String node = this.clickValue.toText(context, true).getString();
+            switch (style.getClickEvent().getAction()) {
+                case OPEN_URL -> {
+                    try {
+                        style = style.withClickEvent(new ClickEvent.OpenUrl(URI.create(node)));
+                    } catch (Exception ignored) { }
+                } case CHANGE_PAGE -> {
+                    try {
+                        style = style.withClickEvent(new ClickEvent.ChangePage(Integer.parseInt(node)));
+                    } catch (Exception ignored) { }
+                }
+                case OPEN_FILE -> style = style.withClickEvent(new ClickEvent.OpenFile(node));
+				case RUN_COMMAND -> style = style.withClickEvent(new ClickEvent.RunCommand(node));
+				case SUGGEST_COMMAND -> style = style.withClickEvent(new ClickEvent.SuggestCommand(node));
+				case COPY_TO_CLIPBOARD -> style = style.withClickEvent(new ClickEvent.CopyToClipboard(node));
+            }
         }
 
-        if (insertion != null) {
+        if (this.insertion != null) {
             style = style.withInsertion(this.insertion.toText(context, true).getString());
         }
         return style;

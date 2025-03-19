@@ -6,17 +6,19 @@ import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
 
+import java.net.URI;
+
 public final class ClickActionNode extends SimpleStylingNode {
-    private final ClickEvent.Action action;
+    private final Action action;
     private final TextNode value;
 
-    public ClickActionNode(TextNode[] children, ClickEvent.Action action, TextNode value) {
+    public ClickActionNode(TextNode[] children, Action action, TextNode value) {
         super(children);
         this.action = action;
         this.value = value;
     }
 
-    public ClickEvent.Action action() {
+    public Action action() {
         return action;
     }
 
@@ -26,7 +28,29 @@ public final class ClickActionNode extends SimpleStylingNode {
 
     @Override
     protected Style style(ParserContext context) {
-        return Style.EMPTY.withClickEvent(new ClickEvent(this.action, this.value.toText(context, true).getString()));
+        if (this.action == Action.OPEN_URL) {
+            try {
+                return Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create(this.value.toText(context).getString())));
+            } catch (Exception ignored) {
+                return Style.EMPTY;
+            }
+        } else if (this.action == Action.CHANGE_PAGE) {
+            try {
+                return Style.EMPTY.withClickEvent(new ClickEvent.ChangePage(Integer.parseInt(this.value.toText(context).getString())));
+            } catch (Exception ignored) {
+                return Style.EMPTY;
+            }
+        } else if (this.action == Action.OPEN_FILE) {
+            return Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(this.value.toText(context).getString()));
+        } else if (this.action == Action.RUN_COMMAND) {
+            return Style.EMPTY.withClickEvent(new ClickEvent.RunCommand(this.value.toText(context).getString()));
+        } else if (this.action == Action.SUGGEST_COMMAND) {
+            return Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand(this.value.toText(context).getString()));
+        } else if (this.action == Action.COPY_TO_CLIPBOARD) {
+            return Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(this.value.toText(context).getString()));
+        } else {
+            return Style.EMPTY;
+        }
     }
 
     @Override
@@ -50,5 +74,14 @@ public final class ClickActionNode extends SimpleStylingNode {
                 "action=" + action +
                 ", value=" + value +
                 '}';
+    }
+
+    public record Action(ClickEvent.Action vanillaType) {
+        public static final Action OPEN_URL = new Action(ClickEvent.Action.OPEN_URL);
+        public static final Action CHANGE_PAGE = new Action(ClickEvent.Action.CHANGE_PAGE);
+        public static final Action OPEN_FILE = new Action(ClickEvent.Action.OPEN_FILE);
+        public static final Action RUN_COMMAND = new Action(ClickEvent.Action.RUN_COMMAND);
+        public static final Action SUGGEST_COMMAND = new Action(ClickEvent.Action.SUGGEST_COMMAND);
+        public static final Action COPY_TO_CLIPBOARD = new Action(ClickEvent.Action.COPY_TO_CLIPBOARD);
     }
 }

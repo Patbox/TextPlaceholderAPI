@@ -16,8 +16,8 @@
   "icon": "assets/icon.png",
   "environment": "*",
   "depends": {
-    "fabricloader": ">=0.15.0",
-    "minecraft": ">=1.21.2-alpha.24.33.a"
+    "fabricloader": ">=0.16.10",
+    "minecraft": ">=1.21.5-beta.3"
   },
   "custom": {
     "modmenu": {

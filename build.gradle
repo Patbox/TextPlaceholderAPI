@@ -1,16 +1,15 @@
 plugins {
-	id 'fabric-loom' version '1.7.+'
+	id 'fabric-loom' version '1.10.+'
 	id 'maven-publish'
 	id "com.modrinth.minotaur" version "2.+"
 	id 'com.matthewprenger.cursegradle' version '1.4.0'
 }
 
-sourceCompatibility = JavaVersion.VERSION_21
-targetCompatibility = JavaVersion.VERSION_21
-
-archivesBaseName = project.archives_base_name
-version = project.mod_version
-group = project.maven_group
+base {
+	archivesName = project.archives_base_name
+	version = project.mod_version
+	group = project.maven_group
+}
 
 
 repositories {
@@ -20,8 +19,8 @@ repositories {
 	// See https://docs.gradle.org/current/userguide/declaring_repositories.html
 	// for more information about repositories.
 
-	maven { url "https://maven.nucleoid.xyz" }
-	maven { url "https://jitpack.io" }
+	maven { url = "https://maven.nucleoid.xyz" }
+	maven { url = "https://jitpack.io" }
 }
 
 sourceSets {
@@ -37,13 +36,13 @@ loom {
 			client()
 			ideConfigGenerated project.rootProject == project
 			name = "Test Mod Client"
-			source sourceSets.testmod
+			source = sourceSets.testmod
 		}
 		testmodServer {
 			server()
 			ideConfigGenerated project.rootProject == project
 			name = "Test Mod Server"
-			source sourceSets.testmod
+			source = sourceSets.testmod
 		}
 	}
 }
@@ -86,6 +85,8 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 java {
+	sourceCompatibility = JavaVersion.VERSION_21
+	targetCompatibility = JavaVersion.VERSION_21
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 	// if it is present.
 	// If you remove this line, sources will not be generated.
@@ -104,6 +105,7 @@ def env = System.getenv()
 publishing {
 	publications {
 		mavenJava(MavenPublication) {
+			//artifactId = base.archivesName.get()
 			// add all the jars that should be included when publishing to maven
 			artifact(remapJar) {
 				builtBy remapJar
