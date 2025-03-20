@@ -4,12 +4,16 @@ import com.mojang.brigadier.StringReader;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.TranslatedNode;
-import eu.pb4.placeholders.api.node.parent.*;
+import eu.pb4.placeholders.api.node.parent.ClickActionNode;
+import eu.pb4.placeholders.api.node.parent.FormattingNode;
+import eu.pb4.placeholders.api.node.parent.HoverNode;
+import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.impl.textparser.TextParserImpl;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.ListIterator;
 import java.util.function.BiFunction;
@@ -44,9 +48,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             BiFunction<TextNode[], TextNode, TextNode> urlFormatting,
             MarkdownFormat... formatting
     ) {
-        for (var form : formatting) {
-            this.allowedFormatting.add(form);
-        }
+        this.allowedFormatting.addAll(Arrays.asList(formatting));
         this.spoilerFormatting = spoilerFormatting;
         this.backtickFormatting = quoteFormatting;
         this.urlFormatting = urlFormatting;
@@ -76,7 +78,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             parseLiteral(literalNode, list::add);
             return parseSubNodes(list.listIterator(), null, -1);
         } else if (input instanceof TranslatedNode translatedNode) {
-            return new TextNode[]{ translatedNode.transform(this) };
+            return new TextNode[]{translatedNode.transform(this)};
         } else if (input instanceof ParentTextNode parentTextNode) {
             var list = new ArrayList<SubNode<?>>();
             for (var children : parentTextNode.getChildren()) {
@@ -113,6 +115,8 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     type = switch (i) {
                         case '~' -> SubNodeType.DOUBLE_WAVY_LINE;
                         case '|' -> SubNodeType.SPOILER_LINE;
+                        case '_' -> SubNodeType.DOUBLE_FLOOR;
+                        case '*' -> SubNodeType.DOUBLE_STAR;
                         default -> null;
                     };
                 }
@@ -247,53 +251,50 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     out.add(new FormattingNode(value, Formatting.STRIKETHROUGH));
                     continue;
                 }
-            } else if (next.type == SubNodeType.STAR || next.type == SubNodeType.FLOOR) {
-                boolean two = false;
-                if (nodes.hasNext()) {
-                    if ((next.type == SubNodeType.STAR && this.allowedFormatting.contains(MarkdownFormat.BOLD))
-                            || (next.type == SubNodeType.FLOOR && this.allowedFormatting.contains(MarkdownFormat.UNDERLINE))
-                    ) {
-                        var nexter = nodes.next();
-                        if (nexter.type == next.type) {
-                            two = true;
-                            var i = nodes.nextIndex();
-                            var value = parseSubNodes(nodes, next.type, 2);
+            } else if (next.type == SubNodeType.DOUBLE_STAR && this.allowedFormatting.contains(MarkdownFormat.BOLD)) {
+                var value = parseSubNodes(nodes, next.type, 1);
 
-                            if (value != null) {
-                                if (!builder.isEmpty()) {
-                                    out.add(new LiteralNode(builder.toString()));
-                                    builder = new StringBuilder();
-                                }
-                                out.add(new FormattingNode(value, next.type == SubNodeType.STAR ? Formatting.BOLD : Formatting.UNDERLINE));
-                                continue;
-                            }
-                        }
-                        nodes.previous();
+                if (value != null) {
+                    if (!builder.isEmpty()) {
+                        out.add(new LiteralNode(builder.toString()));
+                        builder = new StringBuilder();
                     }
+                    out.add(new FormattingNode(value, Formatting.BOLD));
+                    continue;
+                }
+            } else if (next.type == SubNodeType.DOUBLE_FLOOR && this.allowedFormatting.contains(MarkdownFormat.UNDERLINE)) {
+                var value = parseSubNodes(nodes, next.type, 1);
+
+                if (value != null) {
+                    if (!builder.isEmpty()) {
+                        out.add(new LiteralNode(builder.toString()));
+                        builder = new StringBuilder();
+                    }
+                    out.add(new FormattingNode(value, Formatting.UNDERLINE));
+                    continue;
+                }
+            } else if ((next.type == SubNodeType.STAR || next.type == SubNodeType.FLOOR) && this.allowedFormatting.contains(MarkdownFormat.ITALIC)) {
+                boolean startingOrSpace;
+                if (nodes.hasPrevious()) {
+                    var prev = nodes.previous();
+                    startingOrSpace = prev.type != SubNodeType.STRING || ((String) prev.value).endsWith(" ");
+                    nodes.next();
+                } else {
+                    startingOrSpace = true;
                 }
 
-                if (!two && this.allowedFormatting.contains(MarkdownFormat.ITALIC)) {
-                    boolean startingOrSpace;
-                    if (nodes.hasPrevious()) {
-                        var prev = nodes.previous();
-                        startingOrSpace = prev.type != SubNodeType.STRING || ((String) prev.value).endsWith(" ");
-                        nodes.next();
-                    } else {
-                        startingOrSpace = true;
-                    }
+                if (startingOrSpace) {
+                    var value = parseSubNodes(nodes, next.type, 1);
 
-                    if (startingOrSpace) {
-                        var value = parseSubNodes(nodes, next.type, 1);
-
-                        if (value != null) {
-                            if (!builder.isEmpty()) {
-                                out.add(new LiteralNode(builder.toString()));
-                                builder = new StringBuilder();
-                            }
-                            out.add(new FormattingNode(value, Formatting.ITALIC));
-                            continue;
+                    if (value != null) {
+                        if (!builder.isEmpty()) {
+                            out.add(new LiteralNode(builder.toString()));
+                            builder = new StringBuilder();
                         }
+                        out.add(new FormattingNode(value, Formatting.ITALIC));
+                        continue;
                     }
+
                 }
             } else if (next.type == SubNodeType.SQR_BRACKET_OPEN && this.allowedFormatting.contains(MarkdownFormat.URL) && nodes.hasNext()) {
                 var start = nodes.nextIndex();
@@ -353,7 +354,9 @@ public final class MarkdownLiteParserV1 implements NodeParser {
         public static final SubNodeType<String> STRING = new SubNodeType<>(null);
 
         public static final SubNodeType<String> STAR = new SubNodeType<>("*");
+        public static final SubNodeType<String> DOUBLE_STAR = new SubNodeType<>("**");
         public static final SubNodeType<String> FLOOR = new SubNodeType<>("_");
+        public static final SubNodeType<String> DOUBLE_FLOOR = new SubNodeType<>("__");
         public static final SubNodeType<String> DOUBLE_WAVY_LINE = new SubNodeType<>("~~");
         public static final SubNodeType<String> BACK_TICK = new SubNodeType<>("`");
         public static final SubNodeType<String> SPOILER_LINE = new SubNodeType<>("||");

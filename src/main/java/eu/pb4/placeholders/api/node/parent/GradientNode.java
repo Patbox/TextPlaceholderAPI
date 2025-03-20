@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class GradientNode extends ParentNode {
+public final class GradientNode extends ParentNode implements DynamicShadowNode.Transformer {
     private final GradientProvider gradientProvider;
 
     public GradientNode(TextNode[] children, GradientProvider gradientBuilder) {
@@ -83,6 +83,11 @@ public final class GradientNode extends ParentNode {
                 "gradientProvider=" + gradientProvider +
                 ", children=" + Arrays.toString(children) +
                 '}';
+    }
+
+    @Override
+    public Text applyShadowColors(Text text, float scale, float alpha, ParserContext context) {
+        return GeneralUtils.toGradientShadow(text, scale, alpha, this.gradientProvider);
     }
 
     @FunctionalInterface

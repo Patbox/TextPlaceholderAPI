@@ -12,6 +12,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -48,7 +50,21 @@ public class GeneralUtils {
     }
 
     public static MutableText toGradient(Text base, GradientNode.GradientProvider posToColor) {
-        return recursiveGradient(base, posToColor, 0, getGradientLength(base)).text();
+        return recursiveGradient(base, posToColor, 0, getGradientLength(base),
+                text -> text.getStyle().getColor() == null,
+                Style::withColor,
+                Text::copy
+                ).text();
+    }
+
+    public static MutableText toGradientShadow(Text base, float scale, float alpha, GradientNode.GradientProvider posToColor) {
+        return recursiveGradient(base, posToColor, 0, getGradientLength(base),
+                text -> text.getStyle().getShadowColor() == null && text.getStyle().getColor() == null,
+                ((style, textColor) -> style.withShadowColor(DynamicShadowNode.modifiedColor(textColor.getRgb(), scale, alpha))),
+                text2 -> text2.getStyle().getShadowColor() != null ? text2.copy() : GeneralUtils.cloneTransformText(text2, text -> {
+                    var color = text.getStyle().getColor();
+                    return text.setStyle(text.getStyle().withShadowColor(DynamicShadowNode.modifiedColor(Objects.requireNonNull(color).getRgb(), scale, alpha)));
+                }, text -> text == text2 || text.getStyle().getShadowColor() == null && text.getStyle().getColor() != null)).text();
     }
 
     private static int getGradientLength(Text base) {
@@ -63,8 +79,11 @@ public class GeneralUtils {
         return length;
     }
 
-    private static TextLengthPair recursiveGradient(Text base, GradientNode.GradientProvider posToColor, int pos, int totalLength) {
-        if (base.getStyle().getColor() == null) {
+    private static TextLengthPair recursiveGradient(Text base, GradientNode.GradientProvider posToColor, int pos, int totalLength,
+                                                    Predicate<Text> canContinue,
+                                                    BiFunction<Style, TextColor, Style> apply,
+                                                    Function<Text, MutableText> passthroughApply) {
+        if (canContinue.test(base)) {
             MutableText out = Text.empty().setStyle(base.getStyle());
             if (base.getContent() instanceof PlainTextContent.Literal literalTextContent) {
                 var l = literalTextContent.string().length();
@@ -82,21 +101,21 @@ public class GeneralUtils {
                         value = character;
                     }
 
-                    out.append(Text.literal(Character.toString(value)).setStyle(Style.EMPTY.withColor(posToColor.getColorAt(pos++, totalLength))));
+                    out.append(Text.literal(Character.toString(value)).setStyle(apply.apply(Style.EMPTY, posToColor.getColorAt(pos++, totalLength))));
 
                 }
-            } else {
-                out.append(base.copyContentOnly().setStyle(Style.EMPTY.withColor(posToColor.getColorAt(pos++, totalLength))));
+            } else if (base.getContent() != PlainTextContent.EMPTY) {
+                out.append(base.copyContentOnly().setStyle(apply.apply(Style.EMPTY, posToColor.getColorAt(pos++, totalLength))));
             }
 
             for (Text sibling : base.getSiblings()) {
-                var pair = recursiveGradient(sibling, posToColor, pos, totalLength);
+                var pair = recursiveGradient(sibling, posToColor, pos, totalLength, canContinue, apply, passthroughApply);
                 pos = pair.length;
                 out.append(pair.text);
             }
             return new TextLengthPair(out, pos);
         }
-        return new TextLengthPair(base.copy(), pos + base.getString().length());
+        return new TextLengthPair(passthroughApply.apply(base), pos + base.getString().length());
     }
 
     public static int rgbToInt(float r, float g, float b) {

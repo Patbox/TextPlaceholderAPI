@@ -126,12 +126,12 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
                                 try {
                                     if (data.contains("scale") && data.size() == 1) {
-                                        return new ColorBasedShadowNode(nodes, Float.parseFloat(data.get("scale", "0")));
+                                        return new DynamicShadowNode(nodes, Float.parseFloat(data.get("scale", "0")), 1);
                                     }
 
                                     var color = data.get("value", 0);
                                     if (color == null) {
-                                        return new ColorBasedShadowNode(nodes);
+                                        return new DynamicShadowNode(nodes);
                                     }
 
                                     int value;

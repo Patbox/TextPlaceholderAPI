@@ -30,7 +30,7 @@ public interface NodeParser {
     }
 
     default Codec<WrappedText> codec() {
-        return Codec.STRING.xmap(x -> WrappedText.from(this, x), w -> w.input());
+        return Codec.STRING.xmap(x -> WrappedText.from(this, x), WrappedText::input);
     }
 
     static NodeParser merge(NodeParser... parsers) {
