@@ -9,6 +9,7 @@ import eu.pb4.placeholders.api.node.parent.FormattingNode;
 import eu.pb4.placeholders.api.node.parent.HoverNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.impl.textparser.TextParserImpl;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,7 +69,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
     }
 
     public static TextNode defaultUrlFormatting(TextNode[] textNodes, TextNode url) {
-        return new ClickActionNode(TextNode.array(new FormattingNode(textNodes, Formatting.BLUE, Formatting.UNDERLINE)), ClickActionNode.Action.OPEN_URL, url);
+        return new ClickActionNode(TextNode.array(new FormattingNode(textNodes, Formatting.BLUE, Formatting.UNDERLINE)), ClickEvent.Action.OPEN_URL, url);
     }
 
     @Override

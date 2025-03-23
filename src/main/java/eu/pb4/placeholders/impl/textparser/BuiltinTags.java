@@ -226,16 +226,15 @@ public final class BuiltinTags {
                     (data) -> new KeybindNode(data.getNext("value", ""))));
         }
 
-        // Broken
-        /*
         {
             TagRegistry.registerDefault(TextTag.enclosing("click", "click_action", false,
                     (nodes, data, parser) -> {
                         if (!data.isEmpty()) {
                             var type = data.getNext("type");
                             var value = data.getNext("value", "");
-                            for (ClickEvent.Action action : ClickEvent.Action.values()) {
-                                if (action.asString().equals(type)) {
+
+                            for (var action : ClickEvent.Action.values()) {
+                                if (action.asString().equals(type) && action.isUserDefinable()) {
                                     return new ClickActionNode(nodes, action, parser.parseNode(value));
                                 }
                             }
@@ -243,7 +242,6 @@ public final class BuiltinTags {
                         return new ParentNode(nodes);
                     }));
         }
-         */
 
         {
             TagRegistry.registerDefault(
@@ -254,7 +252,7 @@ public final class BuiltinTags {
                             false,
                             (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickActionNode.Action.RUN_COMMAND, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.RUN_COMMAND, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -272,7 +270,7 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickActionNode.Action.SUGGEST_COMMAND, parser.parseNode(data.getNext("value", "")));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.SUGGEST_COMMAND, parser.parseNode(data.getNext("value", "")));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -289,7 +287,7 @@ public final class BuiltinTags {
                             false, (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickActionNode.Action.OPEN_URL, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.OPEN_URL, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -307,7 +305,7 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
 
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickActionNode.Action.COPY_TO_CLIPBOARD, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.COPY_TO_CLIPBOARD, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }
@@ -323,7 +321,7 @@ public final class BuiltinTags {
                             "click_action",
                             true, (nodes, data, parser) -> {
                                 if (!data.isEmpty()) {
-                                    return new ClickActionNode(nodes, ClickActionNode.Action.CHANGE_PAGE, parser.parseNode(data.get("value", 0)));
+                                    return new ClickActionNode(nodes, ClickEvent.Action.CHANGE_PAGE, parser.parseNode(data.get("value", 0)));
                                 }
                                 return new ParentNode(nodes);
                             }));

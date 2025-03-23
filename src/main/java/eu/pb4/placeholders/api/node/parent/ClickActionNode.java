@@ -9,16 +9,16 @@ import net.minecraft.text.Style;
 import java.net.URI;
 
 public final class ClickActionNode extends SimpleStylingNode {
-    private final Action action;
+    private final ClickEvent.Action action;
     private final TextNode value;
 
-    public ClickActionNode(TextNode[] children, Action action, TextNode value) {
+    public ClickActionNode(TextNode[] children, ClickEvent.Action action, TextNode value) {
         super(children);
         this.action = action;
         this.value = value;
     }
 
-    public Action action() {
+    public ClickEvent.Action clickEventAction() {
         return action;
     }
 
@@ -28,29 +28,26 @@ public final class ClickActionNode extends SimpleStylingNode {
 
     @Override
     protected Style style(ParserContext context) {
-        if (this.action == Action.OPEN_URL) {
-            try {
-                return Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create(this.value.toText(context).getString())));
-            } catch (Exception ignored) {
-                return Style.EMPTY;
+        return switch (this.action) {
+            case OPEN_URL -> {
+                try {
+                    yield  Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create(this.value.toText(context).getString())));
+                } catch (Exception ignored) {
+                    yield  Style.EMPTY;
+                }
             }
-        } else if (this.action == Action.CHANGE_PAGE) {
-            try {
-                return Style.EMPTY.withClickEvent(new ClickEvent.ChangePage(Integer.parseInt(this.value.toText(context).getString())));
-            } catch (Exception ignored) {
-                return Style.EMPTY;
+            case CHANGE_PAGE -> {
+                try {
+                    yield Style.EMPTY.withClickEvent(new ClickEvent.ChangePage(Integer.parseInt(this.value.toText(context).getString())));
+                } catch (Exception ignored) {
+                    yield Style.EMPTY;
+                }
             }
-        } else if (this.action == Action.OPEN_FILE) {
-            return Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(this.value.toText(context).getString()));
-        } else if (this.action == Action.RUN_COMMAND) {
-            return Style.EMPTY.withClickEvent(new ClickEvent.RunCommand(this.value.toText(context).getString()));
-        } else if (this.action == Action.SUGGEST_COMMAND) {
-            return Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand(this.value.toText(context).getString()));
-        } else if (this.action == Action.COPY_TO_CLIPBOARD) {
-            return Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(this.value.toText(context).getString()));
-        } else {
-            return Style.EMPTY;
-        }
+            case OPEN_FILE -> Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(this.value.toText(context).getString()));
+            case RUN_COMMAND -> Style.EMPTY.withClickEvent(new ClickEvent.RunCommand(this.value.toText(context).getString()));
+            case SUGGEST_COMMAND -> Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand(this.value.toText(context).getString()));
+            case COPY_TO_CLIPBOARD -> Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(this.value.toText(context).getString()));
+        };
     }
 
     @Override
@@ -71,11 +68,31 @@ public final class ClickActionNode extends SimpleStylingNode {
     @Override
     public String toString() {
         return "ClickActionNode{" +
-                "action=" + action +
+                "action=" + action.asString() +
                 ", value=" + value +
                 '}';
     }
 
+
+    @Deprecated(forRemoval = true)
+    public ClickActionNode(TextNode[] children, Action action, TextNode value) {
+        super(children);
+        this.action = action.vanillaType();
+        this.value = value;
+    }
+
+    @Deprecated(forRemoval = true)
+    public Action action() {
+        return switch (this.action) {
+            case OPEN_URL -> Action.OPEN_URL;
+            case OPEN_FILE -> Action.OPEN_FILE;
+            case CHANGE_PAGE -> Action.CHANGE_PAGE;
+            case RUN_COMMAND -> Action.RUN_COMMAND;
+            case SUGGEST_COMMAND -> Action.SUGGEST_COMMAND;
+            case COPY_TO_CLIPBOARD -> Action.COPY_TO_CLIPBOARD;
+        };
+    }
+    @Deprecated(forRemoval = true)
     public record Action(ClickEvent.Action vanillaType) {
         public static final Action OPEN_URL = new Action(ClickEvent.Action.OPEN_URL);
         public static final Action CHANGE_PAGE = new Action(ClickEvent.Action.CHANGE_PAGE);
