@@ -270,64 +270,42 @@ public class GeneralUtils {
             return new ParentNode(list);
         } else {
             var style = input.getStyle();
-            var hoverValue = style.getHoverEvent() != null ? convertToNodes(getHoverValue(style)) : null;
-            var clickValue = style.getClickEvent() != null ? (TextNode) getClickValue(style) : null;
+            var hoverValue = style.getHoverEvent() != null ? getHoverValue(style) : null;
+            var clickValue = style.getClickEvent() != null ? getClickValue(style) : null;
             var insertion = style.getInsertion() != null ? new LiteralNode(style.getInsertion()) : null;
 
             return new StyledNode(list.toArray(new TextNode[0]), style, hoverValue, clickValue, insertion);
         }
     }
 
-    private static Text getHoverValue(Style style) {
+    private static StyledNode.HoverData<?> getHoverValue(Style style) {
         if (style.getHoverEvent() != null) {
-            switch (style.getHoverEvent().getAction()) {
-                case SHOW_TEXT -> {
-                    return ((HoverEvent.ShowText) style.getHoverEvent()).value();
-                }
-                /*
-                case SHOW_ITEM -> {
-                    return ((HoverEvent.ShowItem) style.getHoverEvent()).item().toHoverableText();
-                }
-                case SHOW_ENTITY -> {
-                    HoverEvent.EntityContent content = ((HoverEvent.ShowEntity) style.getHoverEvent()).entity();
-                    Text result = content.name.orElseGet(content.entityType::getName);
-                    if (result != null && !result.equals(Text.empty())) {
-                        return result;
-                    }
-                    return Text.literal("id="+ EntityType.getId(content.entityType).toString());
-                }
-                 */
+            if (style.getHoverEvent() instanceof HoverEvent.ShowText showText) {
+                return new StyledNode.HoverData<>(HoverNode.Action.TEXT_NODE, convertToNodes(showText.value()));
+            } else if (style.getHoverEvent() instanceof HoverEvent.ShowEntity showEntity) {
+                return new StyledNode.HoverData<>(HoverNode.Action.ENTITY_NODE,
+                        new HoverNode.EntityNodeContent(showEntity.entity().entityType, showEntity.entity().uuid, showEntity.entity().name.map(GeneralUtils::convertToNodes).orElse(null)));
+            } else if (style.getHoverEvent() instanceof HoverEvent.ShowItem showItem) {
+                return new StyledNode.HoverData<>(HoverNode.Action.VANILLA_ITEM_STACK, showItem);
             }
         }
 
-        return Text.literal("Missing Hover Value");
+        return null;
     }
 
-    private static Text getClickValue(Style style) {
+    private static TextNode getClickValue(Style style) {
         if (style.getClickEvent() != null) {
-            switch (style.getClickEvent().getAction()) {
-                case CHANGE_PAGE -> {
-                    return Text.literal(String.valueOf(((ClickEvent.ChangePage) style.getClickEvent()).page()));
-                }
-                case COPY_TO_CLIPBOARD -> {
-                    return Text.literal(((ClickEvent.CopyToClipboard) style.getClickEvent()).value());
-                }
-                case OPEN_FILE -> {
-                    return Text.literal(((ClickEvent.OpenFile) style.getClickEvent()).file().getAbsolutePath());
-                }
-                case OPEN_URL -> {
-                    return Text.literal(((ClickEvent.OpenUrl) style.getClickEvent()).uri().getRawPath());
-                }
-                case RUN_COMMAND -> {
-                    return Text.literal(((ClickEvent.RunCommand) style.getClickEvent()).command());
-                }
-                case SUGGEST_COMMAND -> {
-                    return Text.literal(((ClickEvent.SuggestCommand) style.getClickEvent()).command());
-                }
-            }
+            return TextNode.of(switch (style.getClickEvent().getAction()) {
+                case CHANGE_PAGE -> String.valueOf(((ClickEvent.ChangePage) style.getClickEvent()).page());
+                case COPY_TO_CLIPBOARD -> ((ClickEvent.CopyToClipboard) style.getClickEvent()).value();
+                case OPEN_FILE -> ((ClickEvent.OpenFile) style.getClickEvent()).file().getPath();
+                case OPEN_URL -> ((ClickEvent.OpenUrl) style.getClickEvent()).uri().toString();
+                case RUN_COMMAND -> ((ClickEvent.RunCommand) style.getClickEvent()).command();
+                case SUGGEST_COMMAND -> ((ClickEvent.SuggestCommand) style.getClickEvent()).command();
+            });
         }
 
-        return Text.literal("Missing Click Value");
+        return null;
     }
 
     public static TextNode removeColors(TextNode node) {
@@ -341,7 +319,7 @@ public class GeneralUtils {
             if (node instanceof ColorNode || node instanceof FormattingNode) {
                 return new ParentNode(list.toArray(new TextNode[0]));
             } else if (node instanceof StyledNode styledNode) {
-                return new StyledNode(list.toArray(new TextNode[0]), styledNode.rawStyle().withColor((TextColor) null), styledNode.hoverValue(), styledNode.clickValue(), styledNode.insertion());
+                return new StyledNode(list.toArray(new TextNode[0]), styledNode.rawStyle().withColor((TextColor) null), styledNode.hover(), styledNode.clickValue(), styledNode.insertion());
             }
 
             return parentNode.copyWith(list.toArray(new TextNode[0]));

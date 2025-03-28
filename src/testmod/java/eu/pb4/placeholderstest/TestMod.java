@@ -106,6 +106,7 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             player.sendMessage(Placeholders.parseText(context.getArgument("text", Text.class), PlaceholderContext.of(player)), false);
+            player.sendMessage(Text.literal(TextNode.convert(context.getArgument("text", Text.class)).toString()), false);
         } catch (Exception e) {
             e.printStackTrace();
         }

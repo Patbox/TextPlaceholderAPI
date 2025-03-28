@@ -41,28 +41,7 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
     @SuppressWarnings("unchecked")
     @Override
     protected Style style(ParserContext context) {
-        if (this.action == Action.TEXT_NODE) {
-            return Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(((TextNode) this.value).toText(context, true)));
-        } else if (this.action == Action.ENTITY_NODE) {
-            return Style.EMPTY.withHoverEvent(new HoverEvent.ShowEntity(((EntityNodeContent) this.value).toVanilla(context)));
-        } else if (this.action == Action.LAZY_ITEM_STACK) {
-            RegistryWrapper.WrapperLookup wrapper;
-            if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
-                wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
-            } else if (context.contains(PlaceholderContext.KEY)) {
-                wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
-            } else {
-                return Style.EMPTY;
-            }
-
-            return Style.EMPTY.withHoverEvent(new HoverEvent.ShowItem(((LazyItemStackNodeContent<T>) this.value).toVanilla(wrapper)));
-        } else if (this.action == Action.VANILLA_ITEM_STACK) {
-            return Style.EMPTY.withHoverEvent(new HoverEvent.ShowItem(((HoverEvent.ShowItem) this.value).item()));
-        } else if (this.action == Action.VANILLA_ENTITY) {
-            return Style.EMPTY.withHoverEvent(new HoverEvent.ShowEntity(((HoverEvent.ShowEntity) this.value).entity()));
-        } else {
-            return Style.EMPTY;
-        }
+        return Style.EMPTY.withHoverEvent(toVanilla(this.action, this.value, context));
     }
 
     @Override
@@ -111,6 +90,33 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
         } return this.copyWith(children);
     }
 
+
+    @Nullable
+    public static <T> HoverEvent toVanilla(HoverNode.Action<T, ?> action, T value, ParserContext context) {
+        if (action == Action.TEXT_NODE) {
+            return new HoverEvent.ShowText(((TextNode) value).toText(context.copyWithoutNodeContext(), true));
+        } else if (action == Action.ENTITY_NODE) {
+            return new HoverEvent.ShowEntity(((EntityNodeContent) value).toVanilla(context.copyWithoutNodeContext()));
+        } else if (action == Action.LAZY_ITEM_STACK) {
+            RegistryWrapper.WrapperLookup wrapper;
+            if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
+                wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
+            } else if (context.contains(PlaceholderContext.KEY)) {
+                wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
+            } else {
+                return null;
+            }
+
+            return new HoverEvent.ShowItem(((LazyItemStackNodeContent<T>) value).toVanilla(wrapper));
+        } else if (action == Action.VANILLA_ITEM_STACK) {
+            return new HoverEvent.ShowItem(((HoverEvent.ShowItem) value).item());
+        } else if (action == Action.VANILLA_ENTITY) {
+            return new HoverEvent.ShowEntity(((HoverEvent.ShowEntity) value).entity());
+        } else {
+            return null;
+        }
+    }
+
     @Override
     public String toString() {
         return "HoverNode{" +
@@ -139,13 +145,10 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
         }
     }
 
-    public record EntityNodeContent(EntityType<?>entityType, UUID uuid, @Nullable TextNode name) implements HoverEvent {
-        public EntityContent toVanilla(ParserContext context) {
-            return new EntityContent(this.entityType, this.uuid, Optional.ofNullable(this.name != null ? this.name.toText(context, true) : null));
+    public record EntityNodeContent(EntityType<?>entityType, UUID uuid, @Nullable TextNode name) {
+        public HoverEvent.EntityContent toVanilla(ParserContext context) {
+            return new HoverEvent.EntityContent(this.entityType, this.uuid, Optional.ofNullable(this.name != null ? this.name.toText(context, true) : null));
         }
-
-        @Override
-        public Action getAction() { return Action.SHOW_ENTITY; }
 
         @Override
         public String toString() {
@@ -159,7 +162,7 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
         }
     }
 
-    public record LazyItemStackNodeContent<T>(Identifier identifier, int count, DynamicOps<T> ops, T componentMap) implements HoverEvent {
+    public record LazyItemStackNodeContent<T>(Identifier identifier, int count, DynamicOps<T> ops, T componentMap) {
         public ItemStack toVanilla(RegistryWrapper.WrapperLookup lookup) {
             var stack = new ItemStack(lookup.getOrThrow(RegistryKeys.ITEM).getOrThrow(RegistryKey.of(RegistryKeys.ITEM, identifier)));
             stack.setCount(count);
@@ -168,9 +171,6 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
             }
             return stack;
         }
-
-        @Override
-        public Action getAction() { return Action.SHOW_ITEM; }
 
         @Override
         public String toString() {

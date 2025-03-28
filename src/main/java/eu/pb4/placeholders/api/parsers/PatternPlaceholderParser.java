@@ -24,7 +24,7 @@ import java.util.regex.Pattern;
 /**
  * Replaced with {@link TagLikeParser}
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public record PatternPlaceholderParser(Pattern pattern, Function<String, @Nullable TextNode> placeholderProvider) implements NodeParser {
     public static final Pattern PLACEHOLDER_PATTERN = Pattern.compile("(?<!((?<!(\\\\))\\\\))[%](?<id>[^%]+:[^%]+)[%]");
     public static final Pattern ALT_PLACEHOLDER_PATTERN = Pattern.compile("(?<!((?<!(\\\\))\\\\))[{](?<id>[^{}]+:[^{}]+)[}]");

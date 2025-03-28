@@ -89,31 +89,31 @@ public final class Placeholders {
 	}
 
 
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern) {
 		return parseNodes(node, pattern, PlaceholderContext.KEY);
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, ParserContext.Key<PlaceholderContext> contextKey) {
 		return asSingleParent(PatternPlaceholderParser.of(pattern, contextKey, DEFAULT_PLACEHOLDER_GETTER).parseNodes(node));
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, PlaceholderGetter placeholderGetter) {
 		return parseNodes(node, pattern, placeholderGetter, PlaceholderContext.KEY);
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, PlaceholderGetter placeholderGetter, ParserContext.Key<PlaceholderContext> contextKey) {
 		return asSingleParent(PatternPlaceholderParser.of(pattern, contextKey, placeholderGetter).parseNodes(node));
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, Map<String, Text> placeholders) {
 		return asSingleParent(PatternPlaceholderParser.ofTextMap(pattern, placeholders).parseNodes(node));
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
 		return parseNodes(node, pattern, placeholders, key, PlaceholderContext.KEY);
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key, ParserContext.Key<PlaceholderContext> contextKey) {
 		return asSingleParent(PatternPlaceholderParser.of(pattern, contextKey, new PlaceholderGetter() {
 			@Override
@@ -133,43 +133,43 @@ public final class Placeholders {
 			}
 		}).parseNodes(node));
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(Text text, PlaceholderContext context, Pattern pattern) {
 		return parseNodes(TextNode.convert(text), pattern).toText(ParserContext.of(PlaceholderContext.KEY, context));
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(Text text, PlaceholderContext context, Pattern pattern, PlaceholderGetter placeholderGetter) {
 		return parseNodes(TextNode.convert(text), pattern, placeholderGetter).toText(ParserContext.of(PlaceholderContext.KEY, context));
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(Text text, Pattern pattern, Map<String, Text> placeholders) {
 		return parseNodes(TextNode.convert(text), pattern, placeholders).toText(ParserContext.of());
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(Text text, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
 		return parseNodes(TextNode.convert(text), pattern, placeholders, key).toText(ParserContext.of());
 	}
 
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(TextNode textNode, PlaceholderContext context, Pattern pattern) {
 		return parseNodes(textNode, pattern).toText(ParserContext.of(PlaceholderContext.KEY, context));
 	}
 
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(TextNode textNode, PlaceholderContext context, Pattern pattern, PlaceholderGetter placeholderGetter) {
 		return parseNodes(textNode, pattern, placeholderGetter).toText(ParserContext.of(PlaceholderContext.KEY, context));
 	}
 
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(TextNode textNode, PlaceholderContext context, Pattern pattern, Map<String, Text> placeholders) {
 		return parseNodes(textNode, pattern, placeholders).toText(ParserContext.of(PlaceholderContext.KEY, context));
 	}
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(TextNode textNode, Pattern pattern, Map<String, Text> placeholders) {
 		return parseNodes(textNode, pattern, placeholders).toText();
 	}
 
-	@Deprecated
+	@Deprecated(forRemoval = true)
 	public static Text parseText(TextNode textNode, Pattern pattern, Set<String> placeholders, ParserContext.Key<PlaceholderGetter> key) {
 		return parseNodes(textNode, pattern, placeholders, key).toText();
 	}

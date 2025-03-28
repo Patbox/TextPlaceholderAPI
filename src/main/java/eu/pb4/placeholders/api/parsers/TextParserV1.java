@@ -27,7 +27,7 @@ import java.util.function.Function;
  *
  * @Deprecated Replaced with {@link TagParser}
  */
-@Deprecated
+@Deprecated(forRemoval = true)
 public class TextParserV1 implements NodeParser {
 
     public static final TextParserV1 DEFAULT = new TextParserV1();

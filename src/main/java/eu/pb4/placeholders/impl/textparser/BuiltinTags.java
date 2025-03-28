@@ -550,7 +550,7 @@ public final class BuiltinTags {
                                     System.out.println(x.error().get().message());
                                     return TextNode.asSingle(nodes);
                                 }
-                                return new StyledNode(nodes, x.result().get().getFirst(), null, null, null);
+                                return new StyledNode(nodes, x.result().get().getFirst(), (StyledNode.HoverData<?>) null, null, null);
                             }
                     )
             );

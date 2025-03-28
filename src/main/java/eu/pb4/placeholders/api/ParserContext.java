@@ -14,14 +14,16 @@ import java.util.function.Supplier;
 public final class ParserContext {
     private Map<Key<?>, Object> map;
     private boolean copyOnWrite;
+    private boolean hasNodeContext;
 
-    private ParserContext(Map<Key<?>, Object> map, boolean copyOnWrite) {
+    private ParserContext(Map<Key<?>, Object> map, boolean copyOnWrite, boolean hasNodeContext) {
         this.map = map;
         this.copyOnWrite = copyOnWrite;
+        this.hasNodeContext = hasNodeContext;
     }
 
     public static ParserContext of() {
-        return new ParserContext(new HashMap<>(), false);
+        return new ParserContext(new HashMap<>(), false, false);
     }
 
     public static <T> ParserContext of(Key<T> key, T object) {
@@ -34,6 +36,7 @@ public final class ParserContext {
             this.copyOnWrite = false;
         }
         this.map.put(key, object);
+        this.hasNodeContext |= key.nodeContext();
         return this;
     }
 
@@ -68,24 +71,52 @@ public final class ParserContext {
 
     public ParserContext copy() {
         this.copyOnWrite = true;
-        return new ParserContext(this.map, true);
+        return new ParserContext(this.map, true, this.hasNodeContext);
     }
 
+    public ParserContext copyWithoutNodeContext() {
+        if (this.hasNodeContext) {
+            var map = new HashMap<Key<?>, Object>();
+            for (var key : this.map.keySet()) {
+                if (!key.nodeContext()) {
+                    map.put(key, this.map.get(key));
+                }
+            }
 
-    public record Key<T>(String key, @Nullable Class<T> type) {
-        public static final Key<Boolean> COMPACT_TEXT = new Key<>("compact_text", Boolean.class);
-        public static final Key<RegistryWrapper.WrapperLookup> WRAPPER_LOOKUP = new Key<>("wrapper_lookup", RegistryWrapper.WrapperLookup.class);
-        public static final Key<DynamicShadowNode.Transformer> DEFAULT_SHADOW_STYLER = Key.of("default_shadow_styler");
+            return new ParserContext(map, false, false);
+        }
+        return this.copy();
+    }
 
-        public static <T> Key<T> of(String key, T type) {
-            //noinspection unchecked
-            return new Key<T>(key, (Class<T>) type.getClass());
+    public record Key<T>(String key, @Nullable Class<T> type, boolean nodeContext) {
+        public Key(String key, @Nullable Class<T> type) {
+            this(key, type, false);
         }
 
 
+        public static final Key<Boolean> COMPACT_TEXT = new Key<>("compact_text", Boolean.class);
+        public static final Key<RegistryWrapper.WrapperLookup> WRAPPER_LOOKUP = new Key<>("wrapper_lookup", RegistryWrapper.WrapperLookup.class);
+        public static final Key<DynamicShadowNode.Transformer> DEFAULT_SHADOW_STYLER = Key.ofNode("default_shadow_styler");
+
+        public static <T> Key<T> of(String key, T type) {
+            //noinspection unchecked
+            return new Key<T>(key, (Class<T>) type.getClass(), false);
+        }
+
         public static <T> Key<T> of(String key) {
             //noinspection unchecked
-            return new Key<T>(key, null);
+            return new Key<T>(key, null, false);
+        }
+
+        public static <T> Key<T> ofNode(String key, T type) {
+            //noinspection unchecked
+            return new Key<T>(key, (Class<T>) type.getClass(), true);
+        }
+
+
+        public static <T> Key<T> ofNode(String key) {
+            //noinspection unchecked
+            return new Key<T>(key, null, true);
         }
     };
 }
