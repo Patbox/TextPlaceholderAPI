@@ -2,6 +2,7 @@ package eu.pb4.placeholders.api;
 
 import com.mojang.authlib.GameProfile;
 import eu.pb4.placeholders.impl.placeholder.ViewObjectImpl;
+import net.minecraft.class_10961;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.command.CommandOutput;
@@ -71,7 +72,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public ParserContext asParserContext() {
-        return ParserContext.of(KEY, this).with(ParserContext.Key.WRAPPER_LOOKUP, this.server.getRegistryManager());
+        return ParserContext.of(KEY, this).with(ParserContext.Key.WRAPPER_LOOKUP, this.server.method_70562().method_69003());
     }
 
     public PlaceholderContext withView(ViewObject view) {
@@ -80,7 +81,7 @@ public record PlaceholderContext(MinecraftServer server,
 
     public void addToContext(ParserContext context) {
         context.with(KEY, this);
-        context.with(ParserContext.Key.WRAPPER_LOOKUP, this.server.getRegistryManager());
+        context.with(ParserContext.Key.WRAPPER_LOOKUP, this.server.method_70562().method_69003());
     }
 
 
@@ -89,7 +90,8 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(MinecraftServer server, ViewObject view) {
-        return new PlaceholderContext(server, server::getCommandSource, null, null, null, null, view);
+        class_10961 gameInstance = server.method_70562();
+        return new PlaceholderContext(server, gameInstance::method_68953, null, null, null, null, view);
     }
 
     public static PlaceholderContext of(GameProfile profile, MinecraftServer server) {
@@ -98,7 +100,7 @@ public record PlaceholderContext(MinecraftServer server,
 
     public static PlaceholderContext of(GameProfile profile, MinecraftServer server, ViewObject view) {
         var name = profile.getName() != null ? profile.getName() : profile.getId().toString();
-        return new PlaceholderContext(server, () -> new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ZERO, Vec2f.ZERO, server.getOverworld(), server.getPermissionLevel(profile), name, Text.literal(name), server, null), null, null, null, profile, view);
+        return new PlaceholderContext(server, () -> new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ZERO, Vec2f.ZERO, server.method_70562().method_68995(), server.getPermissionLevel(profile), name, Text.literal(name), server.method_70562(), null), null, null, null, profile, view);
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player) {
@@ -106,7 +108,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player, ViewObject view) {
-        return new PlaceholderContext(player.getServer(), player::getCommandSource, player.getServerWorld(), player, player, player.getGameProfile(), view);
+        return new PlaceholderContext(player.method_69130().method_68961(), player::getCommandSource, player.getServerWorld(), player, player, player.getGameProfile(), view);
     }
 
     public static PlaceholderContext of(ServerCommandSource source) {
@@ -114,7 +116,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(ServerCommandSource source, ViewObject view) {
-        return new PlaceholderContext(source.getServer(), source, source.getWorld(), source.getPlayer(), source.getEntity(), source.getPlayer() != null ? source.getPlayer().getGameProfile() : null, view);
+        return new PlaceholderContext(source.method_69818().method_68961(), source, source.getWorld(), source.getPlayer(), source.getEntity(), source.getPlayer() != null ? source.getPlayer().getGameProfile() : null, view);
     }
 
     public static PlaceholderContext of(Entity entity) {
@@ -126,7 +128,7 @@ public record PlaceholderContext(MinecraftServer server,
             return of(player, view);
         } else {
             var world = (ServerWorld) entity.getWorld();
-            return new PlaceholderContext(entity.getServer(), () -> entity.getCommandSource(world), world, null, entity, null, view);
+            return new PlaceholderContext(entity.method_69130().method_68961(), () -> entity.getCommandSource(world), world, null, entity, null, view);
         }
     }
 
