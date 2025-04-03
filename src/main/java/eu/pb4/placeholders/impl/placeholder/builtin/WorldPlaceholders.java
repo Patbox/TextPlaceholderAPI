@@ -22,7 +22,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             long dayTime = (long) (world.getTimeOfDay() * 3.6 / 60);
@@ -35,7 +35,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             long dayTime = (long) (world.getTimeOfDay() * 3.6 / 60);
@@ -52,7 +52,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             return PlaceholderResult.value("" + world.getTimeOfDay() / 24000);
@@ -63,7 +63,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             return PlaceholderResult.value(world.getRegistryKey().getValue().toString());
@@ -74,7 +74,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
             List<String> parts = new ArrayList<>();
             {
@@ -95,7 +95,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             return PlaceholderResult.value("" + world.getPlayers().size());
@@ -106,7 +106,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             SpawnHelper.Info info = world.getChunkManager().getSpawnInfo();
@@ -143,7 +143,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             SpawnHelper.Info info = world.getChunkManager().getSpawnInfo();
@@ -170,7 +170,7 @@ public class WorldPlaceholders {
             if (ctx.player() != null) {
                 world = ctx.player().getServerWorld();
             } else {
-                world = ctx.server().method_70562().method_68995();
+                world = ctx.server().getGameInstance().getOverworld();
             }
 
             SpawnHelper.Info info = world.getChunkManager().getSpawnInfo();

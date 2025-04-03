@@ -269,7 +269,7 @@ public class PlayerPlaceholders {
         Placeholders.register(Identifier.of("player", "objective"), (ctx, arg) -> {
             if (ctx.hasPlayer() && arg != null) {
                 try {
-                    ServerScoreboard scoreboard = ctx.server().method_70562().method_69011();
+                    ServerScoreboard scoreboard = ctx.server().getGameInstance().getScoreboard();
                     ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(arg);
                     if (scoreboardObjective == null) {
                         return PlaceholderResult.invalid("Invalid objective!");
