@@ -30,7 +30,7 @@ import java.util.concurrent.TimeUnit;
 public class ServerPlaceholders {
     public static void register() {
         Placeholders.register(Identifier.of("server", "tps"), (ctx, arg) -> {
-            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().getAverageTickTime(), ctx.server().getTickManager().getMillisPerTick());
+            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().getAverageTickTime(), ctx.server().getGameInstance().getTickManager().getMillisPerTick());
             String format = "%.1f";
 
             if (arg != null) {
@@ -46,7 +46,7 @@ public class ServerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("server", "tps_colored"), (ctx, arg) -> {
-            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().getAverageTickTime(), ctx.server().getTickManager().getMillisPerTick());
+            double tps = TimeUnit.SECONDS.toMillis(1) / Math.max(ctx.server().getAverageTickTime(), ctx.server().getGameInstance().getTickManager().getMillisPerTick());
             String format = "%.1f";
 
             if (arg != null) {
@@ -172,13 +172,13 @@ public class ServerPlaceholders {
                     : String.format("%d", heapUsage.getMax() / 1048576));
         });
 
-        Placeholders.register(Identifier.of("server", "online"), (ctx, arg) -> PlaceholderResult.value(String.valueOf(ctx.server().getPlayerManager().getCurrentPlayerCount())));
-        Placeholders.register(Identifier.of("server", "max_players"), (ctx, arg) -> PlaceholderResult.value(String.valueOf(ctx.server().getPlayerManager().getMaxPlayerCount())));
+        Placeholders.register(Identifier.of("server", "online"), (ctx, arg) -> PlaceholderResult.value(String.valueOf(ctx.server().getGameInstance().getPlayerManager().getCurrentPlayerCount())));
+        Placeholders.register(Identifier.of("server", "max_players"), (ctx, arg) -> PlaceholderResult.value(String.valueOf(ctx.server().getGameInstance().getPlayerManager().getMaxPlayerCount())));
 
         Placeholders.register(Identifier.of("server", "objective_name_top"), (ctx, arg) -> {
             var args = arg.split(" ");
             if (args.length >= 2) {
-                ServerScoreboard scoreboard = ctx.server().getScoreboard();
+                ServerScoreboard scoreboard = ctx.server().getGameInstance().getScoreboard();
                 ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(args[0]);
                 if (scoreboardObjective == null) {
                     return PlaceholderResult.invalid("Invalid objective!");
@@ -198,7 +198,7 @@ public class ServerPlaceholders {
         Placeholders.register(Identifier.of("server", "objective_score_top"), (ctx, arg) -> {
             var args = arg.split(" ");
             if (args.length >= 2) {
-                ServerScoreboard scoreboard = ctx.server().getScoreboard();
+                ServerScoreboard scoreboard = ctx.server().getGameInstance().getScoreboard();
                 ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(args[0]);
                 if (scoreboardObjective == null) {
                     return PlaceholderResult.invalid("Invalid objective!");

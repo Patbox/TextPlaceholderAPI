@@ -102,7 +102,7 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
             if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
                 wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
             } else if (context.contains(PlaceholderContext.KEY)) {
-                wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
+                wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getGameInstance().getRegistryManager();
             } else {
                 return null;
             }
