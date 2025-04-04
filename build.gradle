@@ -156,7 +156,7 @@ if (System.getenv("MODRINTH")) {
 }
 
 
-curseforge {
+/*curseforge {
 	if (System.getenv("CURSEFORGE")) {
 		apiKey = System.getenv("CURSEFORGE")
 
@@ -182,4 +182,4 @@ curseforge {
 	remapJar {
 		finalizedBy project.tasks.curseforge
 	}
-}
+}*/
