@@ -22,9 +22,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class ServerPlaceholders {
@@ -185,8 +183,10 @@ public class ServerPlaceholders {
                 }
                 try {
                     int position = Integer.parseInt(args[1]);
-                    Collection<ScoreboardEntry> scoreboardEntries = scoreboard.getScoreboardEntries(scoreboardObjective);
-                    ScoreboardEntry scoreboardEntry = scoreboardEntries.toArray(ScoreboardEntry[]::new)[scoreboardEntries.size() - position];
+                    List<ScoreboardEntry> scoreboardEntries = new ArrayList<>(scoreboard.getScoreboardEntries(scoreboardObjective));
+                    scoreboardEntries.sort(Comparator.comparingInt(ScoreboardEntry::value).reversed());
+
+                    ScoreboardEntry scoreboardEntry = scoreboardEntries.get(position - 1);
                     return PlaceholderResult.value(scoreboardEntry.name());
                 } catch (Exception e) {
                     /* Into the void you go! */
@@ -205,8 +205,10 @@ public class ServerPlaceholders {
                 }
                 try {
                     int position = Integer.parseInt(args[1]);
-                    Collection<ScoreboardEntry> scoreboardEntries = scoreboard.getScoreboardEntries(scoreboardObjective);
-                    ScoreboardEntry scoreboardEntry = scoreboardEntries.toArray(ScoreboardEntry[]::new)[scoreboardEntries.size() - position];
+                    List<ScoreboardEntry> scoreboardEntries = new ArrayList<>(scoreboard.getScoreboardEntries(scoreboardObjective));
+                    scoreboardEntries.sort(Comparator.comparingInt(ScoreboardEntry::value).reversed());
+
+                    ScoreboardEntry scoreboardEntry = scoreboardEntries.get(position - 1);
                     return PlaceholderResult.value(String.valueOf(scoreboardEntry.value()));
                 } catch (Exception e) {
                     /* Into the void you go! */
