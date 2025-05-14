@@ -85,6 +85,7 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%server:mod_description [modid]%` - Returns description of the specified mod.
 - `%server:objective_name_top [objective] [position]%` - Shows name of the player at the `position`th place in the scoreboard `objective`.
 - `%server:objective_score_top [objective] [position]%` - Shows score of the player at the `position`th place in the scoreboard `objective`.
+- `%server:objective_score_player [objective] [player]%` - Shows score of the specified `player` in the scoreboard `objective`.
 
 *[TPS]: Ticks Per Second. The number of ticks per second executing on the server. <20 TPS means the server is lagging.
 *[MSPT]: Milliseconds Per Tick. The number of milliseconds it takes for a tick on the server. >50 MSPT means the server is lagging.
