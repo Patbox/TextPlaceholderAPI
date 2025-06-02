@@ -217,5 +217,25 @@ public class ServerPlaceholders {
             }
             return PlaceholderResult.invalid("Not enough arguments!");
         });
+
+        Placeholders.register(Identifier.of("server", "objective_score_player"), (ctx, arg) -> {
+            var args = arg.split(" ");
+            if (args.length >= 2) {
+                ServerScoreboard scoreboard = ctx.server().getScoreboard();
+                ScoreboardObjective scoreboardObjective = scoreboard.getNullableObjective(args[0]);
+                if (scoreboardObjective == null) {
+                    return PlaceholderResult.invalid("Invalid Objective!");
+                }
+                try {
+                    Collection<ScoreboardEntry> scoreboardEntries = scoreboard.getScoreboardEntries(scoreboardObjective);
+                    ScoreboardEntry entry = scoreboardEntries.stream().filter(scoreboardEntry -> scoreboardEntry.name().getString().equals(args[1])).toList().getFirst();
+
+                    return PlaceholderResult.value(String.valueOf(entry.value()));
+                } catch (Exception e) {
+                    return PlaceholderResult.invalid("Player Not Found!");
+                }
+            }
+            return PlaceholderResult.invalid("Not enough arguments!");
+        });
     }
 }
