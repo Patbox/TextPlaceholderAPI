@@ -36,6 +36,9 @@ public class MultiTagLikeParser extends TagLikeParser {
                 }
 
                 if (tag == null) {
+                    if (value.charAt(tPos) == '\\' && value.length() > tPos + 1) {
+                        tPos++;
+                    }
                     tPos++;
                 } else {
                     break;

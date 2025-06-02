@@ -232,15 +232,56 @@ public final class BuiltinTags {
                         if (!data.isEmpty()) {
                             var type = data.getNext("type");
                             var value = data.getNext("value", "");
+                            var extraData = data.getNext("data", null);
+                            var extraData2 = data.getNested("data");
 
                             for (var action : ClickEvent.Action.values()) {
                                 if (action.asString().equals(type) && action.isUserDefinable()) {
-                                    return new ClickActionNode(nodes, action, parser.parseNode(value));
+                                    return new ClickActionNode(nodes, action, parser.parseNode(value),
+                                            extraData != null ? Either.left(parser.parseNode(extraData)) : (extraData2 != null ? Either.right(extraData2) : null));
                                 }
                             }
                         }
                         return new ParentNode(nodes);
                     }));
+        }
+
+        {
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
+                            "show_dialog",
+                            "click_action",
+                            false,
+                            (nodes, data, parser) -> {
+                                if (!data.isEmpty()) {
+                                    return new ClickActionNode(nodes, ClickEvent.Action.SHOW_DIALOG, parser.parseNode(data.get("value", 0, "")));
+                                }
+                                return new ParentNode(nodes);
+                            }
+                    )
+            );
+        }
+
+        {
+            TagRegistry.registerDefault(
+                    TextTag.enclosing(
+                            "custom_click",
+                            List.of("click"),
+                            "click_action",
+                            false,
+                            (nodes, data, parser) -> {
+                                if (!data.isEmpty()) {
+                                    var value = data.get("value", 0, "");
+                                    var extraData = data.get("data", 1);
+                                    var extraData2 = data.getNested("data");
+
+                                    return new ClickActionNode(nodes, ClickEvent.Action.CUSTOM, parser.parseNode(value),
+                                            extraData != null ? Either.left(parser.parseNode(extraData)) : (extraData2 != null ? Either.right(extraData2) : null));
+                                }
+                                return new ParentNode(nodes);
+                            }
+                    )
+            );
         }
 
         {

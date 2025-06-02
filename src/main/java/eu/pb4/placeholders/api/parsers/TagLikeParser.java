@@ -371,6 +371,9 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
                 if (x != null) {
                     return x;
                 }
+                if (string.charAt(i) == '\\' && maxLength > i + 1) {
+                    i++;
+                }
             }
             return null;
         }

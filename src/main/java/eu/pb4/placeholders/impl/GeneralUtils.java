@@ -5,6 +5,9 @@ import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
@@ -22,6 +25,7 @@ public class GeneralUtils {
     public static final Logger LOGGER = LoggerFactory.getLogger("Text Placeholder API");
     public static final boolean IS_DEV = FabricLoader.getInstance().isDevelopmentEnvironment();
     public static final TextNode[] CASTER = new TextNode[0];
+    public static final RegistryWrapper.WrapperLookup DEFAULT_WRAPPER = DynamicRegistryManager.of(Registries.REGISTRIES);
 
     public static String durationToString(long x) {
         long seconds = x % 60;
@@ -295,13 +299,14 @@ public class GeneralUtils {
 
     private static TextNode getClickValue(Style style) {
         if (style.getClickEvent() != null) {
-            return TextNode.of(switch (style.getClickEvent().getAction()) {
-                case CHANGE_PAGE -> String.valueOf(((ClickEvent.ChangePage) style.getClickEvent()).page());
-                case COPY_TO_CLIPBOARD -> ((ClickEvent.CopyToClipboard) style.getClickEvent()).value();
-                case OPEN_FILE -> ((ClickEvent.OpenFile) style.getClickEvent()).file().getPath();
-                case OPEN_URL -> ((ClickEvent.OpenUrl) style.getClickEvent()).uri().toString();
-                case RUN_COMMAND -> ((ClickEvent.RunCommand) style.getClickEvent()).command();
-                case SUGGEST_COMMAND -> ((ClickEvent.SuggestCommand) style.getClickEvent()).command();
+            return TextNode.of(switch (style.getClickEvent()) {
+                case ClickEvent.ChangePage event -> String.valueOf(event.page());
+                case ClickEvent.CopyToClipboard event -> event.value();
+                case ClickEvent.OpenFile openFile -> openFile.file().getPath();
+                case ClickEvent.OpenUrl openUrl -> openUrl.uri().toString();
+                case ClickEvent.RunCommand runCommand -> runCommand.command();
+                case ClickEvent.SuggestCommand suggestCommand -> suggestCommand.command();
+                default -> "";
             });
         }
 

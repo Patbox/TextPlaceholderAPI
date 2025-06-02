@@ -2,6 +2,7 @@ package eu.pb4.placeholderstest;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
@@ -14,9 +15,11 @@ import it.unimi.dsi.fastutil.Pair;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.command.argument.TextArgumentType;
+import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.text.Texts;
 
 import java.util.List;
@@ -72,7 +75,7 @@ public class TestMod implements ModInitializer {
                 }
                 long total = tagTimeTotal + placeholderTimeTotal + textTimeTotal + contextTimeTotal;
 
-                //player.sendMessage(Text.literal(Text.Serialization.toJsonString(output)), false);
+                //player.sendMessage(Text.literal(toJsonString(output)), false);
                 player.sendMessage(Texts.parse(context.getSource(), output, context.getSource().getEntity(), 0), false);
                 player.sendMessage(Text.literal(
                         "<FULL> Tag: " + ((tagTimeTotal / 1000) / 1000d) + " ms | " +
@@ -127,12 +130,16 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayerEntity player = context.getSource().getPlayer();
             Text text = TextParserUtils.formatText(context.getArgument("text", String.class));
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
+            player.sendMessage(Text.literal(toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    private static String toJsonString(Text text, DynamicRegistryManager registryManager) {
+        return TextCodecs.CODEC.encodeStart(registryManager.getOps(JsonOps.INSTANCE), text).getOrThrow().toString();
     }
 
     private static int test2oldnew(CommandContext<ServerCommandSource> context) {
@@ -158,10 +165,10 @@ public class TestMod implements ModInitializer {
             Text text = TextParserV1.DEFAULT.parseNode(form).toText();
             Text text2 = TagParser.SIMPLIFIED_TEXT_FORMAT.parseNode(form).toText();
             player.sendMessage(Text.literal("v1"), false);
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
+            player.sendMessage(Text.literal(toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
             player.sendMessage(Text.literal("v2"), false);
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2, context.getSource().getRegistryManager())), false);
+            player.sendMessage(Text.literal(toJsonString(text2, context.getSource().getRegistryManager())), false);
             player.sendMessage(text2, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -194,7 +201,7 @@ public class TestMod implements ModInitializer {
             Text text = placeholders.toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
             var textTime = System.nanoTime() - time;
 
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
+            player.sendMessage(Text.literal(toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(Texts.parse(context.getSource(), text, context.getSource().getEntity(), 0), false);
             player.sendMessage(Text.literal(
                       "Tag: " + ((tagTime / 1000) / 1000d) + " ms | " +
@@ -216,7 +223,7 @@ public class TestMod implements ModInitializer {
                     Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
                     Map.of("player", player.getName())
             );
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
+            player.sendMessage(Text.literal(toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -232,7 +239,7 @@ public class TestMod implements ModInitializer {
                     Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
                     Map.of("player", player.getName())
             ).toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text, context.getSource().getRegistryManager())), false);
+            player.sendMessage(Text.literal(toJsonString(text, context.getSource().getRegistryManager())), false);
             player.sendMessage(text, false);
         } catch (Exception e) {
             e.printStackTrace();
@@ -250,7 +257,7 @@ public class TestMod implements ModInitializer {
                     .simplifiedTextFormat()
                     .build()
                     .parseText(form, PlaceholderContext.of(player).asParserContext());
-            player.sendMessage(Text.literal(Text.Serialization.toJsonString(text2, context.getSource().getRegistryManager())), false);
+            player.sendMessage(Text.literal(toJsonString(text2, context.getSource().getRegistryManager())), false);
             player.sendMessage(text2, false);
         } catch (Exception e) {
             e.printStackTrace();

@@ -1,14 +1,27 @@
 package eu.pb4.placeholders.api.node.parent;
 
+import com.google.gson.JsonParser;
+import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.ParserContext;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
+import eu.pb4.placeholders.impl.GeneralUtils;
+import net.minecraft.dialog.type.Dialog;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.StringNbtReader;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.HoverEvent;
 import net.minecraft.text.Style;
+import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
+import java.util.Optional;
 
 public final class StyledNode extends SimpleStylingNode {
     private final Style style;
@@ -52,6 +65,55 @@ public final class StyledNode extends SimpleStylingNode {
 				case RUN_COMMAND -> style = style.withClickEvent(new ClickEvent.RunCommand(node));
 				case SUGGEST_COMMAND -> style = style.withClickEvent(new ClickEvent.SuggestCommand(node));
 				case COPY_TO_CLIPBOARD -> style = style.withClickEvent(new ClickEvent.CopyToClipboard(node));
+                case CUSTOM -> {
+                    try {
+                        RegistryWrapper.WrapperLookup wrapper;
+                        if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
+                            wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
+                        } else if (context.contains(PlaceholderContext.KEY)) {
+                            wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
+                        } else {
+                            wrapper = GeneralUtils.DEFAULT_WRAPPER;
+                        }
+
+                        style = style.withClickEvent(new ClickEvent.Custom(
+                                Identifier.of(node),
+                                /*this.data == null ?*/ Optional.empty() //: Optional.of(StringNbtReader.fromOps(wrapper.getOps(NbtOps.INSTANCE)).read(this.data.toText(context).getString()))
+                        ));
+                    } catch (Throwable e) {
+                        // ignore
+                    }
+
+                }
+                case SHOW_DIALOG -> {
+                    RegistryWrapper.WrapperLookup wrapper;
+                    if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
+                        wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
+                    } else if (context.contains(PlaceholderContext.KEY)) {
+                        wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
+                    } else {
+                        wrapper = GeneralUtils.DEFAULT_WRAPPER;
+                    }
+                    RegistryEntry<Dialog> dialogRegistryEntry = null;
+
+                    var id = Identifier.tryParse(node);
+
+                    if (id != null) {
+                        dialogRegistryEntry = wrapper.getOptionalEntry(RegistryKey.of(RegistryKeys.DIALOG, id)).orElse(null);
+                    }
+
+                    if (dialogRegistryEntry == null) {
+                        try {
+                            dialogRegistryEntry =  Dialog.ENTRY_CODEC.decode(
+                                    wrapper.getOps(JsonOps.INSTANCE), JsonParser.parseString(node)).getOrThrow().getFirst();
+                        } catch (Throwable e) {
+                            // ignored
+                        }
+                    }
+                    if (dialogRegistryEntry != null) {
+                        style = style.withClickEvent(new ClickEvent.ShowDialog(dialogRegistryEntry));
+                    }
+                }
             }
         }
 

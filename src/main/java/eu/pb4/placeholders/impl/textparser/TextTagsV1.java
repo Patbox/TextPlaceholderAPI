@@ -21,7 +21,8 @@ import java.util.function.Function;
 
 import static eu.pb4.placeholders.impl.textparser.TextParserImpl.*;
 
-@Deprecated
+@SuppressWarnings("removal")
+@Deprecated(forRemoval = true)
 @ApiStatus.Internal
 public final class TextTagsV1 {
     public static void register() {
@@ -512,7 +513,7 @@ public final class TextTagsV1 {
             );
         }
 
-        {
+        /*{
             TextParserV1.registerDefault(
                     TextParserV1.TextTag.of(
                             "raw_style",
@@ -521,7 +522,7 @@ public final class TextTagsV1 {
                             (tag, data, input, handlers, endAt) -> new TextParserV1.TagNodeValue(new DirectTextNode(Text.Serialization.fromLenientJson(restoreOriginalEscaping(cleanArgument(data)), DynamicRegistryManager.EMPTY)), 0)
                     )
             );
-        }
+        }*/
 
         {
             TextParserV1.registerDefault(
