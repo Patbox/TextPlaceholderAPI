@@ -13,14 +13,14 @@ used by bukkit and bukkit-based plugins.
 
 ## Structure
 
-Formatting is build on concept of tags, comparable to html.
+Formatting is built on concept of tags, comparable to HTML.
 
 Most of them come in pairs of a starting (`#!xml <tag>`) and closing one (`#!xml </tag>` for closing last tag of selected type or `#!xml <‍/‍>` for last opened one.
 While closing ones are technically optional, without them formatting will continue until end of
 an input text or special `#!xml </*>` tag. Some tags support arguments, which are defined
 after the name in ordered inline fashion (for example `#!xml <color #FF3333>`) or as key-value pair (for example `#!xml <hover value:'Hello!'>`).
 You are allowed to mix inline and key-value defined arguments (in `KEY:VALUE` format). In that case, any key defined argument will be skipped from being read as ordered one.
-Arguments spaces are required to be wrapped in a `'`, `"` or ``` symbols, with starting and ending symbols matching
+Arguments spaces are required to be wrapped in a `'`, `"` or ``` ` ``` symbols, with starting and ending symbols matching
 (for example `#!xml <hover show_text '<red>Hello!'>...`, `#!xml <hover type:show_text value:'<red>Hello!'>...`).
 If you want to use character used for wrapping, you can prefix it with backslash (for example as `\'`) or type it twice).
 
