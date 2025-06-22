@@ -11,6 +11,7 @@ import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -253,7 +254,6 @@ public class GeneralUtils {
                 }
             }
 
-
             list.add(TranslatedNode.ofFallback(content.getKey(), content.getFallback(), args.toArray()));
         } else if (input.getContent() instanceof ScoreTextContent content) {
             list.add(new ScoreNode(content.name(), content.objective()));
@@ -297,17 +297,18 @@ public class GeneralUtils {
         return null;
     }
 
+    @Nullable
     private static TextNode getClickValue(Style style) {
         if (style.getClickEvent() != null) {
-            return TextNode.of(switch (style.getClickEvent()) {
-                case ClickEvent.ChangePage event -> String.valueOf(event.page());
-                case ClickEvent.CopyToClipboard event -> event.value();
-                case ClickEvent.OpenFile openFile -> openFile.file().getPath();
-                case ClickEvent.OpenUrl openUrl -> openUrl.uri().toString();
-                case ClickEvent.RunCommand runCommand -> runCommand.command();
-                case ClickEvent.SuggestCommand suggestCommand -> suggestCommand.command();
-                default -> "";
-            });
+            return switch (style.getClickEvent()) {
+                case ClickEvent.ChangePage event -> TextNode.of(String.valueOf(event.page()));
+                case ClickEvent.CopyToClipboard event -> TextNode.of(event.value());
+                case ClickEvent.OpenFile openFile -> TextNode.of(openFile.file().getPath());
+                case ClickEvent.OpenUrl openUrl -> TextNode.of(openUrl.uri().toString());
+                case ClickEvent.RunCommand runCommand -> TextNode.of(runCommand.command());
+                case ClickEvent.SuggestCommand suggestCommand -> TextNode.of(suggestCommand.command());
+                default -> null;
+            };
         }
 
         return null;
