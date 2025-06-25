@@ -15,9 +15,7 @@ import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.SnbtOperation;
 import net.minecraft.nbt.SnbtParsing;
 import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Style;
@@ -31,6 +29,8 @@ public final class ClickActionNode extends SimpleStylingNode {
     private final ClickEvent.Action action;
     private final TextNode value;
     private final @Nullable Either<TextNode, StringArgs> data;
+
+    private static final RegistryWrapper.WrapperLookup DEFAULT_WRAPPER = DynamicRegistryManager.of(Registries.REGISTRIES);
 
     public ClickActionNode(TextNode[] children, ClickEvent.Action action, TextNode value) {
         this(children, action, value, null);
@@ -79,7 +79,7 @@ public final class ClickActionNode extends SimpleStylingNode {
                     } else if (context.contains(PlaceholderContext.KEY)) {
                         wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
                     } else {
-                        wrapper = GeneralUtils.DEFAULT_WRAPPER;
+                        wrapper = DEFAULT_WRAPPER;
                     }
 
                     yield Style.EMPTY.withClickEvent(new ClickEvent.Custom(
@@ -101,7 +101,7 @@ public final class ClickActionNode extends SimpleStylingNode {
                 } else if (context.contains(PlaceholderContext.KEY)) {
                     wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
                 } else {
-                    wrapper = GeneralUtils.DEFAULT_WRAPPER;
+                    wrapper = DEFAULT_WRAPPER;
                 }
                 RegistryEntry<Dialog> dialogRegistryEntry = null;
                 var data = this.value.toText(context).getString();
