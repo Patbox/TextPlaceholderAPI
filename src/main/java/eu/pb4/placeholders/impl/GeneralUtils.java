@@ -5,9 +5,6 @@ import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.ApiStatus;
@@ -26,7 +23,6 @@ public class GeneralUtils {
     public static final Logger LOGGER = LoggerFactory.getLogger("Text Placeholder API");
     public static final boolean IS_DEV = FabricLoader.getInstance().isDevelopmentEnvironment();
     public static final TextNode[] CASTER = new TextNode[0];
-    public static final RegistryWrapper.WrapperLookup DEFAULT_WRAPPER = DynamicRegistryManager.of(Registries.REGISTRIES);
 
     public static String durationToString(long x) {
         long seconds = x % 60;
