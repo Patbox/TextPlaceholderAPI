@@ -12,7 +12,7 @@ Example
 
     ```java
     Placeholders.register(
-             new Identifier("example", "placeholder"),
+             Identifier.of("example", "placeholder"),
              (ctx, arg) -> PlaceholderResult.value(Text.literal("Hello World!"))
     );
     ```
@@ -37,7 +37,7 @@ Here is example for a placeholder, which requires a player:
 ===+ "Java"
 
     ```java
-    Placeholders.register(new Identifier("player", "displayname"), (ctx, arg) -> {
+    Placeholders.register(Identifier.of("player", "displayname"), (ctx, arg) -> {
         if (!ctx.hasPlayer())
             return PlaceholderResult.invalid("No player!");
 
@@ -65,7 +65,7 @@ Argument itself is a string, so you can parse it in any way.
 ===+ "Java"
 
     ```java
-    PlaceholderAPI.register(new Identifier("server", "name_from_uuid"), (ctx, arg) -> {
+    PlaceholderAPI.register(Identifier.of("server", "name_from_uuid"), (ctx, arg) -> {
         if (arg == null)
             return PlaceholderResult.invalid("No argument!");
 

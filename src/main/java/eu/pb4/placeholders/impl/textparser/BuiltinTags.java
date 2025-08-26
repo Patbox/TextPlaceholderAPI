@@ -28,6 +28,7 @@ import java.util.function.Function;
 public final class BuiltinTags {
     public static final TextColor DEFAULT_COLOR = TextColor.fromFormatting(Formatting.WHITE);
     public static void register() {
+        Function<String, TextColor> extenderColorResolver;
         {
             Map<Formatting, List<String>> aliases = new HashMap<>();
             aliases.put(Formatting.GOLD, List.of("orange"));
@@ -36,19 +37,27 @@ public final class BuiltinTags {
             aliases.put(Formatting.DARK_PURPLE, List.of("purple"));
             aliases.put(Formatting.DARK_GRAY, List.of("dark_grey"));
 
+            var alias2format = new HashMap<String, TextColor>();
+
             for (Formatting formatting : Formatting.values()) {
                 if (formatting.isModifier()) {
                     continue;
+                }
+                var alias = aliases.getOrDefault(formatting, List.of());
+
+                for (var x : alias) {
+                    alias2format.put(x, TextColor.fromFormatting(formatting));
                 }
 
                 TagRegistry.registerDefault(
                         SimpleTags.color(
                                 formatting.getName(),
-                                aliases.containsKey(formatting) ? aliases.get(formatting) : List.of(),
+                                alias,
                                 formatting
                         )
                 );
             }
+            extenderColorResolver = DynamicColorNode.extendedTextColorParse(alias2format::get);
         }
 
         {
@@ -111,7 +120,7 @@ public final class BuiltinTags {
                             "color",
                             true,
                             (nodes, data, parser) -> {
-                                return new DynamicColorNode(nodes, parser.parseNode(data.get("value", 0, "white")));
+                                return new DynamicColorNode(nodes, parser.parseNode(data.get("value", 0, "white")), extenderColorResolver);
                             })
             );
         }
@@ -158,7 +167,20 @@ public final class BuiltinTags {
                             "font",
                             "other_formatting",
                             false,
-                            (nodes, data, parser) -> new FontNode(nodes, Identifier.tryParse(data.get("value", 0, "")))
+                            (nodes, data, parser) -> {
+                                var val = data.get("value");
+                                if (val == null) {
+                                    if (data.size() > 1) {
+                                        val = data.getNext("key", "minecraft") + ":" + data.getNext("path", "");
+                                    } else {
+                                        val = data.getNext("val");
+                                        if (val == null) {
+                                            val = data.input().strip();
+                                        }
+                                    }
+                                }
+                                return new FontNode(nodes, Identifier.tryParse(val));
+                            }
                     )
             );
         }

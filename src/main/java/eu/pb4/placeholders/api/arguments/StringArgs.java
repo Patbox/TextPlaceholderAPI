@@ -1,5 +1,11 @@
 package eu.pb4.placeholders.api.arguments;
 
+import com.mojang.datafixers.util.Either;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import eu.pb4.placeholders.impl.StringArgOps;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.util.function.CharPredicate;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -177,6 +183,22 @@ public final class StringArgs {
     public String get(String name, int id, String defaultValue) {
         var x = get(name, id);
         return x != null ? x : defaultValue;
+    }
+
+    public <T> DataResult<T> get(String name, Codec<T> codec) {
+        var val = get(name);
+        var map = getNested(name);
+        return val == null && map == null ? DataResult.error(() -> "Empty")
+                : codec.decode(StringArgOps.INSTANCE,
+                val != null ? Either.left(val) : Either.right(map)).map(Pair::getFirst);
+    }
+
+    public <T> DataResult<T> get(String name, Codec<T> codec, RegistryWrapper.WrapperLookup wrapperLookup) {
+        var val = get(name);
+        var map = getNested(name);
+        return val == null && map == null ? DataResult.error(() -> "Empty")
+                : codec.decode(wrapperLookup.getOps(StringArgOps.INSTANCE),
+                val != null ? Either.left(val) : Either.right(map)).map(Pair::getFirst);
     }
 
     @Nullable

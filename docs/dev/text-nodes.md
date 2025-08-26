@@ -31,7 +31,7 @@ Examples:
 - LiteralNode - Used for direct text, requires special parsing by parsers,
 - TranslationNode - Used for translated text, also requires special parsing,
 - DirectTextNode - Allows you to insert non-transformable text, can be used for static placeholders, 
-- PlaceholderNode (Internal) - Used for representing parsed placeholder without fetching it's final value.
+- PlaceholderNode (Internal) - Used for representing parsed placeholder without fetching its final value.
 
 ### Parent Text Nodes
 This type is used for joining multiple Value/Parent Text Nodes into single object. Additionally, 

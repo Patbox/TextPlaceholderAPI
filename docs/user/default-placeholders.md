@@ -24,11 +24,15 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%player:displayname%` - The player's display name (used on chat).
 - `%player:displayname_visual%` - The player's display name (without hover and click action).
 - `%player:displayname_unformatted%` - The player's display name (without formatting).
+- `%player:uuid%` - The player's uuid.
 - `%player:ping%` - The player's ping.
 - `%player:ping_colored%` - The player's ping (colored).
 - `%player:pos_x%` - The player's `x` coordinate.
 - `%player:pos_y%` - The player's `y` coordinate.
 - `%player:pos_z%` - The player's `z` coordinate.
+  `%player:pos_x_scaled [compared world id]%` (2.7.2+) - The player's scaled `x` coordinate. Compared world defaults to Overworld.
+- `%player:pos_y_scaled [compared world id]%` (2.7.2+) - The player's scaled `y` coordinate. Compared world defaults to Overworld.
+- `%player:pos_z_scaled [compared world id]%` (2.7.2+) - The player's scaled `z` coordinate. Compared world defaults to Overworld.
 - `%player:facing%` (2.5.1+) - The player's horizontal direction.
 - `%player:facing_axis%` (2.5.1+) - The player's horizontal direction in format of `+/-A` (A si replaced with axis).
 - `%player:horizontal_facing%` (2.5.1+) - The player's horizontal facing direction.
@@ -44,6 +48,8 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%player:statistic [statistic]%`/`%player:statistic [type] [statistic]%` - The formatted value of player's statistic.
 - `%player:statistic_raw [statistic]%`/`%player:statistic_raw [type] [statistic]%` - The value of player's statistic.
 - `%player:objective [objective]%` - The value of player's scoreboard objective.
+- `%player:biome%` (2.7.2+) - Biome at player's location
+- `%player:biome_raw%` (2.7.2+) - Raw biome id at player's location
 
 ### World
 
@@ -60,6 +66,7 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%world:mob_cap%`/`%world:mob_cap [group]%` - Shows maximum amount of mobs that can spawn is player's world.
 - `%world:id%` - The world's ID.
 - `%world:name%` - The world's name.
+- `%world:weather%` (2.7.2+) - The world's weather.
 
 ### Server
 
@@ -68,6 +75,7 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%server:mspt%` - The server's MSPT.
 - `%server:mspt_colored%` - The server's MSPT (colored).
 - `%server:time%`/`%server:time [formatting]%` - The server's time.
+- `%server:time_new format:[format] zone:[time zone]%` (2.4.0-pre1+) - The world's time with timezone The `format` and `zone` fields are optional.
 - `%server:uptime%`/`%server:uptime [formatting]%` (2.1.2+)- The server's uptime.
 - `%server:version%` - The server's version.
 - `%server:name%` - The server's name.

@@ -6,15 +6,33 @@ import eu.pb4.placeholders.api.parsers.NodeParser;
 import net.minecraft.text.Style;
 import net.minecraft.text.Text;
 import net.minecraft.text.TextColor;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.function.Function;
 
 public final class DynamicColorNode extends SimpleStylingNode implements DynamicShadowNode.SimpleColoredTransformer {
+    private static final Function<String, TextColor> DEFAULT_RESOLVER = string -> TextColor.parse(string).result().orElse(null);
     private final TextNode color;
+    private final Function<String, TextColor> resolver;
 
     public DynamicColorNode(TextNode[] children, TextNode color) {
+        this(children, color, DEFAULT_RESOLVER);
+    }
+    public DynamicColorNode(TextNode[] children, TextNode color, Function<String, @Nullable TextColor> resolver) {
         super(children);
         this.color = color;
+        this.resolver = resolver;
+    }
+
+    public static Function<String, @Nullable TextColor> extendedTextColorParse(Function<String, @Nullable TextColor> resolver) {
+        return string -> {
+            var x = resolver.apply(string);
+            if (x != null) {
+                return x;
+            }
+            return TextColor.parse(string).result().orElse(null);
+        };
     }
 
     @Override
@@ -24,8 +42,8 @@ public final class DynamicColorNode extends SimpleStylingNode implements Dynamic
 
     @Override
     protected Style style(ParserContext context) {
-        var c = TextColor.parse(color.toText(context).getString());
-        return c.result().map(Style.EMPTY::withColor).orElse(Style.EMPTY);
+        var c = this.resolver.apply(color.toText(context).getString());
+        return c != null ? Style.EMPTY.withColor(c) : Style.EMPTY;
     }
 
     @Override

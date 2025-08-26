@@ -5,16 +5,21 @@ import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.registry.Registries;
+import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.RegistryKeys;
 import net.minecraft.scoreboard.ReadableScoreboardScore;
 import net.minecraft.scoreboard.ScoreboardObjective;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.scoreboard.Team;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.StatType;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.world.dimension.DimensionType;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.util.Locale;
@@ -23,8 +28,8 @@ import java.util.Locale;
 public class PlayerPlaceholders {
     public static void register() {
         Placeholders.register(Identifier.of("player", "name"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(ctx.player().getName());
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(ctx.entity().getName());
             } else if (ctx.hasGameProfile()) {
                 return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
@@ -33,8 +38,8 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "name_visual"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.player().getName()));
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.entity().getName()));
             } else if (ctx.hasGameProfile()) {
                 return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
@@ -43,8 +48,8 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "name_unformatted"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(ctx.player().getName().getString());
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(ctx.entity().getName().getString());
             } else if (ctx.hasGameProfile()) {
                 return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
@@ -70,8 +75,8 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "displayname"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(ctx.player().getDisplayName());
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(ctx.entity().getDisplayName());
             } else if (ctx.hasGameProfile()) {
                 return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
@@ -82,8 +87,8 @@ public class PlayerPlaceholders {
         Placeholders.register(Identifier.of("player", "display_name"), Placeholders.getPlaceholders().get(Identifier.of("player", "displayname")));
 
         Placeholders.register(Identifier.of("player", "displayname_visual"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.player().getDisplayName()));
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.entity().getDisplayName()));
             } else if (ctx.hasGameProfile()) {
                 return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
@@ -94,8 +99,8 @@ public class PlayerPlaceholders {
         Placeholders.register(Identifier.of("player", "display_name_visual"), Placeholders.getPlaceholders().get(Identifier.of("player", "displayname_visual")));
 
         Placeholders.register(Identifier.of("player", "displayname_unformatted"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(Text.literal(ctx.player().getDisplayName().getString()));
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(Text.literal(ctx.entity().getDisplayName().getString()));
             } else if (ctx.hasGameProfile()) {
                 return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
             } else {
@@ -286,16 +291,16 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "facing"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(ctx.player().getFacing().asString());
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(ctx.entity().getFacing().asString());
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(Identifier.of("player", "facing_axis"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                var facing = ctx.player().getFacing();
+            if (ctx.hasEntity()) {
+                var facing = ctx.entity().getFacing();
                 return PlaceholderResult.value(
                         (facing.getDirection() == Direction.AxisDirection.NEGATIVE ? "-" : "+") + facing.getAxis().asString().toUpperCase(Locale.ROOT));
             } else {
@@ -304,16 +309,16 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "horizontal_facing"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                return PlaceholderResult.value(ctx.player().getHorizontalFacing().asString());
+            if (ctx.hasEntity()) {
+                return PlaceholderResult.value(ctx.entity().getHorizontalFacing().asString());
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.register(Identifier.of("player", "horizontal_facing_axis"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                var facing = ctx.player().getHorizontalFacing();
+            if (ctx.hasEntity()) {
+                var facing = ctx.entity().getHorizontalFacing();
                 return PlaceholderResult.value(
                         (facing.getDirection() == Direction.AxisDirection.NEGATIVE ? "-" : "+") + facing.getAxis().asString().toUpperCase(Locale.ROOT));
             } else {
@@ -322,8 +327,8 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "pos_x"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                double value = ctx.player().getX();
+            if (ctx.hasEntity()) {
+                double value = ctx.entity().getX();
                 String format = "%.2f";
 
                 if (arg != null) {
@@ -342,8 +347,8 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "pos_y"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                double value = ctx.player().getY();
+            if (ctx.hasEntity()) {
+                double value = ctx.entity().getY();
                 String format = "%.2f";
 
                 if (arg != null) {
@@ -362,8 +367,105 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "pos_z"), (ctx, arg) -> {
-            if (ctx.hasPlayer()) {
-                double value = ctx.player().getZ();
+            if (ctx.hasEntity()) {
+                double value = ctx.entity().getZ();
+                String format = "%.2f";
+
+                if (arg != null) {
+                    try {
+                        int x = Integer.parseInt(arg);
+                        format = "%." + x + "f";
+                    } catch (Exception e) {
+                        format = "%.2f";
+                    }
+                }
+
+                return PlaceholderResult.value(String.format(format, value));
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(Identifier.of("player", "pos_x_scaled"), (ctx, arg) -> {
+            if (ctx.hasEntity()) {
+                ServerWorld otherWorld = null;
+
+                if (arg != null) {
+                    var worldId = Identifier.tryParse(arg);
+                    if (worldId != null) {
+                        otherWorld = ctx.server().getWorld(RegistryKey.of(RegistryKeys.WORLD, worldId));
+                    }
+                }
+
+                if (otherWorld == null) {
+                    otherWorld = ctx.server().getOverworld();
+                }
+
+                double value = ctx.entity().getX() * DimensionType.getCoordinateScaleFactor(ctx.entity().getWorld().getDimension(), otherWorld.getDimension());                String format = "%.2f";
+
+                if (arg != null) {
+                    try {
+                        int x = Integer.parseInt(arg);
+                        format = "%." + x + "f";
+                    } catch (Exception e) {
+                        format = "%.2f";
+                    }
+                }
+
+                return PlaceholderResult.value(String.format(format, value));
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(Identifier.of("player", "pos_y_scaled"), (ctx, arg) -> {
+            if (ctx.hasEntity()) {
+                ServerWorld otherWorld = null;
+
+                if (arg != null) {
+                    var worldId = Identifier.tryParse(arg);
+                    if (worldId != null) {
+                        otherWorld = ctx.server().getWorld(RegistryKey.of(RegistryKeys.WORLD, worldId));
+                    }
+                }
+
+                if (otherWorld == null) {
+                    otherWorld = ctx.server().getOverworld();
+                }
+
+                double value = ctx.entity().getY() * DimensionType.getCoordinateScaleFactor(ctx.entity().getWorld().getDimension(), otherWorld.getDimension());                String format = "%.2f";
+
+                if (arg != null) {
+                    try {
+                        int x = Integer.parseInt(arg);
+                        format = "%." + x + "f";
+                    } catch (Exception e) {
+                        format = "%.2f";
+                    }
+                }
+
+                return PlaceholderResult.value(String.format(format, value));
+            } else {
+                return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(Identifier.of("player", "pos_z_scaled"), (ctx, arg) -> {
+            if (ctx.hasEntity()) {
+                ServerWorld otherWorld = null;
+
+                if (arg != null) {
+                    var worldId = Identifier.tryParse(arg);
+                    if (worldId != null) {
+                        otherWorld = ctx.server().getWorld(RegistryKey.of(RegistryKeys.WORLD, worldId));
+                    }
+                }
+
+                if (otherWorld == null) {
+                    otherWorld = ctx.server().getOverworld();
+                }
+
+                double value = ctx.entity().getZ() * DimensionType.getCoordinateScaleFactor(ctx.entity().getWorld().getDimension(), otherWorld.getDimension());
                 String format = "%.2f";
 
                 if (arg != null) {
@@ -448,6 +550,32 @@ public class PlayerPlaceholders {
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
+        });
+
+        Placeholders.register(Identifier.of("player", "biome"), (ctx, arg) -> {
+            var world = ctx.entity() != null ? ctx.entity().getWorld() : ctx.source().getWorld();
+            var pos = ctx.entity() != null ? ctx.entity().getBlockPos() : BlockPos.ofFloored(ctx.source().getPosition());
+
+
+            var biome = world.getBiome(pos);
+            if (biome.getKey().isEmpty()) {
+                return PlaceholderResult.invalid("No biome key??");
+            }
+
+            return PlaceholderResult.value(Text.translatable(biome.getKey().get().getValue().toTranslationKey("biome"), biome.getKey().get().getValue().toString()));
+        });
+
+        Placeholders.register(Identifier.of("player", "biome_raw"), (ctx, arg) -> {
+            var world = ctx.entity() != null ? ctx.entity().getWorld() : ctx.source().getWorld();
+            var pos = ctx.entity() != null ? ctx.entity().getBlockPos() : BlockPos.ofFloored(ctx.source().getPosition());
+
+
+            var biome = world.getBiome(pos);
+            if (biome.getKey().isEmpty()) {
+                return PlaceholderResult.invalid("No biome key??");
+            }
+
+            return PlaceholderResult.value(biome.getKey().get().getValue().toString());
         });
     }
 }

@@ -8,6 +8,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.SpawnHelper;
+import net.minecraft.world.World;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -190,6 +191,17 @@ public class WorldPlaceholders {
                 }
                 return PlaceholderResult.value("" + x * info.getSpawningChunkCount() / CHUNK_AREA);
             }
+        });
+
+        Placeholders.register(Identifier.of("world", "weather"), (ctx, arg) -> {
+            World world;
+            if (ctx.entity() != null) {
+                world = ctx.entity().getWorld();
+            } else {
+                world = ctx.source().getWorld();
+            }
+
+           return PlaceholderResult.value(world.isThundering() ? "rain & thunder" : world.isRaining() ? "rain" : "clear");
         });
     }
 }
