@@ -2,7 +2,9 @@ package eu.pb4.placeholders.impl.placeholder.builtin;
 
 import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
+import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.impl.GeneralUtils;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.registry.Registries;
 import net.minecraft.registry.RegistryKey;
@@ -15,6 +17,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.stat.StatType;
 import net.minecraft.stat.Stats;
 import net.minecraft.text.Text;
+import net.minecraft.text.object.PlayerTextObjectContents;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
@@ -31,7 +34,7 @@ public class PlayerPlaceholders {
             if (ctx.hasEntity()) {
                 return PlaceholderResult.value(ctx.entity().getName());
             } else if (ctx.hasGameProfile()) {
-                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().name()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -41,7 +44,7 @@ public class PlayerPlaceholders {
             if (ctx.hasEntity()) {
                 return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.entity().getName()));
             } else if (ctx.hasGameProfile()) {
-                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().name()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -51,7 +54,7 @@ public class PlayerPlaceholders {
             if (ctx.hasEntity()) {
                 return PlaceholderResult.value(ctx.entity().getName().getString());
             } else if (ctx.hasGameProfile()) {
-                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().name()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -78,7 +81,7 @@ public class PlayerPlaceholders {
             if (ctx.hasEntity()) {
                 return PlaceholderResult.value(ctx.entity().getDisplayName());
             } else if (ctx.hasGameProfile()) {
-                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().name()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -90,7 +93,7 @@ public class PlayerPlaceholders {
             if (ctx.hasEntity()) {
                 return PlaceholderResult.value(GeneralUtils.removeHoverAndClick(ctx.entity().getDisplayName()));
             } else if (ctx.hasGameProfile()) {
-                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().name()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -102,7 +105,7 @@ public class PlayerPlaceholders {
             if (ctx.hasEntity()) {
                 return PlaceholderResult.value(Text.literal(ctx.entity().getDisplayName().getString()));
             } else if (ctx.hasGameProfile()) {
-                return PlaceholderResult.value(Text.of(ctx.gameProfile().getName()));
+                return PlaceholderResult.value(Text.of(ctx.gameProfile().name()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -401,7 +404,7 @@ public class PlayerPlaceholders {
                     otherWorld = ctx.server().getOverworld();
                 }
 
-                double value = ctx.entity().getX() * DimensionType.getCoordinateScaleFactor(ctx.entity().getWorld().getDimension(), otherWorld.getDimension());                String format = "%.2f";
+                double value = ctx.entity().getX() * DimensionType.getCoordinateScaleFactor(ctx.entity().getEntityWorld().getDimension(), otherWorld.getDimension());                String format = "%.2f";
 
                 if (arg != null) {
                     try {
@@ -433,7 +436,7 @@ public class PlayerPlaceholders {
                     otherWorld = ctx.server().getOverworld();
                 }
 
-                double value = ctx.entity().getY() * DimensionType.getCoordinateScaleFactor(ctx.entity().getWorld().getDimension(), otherWorld.getDimension());                String format = "%.2f";
+                double value = ctx.entity().getY() * DimensionType.getCoordinateScaleFactor(ctx.entity().getEntityWorld().getDimension(), otherWorld.getDimension());                String format = "%.2f";
 
                 if (arg != null) {
                     try {
@@ -465,7 +468,7 @@ public class PlayerPlaceholders {
                     otherWorld = ctx.server().getOverworld();
                 }
 
-                double value = ctx.entity().getZ() * DimensionType.getCoordinateScaleFactor(ctx.entity().getWorld().getDimension(), otherWorld.getDimension());
+                double value = ctx.entity().getZ() * DimensionType.getCoordinateScaleFactor(ctx.entity().getEntityWorld().getDimension(), otherWorld.getDimension());
                 String format = "%.2f";
 
                 if (arg != null) {
@@ -487,7 +490,7 @@ public class PlayerPlaceholders {
             if (ctx.hasPlayer()) {
                 return PlaceholderResult.value(ctx.player().getUuidAsString());
             } else if (ctx.hasGameProfile()) {
-                return PlaceholderResult.value(Text.of("" + ctx.gameProfile().getId()));
+                return PlaceholderResult.value(Text.of("" + ctx.gameProfile().id()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -553,7 +556,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "biome"), (ctx, arg) -> {
-            var world = ctx.entity() != null ? ctx.entity().getWorld() : ctx.source().getWorld();
+            var world = ctx.entity() != null ? ctx.entity().getEntityWorld() : ctx.source().getWorld();
             var pos = ctx.entity() != null ? ctx.entity().getBlockPos() : BlockPos.ofFloored(ctx.source().getPosition());
 
 
@@ -566,7 +569,7 @@ public class PlayerPlaceholders {
         });
 
         Placeholders.register(Identifier.of("player", "biome_raw"), (ctx, arg) -> {
-            var world = ctx.entity() != null ? ctx.entity().getWorld() : ctx.source().getWorld();
+            var world = ctx.entity() != null ? ctx.entity().getEntityWorld() : ctx.source().getWorld();
             var pos = ctx.entity() != null ? ctx.entity().getBlockPos() : BlockPos.ofFloored(ctx.source().getPosition());
 
 
@@ -576,6 +579,14 @@ public class PlayerPlaceholders {
             }
 
             return PlaceholderResult.value(biome.getKey().get().getValue().toString());
+        });
+
+        Placeholders.register(Identifier.of("player", "head"), (ctx, arg) -> {
+            if (!ctx.hasGameProfile()) {
+                return PlaceholderResult.invalid("No Game Profile!");
+            }
+
+            return PlaceholderResult.value(Text.method_74062(new PlayerTextObjectContents(ProfileComponent.ofStatic(ctx.gameProfile()), SimpleArguments.bool(arg, true))));
         });
     }
 }

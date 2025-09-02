@@ -4,6 +4,7 @@ import com.mojang.authlib.GameProfile;
 import eu.pb4.placeholders.impl.placeholder.ViewObjectImpl;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -97,8 +98,8 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(GameProfile profile, MinecraftServer server, ViewObject view) {
-        var name = profile.getName() != null ? profile.getName() : profile.getId().toString();
-        return new PlaceholderContext(server, () -> new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ZERO, Vec2f.ZERO, server.getOverworld(), server.getPermissionLevel(profile), name, Text.literal(name), server, null), null, null, null, profile, view);
+        var name = profile.name() != null ? profile.name() : profile.id().toString();
+        return new PlaceholderContext(server, () -> new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ZERO, Vec2f.ZERO, server.getOverworld(), server.getPermissionLevel(new PlayerConfigEntry(profile)), name, Text.literal(name), server, null), null, null, null, profile, view);
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player) {
@@ -106,7 +107,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player, ViewObject view) {
-        return new PlaceholderContext(player.getServer(), player::getCommandSource, player.getWorld(), player, player, player.getGameProfile(), view);
+        return new PlaceholderContext(player.getServer(), player::getCommandSource, player.getEntityWorld(), player, player, player.getGameProfile(), view);
     }
 
     public static PlaceholderContext of(ServerCommandSource source) {
@@ -125,7 +126,7 @@ public record PlaceholderContext(MinecraftServer server,
         if (entity instanceof ServerPlayerEntity player) {
             return of(player, view);
         } else {
-            var world = (ServerWorld) entity.getWorld();
+            var world = (ServerWorld) entity.getEntityWorld();
             return new PlaceholderContext(entity.getServer(), () -> entity.getCommandSource(world), world, null, entity, null, view);
         }
     }

@@ -259,8 +259,9 @@ public class GeneralUtils {
             list.add(new SelectorNode(content.selector(), content.separator().map(GeneralUtils::convertToNodes)));
         } else if (input.getContent() instanceof NbtTextContent content) {
             list.add(new NbtNode(content.getPath(), content.shouldInterpret(), content.getSeparator().map(GeneralUtils::convertToNodes), content.getDataSource()));
+        } else if (input.getContent() instanceof ObjectTextContent content) {
+            list.add(new ObjectNode(content.contents()));
         }
-
 
         for (var child : input.getSiblings()) {
             list.add(convertToNodes(child));

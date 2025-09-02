@@ -12,10 +12,14 @@ import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.StringArgOps;
+import eu.pb4.placeholders.impl.mixin.DynamicAccessor;
+import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.StringNbtReader;
 import net.minecraft.text.*;
+import net.minecraft.text.object.AtlasTextObjectContents;
+import net.minecraft.text.object.PlayerTextObjectContents;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Util;
@@ -183,6 +187,63 @@ public final class BuiltinTags {
                     )
             );
         }
+
+        {
+            var emptyId = Identifier.of("");
+            TagRegistry.registerDefault(
+                    TextTag.self(
+                            "atlas",
+                            "special",
+                            false,
+                            (nodes, data, parser) -> {
+                                var atlas = Objects.requireNonNullElse(Identifier.tryParse(data.getNext("atlas", "")), emptyId);
+                                var texture = Objects.requireNonNullElse(Identifier.tryParse(data.getNext("texture", "")), emptyId);
+
+                                return new ObjectNode(new AtlasTextObjectContents(atlas, texture));
+                            }
+                    )
+            );
+        }
+
+        {
+            var emptyId = Identifier.of("");
+            TagRegistry.registerDefault(
+                    TextTag.self(
+                            "player",
+                            "special",
+                            false,
+                            (nodes, data, parser) -> {
+                                var hat = SimpleArguments.bool(data.get("hat"), true);
+
+                                var next = data.getNext("name", "");
+                                var maybeUuid = data.get("uuid");
+                                UUID uuid = null;
+                                if (maybeUuid == null) {
+                                    try {
+                                        uuid = UUID.fromString(next);
+                                    } catch (Throwable ignored) {}
+                                } else {
+                                    try {
+                                        uuid = UUID.fromString(maybeUuid);
+                                    } catch (Throwable ignored) {}
+                                }
+
+                                if (uuid != null) {
+                                    try {
+                                        return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.ofDynamic(uuid), hat));
+                                    } catch (Throwable e) {}
+                                }
+
+                                if (next != null) {
+                                    return new ObjectNode(new PlayerTextObjectContents(DynamicAccessor.createDynamic(Either.left(next)), hat));
+                                }
+
+                                return new ObjectNode(new AtlasTextObjectContents(emptyId, emptyId));
+                            }
+                    )
+            );
+        }
+
         {
             TagRegistry.registerDefault(TextTag.self(
                     "lang",
