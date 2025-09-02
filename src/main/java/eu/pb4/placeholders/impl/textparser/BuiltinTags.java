@@ -150,9 +150,8 @@ public final class BuiltinTags {
                                             value = (value & 0xFFFFFF) | 0xFF000000;
                                         }
                                     } else {
-                                        value = TextColor.parse(color).getOrThrow().getRgb() | 0xFF000000;
+                                        value = extenderColorResolver.apply(color).getRgb() | 0xFF000000;
                                     }
-
 
                                     return new ShadowNode(nodes, value);
                                 } catch (Throwable e) {
