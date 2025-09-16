@@ -1,9 +1,11 @@
 package eu.pb4.placeholders.api;
 
 import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.yggdrasil.ProfileResult;
 import eu.pb4.placeholders.impl.placeholder.ViewObjectImpl;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.PlayerConfigEntry;
 import net.minecraft.server.command.CommandOutput;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.network.ServerPlayerEntity;
@@ -15,6 +17,7 @@ import net.minecraft.util.math.Vec3d;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 
@@ -92,13 +95,24 @@ public record PlaceholderContext(MinecraftServer server,
         return new PlaceholderContext(server, server::getCommandSource, null, null, null, null, view);
     }
 
+    public static PlaceholderContext of(PlayerConfigEntry profile, MinecraftServer server) {
+        return of(profile, server, ViewObject.DEFAULT);
+    }
+
+    public static PlaceholderContext of(PlayerConfigEntry entry, MinecraftServer server, ViewObject view) {
+        var name = entry.name() != null ? entry.name() : entry.id().toString();
+        ProfileResult result = server.getApiServices().sessionService().fetchProfile(entry.id(), true);     // Try to Fetch Secure GameProfile for textures, if this code requires it.
+        GameProfile profile = result != null ? result.profile() : new GameProfile(entry.id(), name);
+        return new PlaceholderContext(server, () -> new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ZERO, Vec2f.ZERO, server.getOverworld(), server.getPermissionLevel(entry), name, Text.literal(name), server, null), null, null, null, profile, view);
+    }
+
     public static PlaceholderContext of(GameProfile profile, MinecraftServer server) {
         return of(profile, server, ViewObject.DEFAULT);
     }
 
     public static PlaceholderContext of(GameProfile profile, MinecraftServer server, ViewObject view) {
-        var name = profile.getName() != null ? profile.getName() : profile.getId().toString();
-        return new PlaceholderContext(server, () -> new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ZERO, Vec2f.ZERO, server.getOverworld(), server.getPermissionLevel(profile), name, Text.literal(name), server, null), null, null, null, profile, view);
+        var name = profile.name() != null ? profile.name() : profile.id().toString();
+        return new PlaceholderContext(server, () -> new ServerCommandSource(CommandOutput.DUMMY, Vec3d.ZERO, Vec2f.ZERO, server.getOverworld(), server.getPermissionLevel(new PlayerConfigEntry(profile)), name, Text.literal(name), server, null), null, null, null, profile, view);
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player) {
@@ -106,7 +120,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player, ViewObject view) {
-        return new PlaceholderContext(player.getServer(), player::getCommandSource, player.getWorld(), player, player, player.getGameProfile(), view);
+        return new PlaceholderContext(player.getCommandSource().getServer(), player::getCommandSource, player.getEntityWorld(), player, player, player.getGameProfile(), view);
     }
 
     public static PlaceholderContext of(ServerCommandSource source) {
@@ -125,8 +139,8 @@ public record PlaceholderContext(MinecraftServer server,
         if (entity instanceof ServerPlayerEntity player) {
             return of(player, view);
         } else {
-            var world = (ServerWorld) entity.getWorld();
-            return new PlaceholderContext(entity.getServer(), () -> entity.getCommandSource(world), world, null, entity, null, view);
+            var world = (ServerWorld) entity.getEntityWorld();
+            return new PlaceholderContext(entity.getCommandSource(world).getServer(), () -> entity.getCommandSource(world), world, null, entity, null, view);
         }
     }
 
