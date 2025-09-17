@@ -107,7 +107,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(ServerPlayerEntity player, ViewObject view) {
-        return new PlaceholderContext(player.getServer(), player::getCommandSource, player.getEntityWorld(), player, player, player.getGameProfile(), view);
+        return new PlaceholderContext(player.getEntityWorld().getServer(), player::getCommandSource, player.getEntityWorld(), player, player, player.getGameProfile(), view);
     }
 
     public static PlaceholderContext of(ServerCommandSource source) {
@@ -127,7 +127,7 @@ public record PlaceholderContext(MinecraftServer server,
             return of(player, view);
         } else {
             var world = (ServerWorld) entity.getEntityWorld();
-            return new PlaceholderContext(entity.getServer(), () -> entity.getCommandSource(world), world, null, entity, null, view);
+            return new PlaceholderContext(world.getServer(), () -> entity.getCommandSource(world), world, null, entity, null, view);
         }
     }
 

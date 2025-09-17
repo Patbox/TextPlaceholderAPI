@@ -12,7 +12,6 @@ import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.StringArgOps;
-import eu.pb4.placeholders.impl.mixin.DynamicAccessor;
 import net.minecraft.component.type.ProfileComponent;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtOps;
@@ -235,7 +234,7 @@ public final class BuiltinTags {
                                 }
 
                                 if (next != null) {
-                                    return new ObjectNode(new PlayerTextObjectContents(DynamicAccessor.createDynamic(Either.left(next)), hat));
+                                    return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.method_74889(next), hat));
                                 }
 
                                 return new ObjectNode(new AtlasTextObjectContents(emptyId, emptyId));
