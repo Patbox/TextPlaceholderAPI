@@ -586,7 +586,7 @@ public class PlayerPlaceholders {
                 return PlaceholderResult.invalid("No Game Profile!");
             }
 
-            return PlaceholderResult.value(Text.method_74062(new PlayerTextObjectContents(ProfileComponent.ofStatic(ctx.gameProfile()), SimpleArguments.bool(arg, true))));
+            return PlaceholderResult.value(Text.object(new PlayerTextObjectContents(ProfileComponent.ofStatic(ctx.gameProfile()), SimpleArguments.bool(arg, true))));
         });
     }
 }

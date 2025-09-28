@@ -234,7 +234,7 @@ public final class BuiltinTags {
                                 }
 
                                 if (next != null) {
-                                    return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.method_74889(next), hat));
+                                    return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.ofDynamic(next), hat));
                                 }
 
                                 return new ObjectNode(new AtlasTextObjectContents(emptyId, emptyId));
