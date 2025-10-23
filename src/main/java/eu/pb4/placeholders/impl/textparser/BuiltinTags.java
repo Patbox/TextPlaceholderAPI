@@ -1,6 +1,10 @@
 package eu.pb4.placeholders.impl.textparser;
 
 
+import com.google.common.collect.ImmutableMultimap;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.datafixers.util.Either;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.arguments.SimpleArguments;
@@ -216,6 +220,13 @@ public final class BuiltinTags {
 
                                 var next = data.getNext("name", "");
                                 var maybeUuid = data.get("uuid");
+                                var texture = data.get("texture");
+
+                                if (texture != null) {
+                                    PropertyMap map = new PropertyMap(ImmutableMultimap.of("textures", new Property("textures", texture, null)));
+                                    return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.ofStatic(new GameProfile(Util.NIL_UUID, "", map)), hat));
+                                }
+
                                 UUID uuid = null;
                                 if (maybeUuid == null) {
                                     try {
