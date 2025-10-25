@@ -50,6 +50,7 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%player:objective [objective]%` - The value of player's scoreboard objective.
 - `%player:biome%` (2.7.2+) - Biome at player's location
 - `%player:biome_raw%` (2.7.2+) - Raw biome id at player's location
+- `%player:head%` (2.8.0+) - Shows player's head texture.
 
 ### World
 

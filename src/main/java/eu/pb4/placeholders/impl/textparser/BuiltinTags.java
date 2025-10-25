@@ -218,13 +218,18 @@ public final class BuiltinTags {
                             (nodes, data, parser) -> {
                                 var hat = SimpleArguments.bool(data.get("hat"), true);
 
-                                var next = data.getNext("name", "");
-                                var maybeUuid = data.get("uuid");
                                 var texture = data.get("texture");
 
                                 if (texture != null) {
                                     PropertyMap map = new PropertyMap(ImmutableMultimap.of("textures", new Property("textures", texture, null)));
                                     return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.ofStatic(new GameProfile(Util.NIL_UUID, "", map)), hat));
+                                }
+
+                                var next = data.getNext("name", "");
+                                var maybeUuid = data.get("uuid");
+
+                                if (maybeUuid != null) {
+                                    return new DynamicPlayerHeadNode(parser.parseNode(maybeUuid), hat, DynamicPlayerHeadNode.Type.UUID);
                                 }
 
                                 UUID uuid = null;
@@ -245,10 +250,10 @@ public final class BuiltinTags {
                                 }
 
                                 if (next != null) {
-                                    return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.ofDynamic(next), hat));
+                                    return new DynamicPlayerHeadNode(parser.parseNode(next), hat, DynamicPlayerHeadNode.Type.EITHER);
                                 }
 
-                                return new ObjectNode(new AtlasTextObjectContents(emptyId, emptyId));
+                                return new ObjectNode(new PlayerTextObjectContents(ProfileComponent.ofDynamic(""), hat));
                             }
                     )
             );

@@ -116,7 +116,8 @@ Hover tag allows adding simple hover on text. It can be used to display addition
 
 This tag allows you to change font to any build in one or one provided by resource pack.
 
-You can use it by simply adding `#!xml <font '[VALUE]'>`, where `'[VALUE]'` is just a font name.
+- `#!xml <font '[VALUE]'>` - Sets font within tagwhere (`'[VALUE]'` is just a font name).
+
 Minecraft has 3 build-in fonts  `default`, `uniform` and `alt`.
 
 ### Inserting
@@ -155,6 +156,42 @@ This tag allows you to add information about player control keys, with respectin
 
 You can use it with `#!xml <keybind '[VALUE]'>` or `#!xml <keybind value:'[VALUE]'>`, where `'[VALUE]'` is a control key used.
 
+### Atlas (2.8.0+1.21.9+)
+
+!!! question inline end "Atlas"
+
+    You can read more about atlases on the [Minecraft Wiki](https://minecraft.wiki/w/Atlas)
+
+!!! note inline end
+
+    This tag is self containing, so it doesn't contain a closing tag.
+
+This tag allows you to display a texture from select atlas. If not set correctly, it will show missing
+texture.
+
+- `#!xml <atlas '[ATLAS ID]' '[TEXTURE ID]'>` - Quick format of atlas tag.
+- `#!xml <atlas atlas:'[ATLAS ID]' texture:'[TEXTURE ID]'>` - Full format of atlas tag.
+
+Where `'[ATLAS ID]'` is a atlas identifier used and `'[TEXURE ID]'` is a texture within that atlas.
+
+### Player (2.8.0+1.21.9+)
+!!! note inline end
+
+    This tag is self containing, so it doesn't contain a closing tag.
+
+This tag allows you to display a player head. If not set correctly, it will show one of default textures.
+
+- `#!xml <atlas '[NAME / UUID]'>` - Shorthand format for showing player head.
+- `#!xml <atlas name:'[NAME]' hat:[BOOLEAN]>` - Show player head by name (and toggle hat).
+- `#!xml <atlas uuid:'[NAME]' hat:[BOOLEAN]>` - Show player head by uuid (and toggle hat).
+- `#!xml <atlas texture:'[TEXTURE VALUE]' hat:[BOOLEAN]>` - Show player head by raw remote texture value (and toggle hat).
+
+Where `'[NAME]'` is player name, 
+`'[UUID]'` is player uuid, `'[TEXTURE VALUE]'` is skin texture value (not resource pack one!)
+and `[BOOLEAN]` is true or false.
+
+
+
 ### Gradients
 
 This tag allows you to add gradients to the text. However, it has multiple limitation that can
@@ -162,6 +199,7 @@ block its usage. Currently, you can't use dynamic values (translations, control 
 within them, as they require static text.
 
 There 2 types of gradients:
+
 - `#!xml <gradient (type:[type]) [color 1] [color 2] ...>`/`#!xml <gr (type:[type]) [color 1] [color 2] ...>` - I can take multiple colors to move between them
   smoothly. You can replace the optional `(type:[type])` with `type:oklab` (default), `type:hvs` or `type:hard` to change how thge gradient is handled
 - `#!xml <hard_gradient [color 1] [color 2] ...>`/`#!xml <hgr [color 1] [color 2] ...>` - I can take multiple colors to move between them
@@ -181,6 +219,7 @@ works with placeholders, which gives a bit more flexibility.
 This tag can work without arguments making it clear all formatting or with them limiting clearing to selected types.
 
 Examples:
+
 - `#!xml <clear>` - Removes all formatting, leaving only text.
 - `#!xml <clear hover>` - Removes all hovers.
 - `#!xml <clear hover color>` - Removes all hovers and colors.
