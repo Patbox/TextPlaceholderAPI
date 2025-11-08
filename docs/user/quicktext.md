@@ -181,10 +181,10 @@ Where `'[ATLAS ID]'` is a atlas identifier used and `'[TEXURE ID]'` is a texture
 
 This tag allows you to display a player head. If not set correctly, it will show one of default textures.
 
-- `#!xml <atlas '[NAME / UUID]'>` - Shorthand format for showing player head.
-- `#!xml <atlas name:'[NAME]' hat:[BOOLEAN]>` - Show player head by name (and toggle hat).
-- `#!xml <atlas uuid:'[NAME]' hat:[BOOLEAN]>` - Show player head by uuid (and toggle hat).
-- `#!xml <atlas texture:'[TEXTURE VALUE]' hat:[BOOLEAN]>` - Show player head by raw remote texture value (and toggle hat).
+- `#!xml <player '[NAME / UUID]'>` - Shorthand format for showing player head.
+- `#!xml <player name:'[NAME]' hat:[BOOLEAN]>` - Show player head by name (and toggle hat).
+- `#!xml <player uuid:'[NAME]' hat:[BOOLEAN]>` - Show player head by uuid (and toggle hat).
+- `#!xml <player texture:'[TEXTURE VALUE]' hat:[BOOLEAN]>` - Show player head by raw remote texture value (and toggle hat).
 
 Where `'[NAME]'` is player name, 
 `'[UUID]'` is player uuid, `'[TEXTURE VALUE]'` is skin texture value (not resource pack one!)
