@@ -3,17 +3,16 @@ package eu.pb4.placeholders.api.node.parent;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.impl.GeneralUtils;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-
 import java.util.Arrays;
 import java.util.function.Function;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 public final class TransformNode extends ParentNode {
-    private final Function<MutableText, Text> transform;
+    private final Function<MutableComponent, Component> transform;
 
-    public TransformNode(TextNode[] nodes, Function<MutableText, Text> transform) {
+    public TransformNode(TextNode[] nodes, Function<MutableComponent, Component> transform) {
         super(nodes);
         this.transform = transform;
     }
@@ -23,7 +22,7 @@ public final class TransformNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
+    protected Component applyFormatting(MutableComponent out, ParserContext context) {
         return this.transform.apply(out);
     }
 

@@ -1,12 +1,12 @@
 package eu.pb4.placeholders.api.node;
 
 import eu.pb4.placeholders.api.ParserContext;
-import net.minecraft.text.Text;
-import net.minecraft.text.object.TextObjectContents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.objects.ObjectInfo;
 
-public record ObjectNode(TextObjectContents content) implements TextNode {
+public record ObjectNode(ObjectInfo content) implements TextNode {
     @Override
-    public Text toText(ParserContext context, boolean removeBackslashes) {
-        return Text.object(content);
+    public Component toText(ParserContext context, boolean removeBackslashes) {
+        return Component.object(content);
     }
 }

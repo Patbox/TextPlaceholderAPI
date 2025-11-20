@@ -3,16 +3,16 @@ package eu.pb4.placeholders.api.node.parent;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.function.Function;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 
 public final class DynamicColorNode extends SimpleStylingNode implements DynamicShadowNode.SimpleColoredTransformer {
-    private static final Function<String, TextColor> DEFAULT_RESOLVER = string -> TextColor.parse(string).result().orElse(null);
+    private static final Function<String, TextColor> DEFAULT_RESOLVER = string -> TextColor.parseColor(string).result().orElse(null);
     private final TextNode color;
     private final Function<String, TextColor> resolver;
 
@@ -31,7 +31,7 @@ public final class DynamicColorNode extends SimpleStylingNode implements Dynamic
             if (x != null) {
                 return x;
             }
-            return TextColor.parse(string).result().orElse(null);
+            return TextColor.parseColor(string).result().orElse(null);
         };
     }
 
@@ -65,17 +65,17 @@ public final class DynamicColorNode extends SimpleStylingNode implements Dynamic
     }
 
     @Override
-    public int getDefaultShadowColor(Text out, float scale, float alpha, ParserContext context) {
-        var color = TextColor.parse(this.color.toText(context).getString());
+    public int getDefaultShadowColor(Component out, float scale, float alpha, ParserContext context) {
+        var color = TextColor.parseColor(this.color.toText(context).getString());
 
         if (color.result().isPresent()) {
-            return DynamicShadowNode.modifiedColor(color.getOrThrow().getRgb(), scale, alpha);
+            return DynamicShadowNode.modifiedColor(color.getOrThrow().getValue(), scale, alpha);
         }
         return 0;
     }
 
     @Override
     public boolean hasShadowColor(ParserContext context) {
-        return TextColor.parse(this.color.toText(context).getString()).result().isPresent();
+        return TextColor.parseColor(this.color.toText(context).getString()).result().isPresent();
     }
 }

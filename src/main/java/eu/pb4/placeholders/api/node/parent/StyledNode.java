@@ -7,17 +7,10 @@ import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.impl.GeneralUtils;
-import net.minecraft.dialog.type.Dialog;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -45,13 +38,13 @@ public final class StyledNode extends SimpleStylingNode {
     public Style style(ParserContext context) {
         var style = this.style;
 
-        if (this.hoverValue != null && style.getHoverEvent() != null && style.getHoverEvent().getAction() == HoverEvent.Action.SHOW_TEXT) {
+        if (this.hoverValue != null && style.getHoverEvent() != null && style.getHoverEvent().action() == HoverEvent.Action.SHOW_TEXT) {
             style = style.withHoverEvent(this.hoverValue.toVanilla(context));
         }
 
         if (this.clickValue != null && style.getClickEvent() != null) {
             String node = this.clickValue.toText(context, true).getString();
-            switch (style.getClickEvent().getAction()) {
+            switch (style.getClickEvent().action()) {
                 case OPEN_URL -> {
                     try {
                         style = style.withClickEvent(new ClickEvent.OpenUrl(URI.create(node)));

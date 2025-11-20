@@ -1,15 +1,14 @@
 package eu.pb4.placeholders.impl.color;
 
 import eu.pb4.placeholders.impl.GeneralUtils;
-
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.Mth;
 
 // https://bottosson.github.io/posts/oklab/
 public record OkLab(float l, float a, float b) {
     public static OkLab fromRgb(int rgb) {
-        return fromLinearSRGB(ColorHelper.getRed(rgb) / 255f, ColorHelper.getGreen(rgb) / 255f,
-                ColorHelper.getBlue(rgb) / 255f);
+        return fromLinearSRGB(ARGB.red(rgb) / 255f, ARGB.green(rgb) / 255f,
+                ARGB.blue(rgb) / 255f);
     }
 
 
@@ -69,9 +68,9 @@ public record OkLab(float l, float a, float b) {
             //mult = 1 / (max + min);
         }
         return GeneralUtils.rgbToInt(
-                 MathHelper.clamp(r * mult, 0, 1),
-                 MathHelper.clamp(g * mult, 0, 1),
-                 MathHelper.clamp(b * mult, 0, 1)
+                 Mth.clamp(r * mult, 0, 1),
+                 Mth.clamp(g * mult, 0, 1),
+                 Mth.clamp(b * mult, 0, 1)
         );
     }
 }

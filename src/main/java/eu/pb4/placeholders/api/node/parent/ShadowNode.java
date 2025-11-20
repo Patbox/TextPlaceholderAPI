@@ -2,10 +2,8 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.Style;
-import net.minecraft.text.TextColor;
-
 import java.util.Arrays;
+import net.minecraft.network.chat.Style;
 
 public final class ShadowNode extends SimpleStylingNode {
     private final int color;

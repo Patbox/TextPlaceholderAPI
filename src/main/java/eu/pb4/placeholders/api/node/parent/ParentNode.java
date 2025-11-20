@@ -3,12 +3,11 @@ package eu.pb4.placeholders.api.node.parent;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.impl.GeneralUtils;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-
 import java.util.Arrays;
 import java.util.Collection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 
 public class ParentNode implements ParentTextNode {
     public static final ParentNode EMPTY = new ParentNode(new TextNode[0]);
@@ -33,7 +32,7 @@ public class ParentNode implements ParentTextNode {
     }
 
     @Override
-    public final Text toText(ParserContext context, boolean removeBackslashes) {
+    public final Component toText(ParserContext context, boolean removeBackslashes) {
         var compact = context != null && context.get(ParserContext.Key.COMPACT_TEXT) != Boolean.FALSE;
         var oldShadow = context.get(ParserContext.Key.DEFAULT_SHADOW_STYLER);
 
@@ -43,7 +42,7 @@ public class ParentNode implements ParentTextNode {
 
         if (this.children.length == 0) {
             context.with(ParserContext.Key.DEFAULT_SHADOW_STYLER, oldShadow);
-            return Text.empty();
+            return Component.empty();
         } else if ((this.children.length == 1 && this.children[0] != null) && compact) {
             var out = this.children[0].toText(context, true);
             if (GeneralUtils.isEmpty(out)) {
@@ -52,7 +51,7 @@ public class ParentNode implements ParentTextNode {
             context.with(ParserContext.Key.DEFAULT_SHADOW_STYLER, oldShadow);
             return this.applyFormatting(out.copy(), context);
         } else {
-            MutableText base = compact ? null : Text.empty();
+            MutableComponent base = compact ? null : Component.empty();
 
             for (int i = 0; i < this.children.length; i++) {
                 if (this.children[i] != null) {
@@ -63,7 +62,7 @@ public class ParentNode implements ParentTextNode {
                             if (child.getStyle().isEmpty()) {
                                 base = child.copy();
                             } else {
-                                base = Text.empty();
+                                base = Component.empty();
                                 base.append(child);
                             }
                         } else {
@@ -75,14 +74,14 @@ public class ParentNode implements ParentTextNode {
             context.with(ParserContext.Key.DEFAULT_SHADOW_STYLER, oldShadow);
 
             if (base == null || GeneralUtils.isEmpty(base)) {
-                return Text.empty();
+                return Component.empty();
             }
 
             return this.applyFormatting(base, context);
         }
     }
 
-    protected Text applyFormatting(MutableText out, ParserContext context) {
+    protected Component applyFormatting(MutableComponent out, ParserContext context) {
         return out.setStyle(applyFormatting(out.getStyle(), context));
     }
 

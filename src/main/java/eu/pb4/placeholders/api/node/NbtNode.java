@@ -1,15 +1,14 @@
 package eu.pb4.placeholders.api.node;
 
 import eu.pb4.placeholders.api.ParserContext;
-import net.minecraft.text.NbtDataSource;
-import net.minecraft.text.Text;
-
 import java.util.Optional;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.contents.data.DataSource;
 
-public record NbtNode(String rawPath, boolean interpret, Optional<TextNode> separator, NbtDataSource dataSource) implements TextNode {
+public record NbtNode(String rawPath, boolean interpret, Optional<TextNode> separator, DataSource dataSource) implements TextNode {
     @Override
-    public Text toText(ParserContext context, boolean removeBackslashes) {
-        return Text.nbt(rawPath, interpret, separator.map(x -> x.toText(context, removeBackslashes)), dataSource);
+    public Component toText(ParserContext context, boolean removeBackslashes) {
+        return Component.nbt(rawPath, interpret, separator.map(x -> x.toText(context, removeBackslashes)), dataSource);
     }
 
     @Override

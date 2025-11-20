@@ -6,14 +6,13 @@ import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.color.HSV;
 import eu.pb4.placeholders.impl.color.OkLab;
 import eu.pb4.placeholders.impl.color.OkLch;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.math.MathHelper;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextColor;
+import net.minecraft.util.Mth;
 
 public final class GradientNode extends ParentNode implements DynamicShadowNode.Transformer {
     private final GradientProvider gradientProvider;
@@ -23,7 +22,7 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
         this.gradientProvider = gradientBuilder;
     }
 
-    public static Text apply(Text text, GradientProvider gradientProvider) {
+    public static Component apply(Component text, GradientProvider gradientProvider) {
         return GeneralUtils.toGradient(text, gradientProvider);
     }
 
@@ -68,7 +67,7 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
+    protected Component applyFormatting(MutableComponent out, ParserContext context) {
         return GeneralUtils.toGradient(out, this.gradientProvider);
     }
 
@@ -86,7 +85,7 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
     }
 
     @Override
-    public Text applyShadowColors(Text text, float scale, float alpha, ParserContext context) {
+    public Component applyShadowColors(Component text, float scale, float alpha, ParserContext context) {
         return GeneralUtils.toGradientShadow(text, scale, alpha, this.gradientProvider);
     }
 
@@ -102,7 +101,7 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
         static GradientProvider colorsOkLab(List<TextColor> colors) {
             var hvs = new ArrayList<OkLab>(colors.size());
             for (var color : colors) {
-                hvs.add(OkLab.fromRgb(color.getRgb()));
+                hvs.add(OkLab.fromRgb(color.getValue()));
             }
 
             if (hvs.isEmpty()) {
@@ -119,9 +118,9 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
                 OkLab colorA = hvs.get(Math.min((int) (pos / sectionSize), colorSize - 1));
                 OkLab colorB = hvs.get(Math.min((int) (pos / sectionSize) + 1, colorSize - 1));
 
-                float l = MathHelper.lerp(progress, colorA.l(), colorB.l());
-                float a = MathHelper.lerp(progress, colorA.a(), colorB.a());
-                float b = MathHelper.lerp(progress, colorA.b(), colorB.b());
+                float l = Mth.lerp(progress, colorA.l(), colorB.l());
+                float a = Mth.lerp(progress, colorA.a(), colorB.a());
+                float b = Mth.lerp(progress, colorA.b(), colorB.b());
 
                 return TextColor.fromRgb(OkLab.toRgb(l, a, b));
             };
@@ -130,7 +129,7 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
         static GradientProvider colorsHvs(List<TextColor> colors) {
             var hvs = new ArrayList<HSV>(colors.size());
             for (var color : colors) {
-                hvs.add(HSV.fromRgb(color.getRgb()));
+                hvs.add(HSV.fromRgb(color.getValue()));
             }
 
             if (hvs.isEmpty()) {
@@ -163,11 +162,11 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
                     hue = futureHue;
                 }
 
-                float sat = MathHelper.clamp(colorB.s() * progress + colorA.s() * (1 - progress), 0, 1);
-                float value = MathHelper.clamp(colorB.v() * progress + colorA.v() * (1 - progress), 0, 1);
+                float sat = Mth.clamp(colorB.s() * progress + colorA.s() * (1 - progress), 0, 1);
+                float value = Mth.clamp(colorB.v() * progress + colorA.v() * (1 - progress), 0, 1);
 
                 return TextColor.fromRgb(HSV.toRgb(
-                        MathHelper.clamp(hue, 0, 1),
+                        Mth.clamp(hue, 0, 1),
                         sat,
                         value));
             };
@@ -203,7 +202,7 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
             final float finalFreqLength = (frequency < 0 ? -frequency : 0);
 
             return (pos, length) ->
-                    TextColor.fromRgb(OkLch.toRgb(value, saturation / 2, (((pos * frequency * MathHelper.TAU) + (finalFreqLength * length)) / (gradientLength + 1) + offset) % 1));
+                    TextColor.fromRgb(OkLch.toRgb(value, saturation / 2, (((pos * frequency * Mth.TWO_PI) + (finalFreqLength * length)) / (gradientLength + 1) + offset) % 1));
         }
 
         static GradientProvider rainbow(float saturation, float value, float frequency, float offset) {
@@ -221,7 +220,7 @@ public final class GradientNode extends ParentNode implements DynamicShadowNode.
             final float finalFreqLength = (frequency < 0 ? -frequency : 0);
 
             return (pos, length) ->
-                    TextColor.fromRgb(OkLch.toRgb(value, saturation / 2, (((pos * frequency * MathHelper.TAU) + (finalFreqLength * length)) / (length) + offset)));
+                    TextColor.fromRgb(OkLch.toRgb(value, saturation / 2, (((pos * frequency * Mth.TWO_PI) + (finalFreqLength * length)) / (length) + offset)));
         }
     }
 }

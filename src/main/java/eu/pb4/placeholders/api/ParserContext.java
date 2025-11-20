@@ -1,15 +1,13 @@
 package eu.pb4.placeholders.api;
 
 import eu.pb4.placeholders.api.node.parent.DynamicShadowNode;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import net.minecraft.core.HolderLookup;
 
 public final class ParserContext {
     private Map<Key<?>, Object> map;
@@ -95,7 +93,7 @@ public final class ParserContext {
 
 
         public static final Key<Boolean> COMPACT_TEXT = new Key<>("compact_text", Boolean.class);
-        public static final Key<RegistryWrapper.WrapperLookup> WRAPPER_LOOKUP = new Key<>("wrapper_lookup", RegistryWrapper.WrapperLookup.class);
+        public static final Key<HolderLookup.Provider> WRAPPER_LOOKUP = new Key<>("wrapper_lookup", HolderLookup.Provider.class);
         public static final Key<DynamicShadowNode.Transformer> DEFAULT_SHADOW_STYLER = Key.ofNode("default_shadow_styler");
 
         public static <T> Key<T> of(String key, T type) {

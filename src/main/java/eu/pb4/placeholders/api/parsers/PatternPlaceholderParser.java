@@ -11,7 +11,6 @@ import eu.pb4.placeholders.api.node.TranslatedNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.impl.placeholder.PlaceholderNode;
-import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -19,6 +18,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.minecraft.network.chat.Component;
 
 
 /**
@@ -50,7 +50,7 @@ public record PatternPlaceholderParser(Pattern pattern, Function<String, @Nullab
         return new PatternPlaceholderParser(pattern, map::get);
     }
 
-    public static PatternPlaceholderParser ofTextMap(Pattern pattern, Map<String, Text> map) {
+    public static PatternPlaceholderParser ofTextMap(Pattern pattern, Map<String, Component> map) {
         return new PatternPlaceholderParser(pattern, arg -> {
             var x = map.get(arg);
             return x != null ? new DirectTextNode(x) : null;

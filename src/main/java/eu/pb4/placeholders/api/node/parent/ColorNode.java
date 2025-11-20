@@ -2,11 +2,10 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-
 import java.util.Arrays;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 
 public final class ColorNode extends SimpleStylingNode implements DynamicShadowNode.SimpleColoredTransformer {
     private final TextColor color;
@@ -35,7 +34,7 @@ public final class ColorNode extends SimpleStylingNode implements DynamicShadowN
     }
 
     @Override
-    public int getDefaultShadowColor(Text out, float scale, float alpha, ParserContext context) {
-        return DynamicShadowNode.modifiedColor(this.color.getRgb(), scale, alpha);
+    public int getDefaultShadowColor(Component out, float scale, float alpha, ParserContext context) {
+        return DynamicShadowNode.modifiedColor(this.color.getValue(), scale, alpha);
     }
 }

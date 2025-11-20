@@ -3,10 +3,11 @@ package eu.pb4.placeholders.impl;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.item.ItemStack;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.*;
+import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -43,35 +44,35 @@ public class GeneralUtils {
         }
     }
 
-    public static boolean isEmpty(Text text) {
+    public static boolean isEmpty(Component text) {
         return (
-                text.getContent() == PlainTextContent.EMPTY
-                || (text.getContent() instanceof PlainTextContent.Literal l && l.string().isEmpty())
+                text.getContents() == PlainTextContents.EMPTY
+                || (text.getContents() instanceof PlainTextContents.LiteralContents l && l.text().isEmpty())
         ) && text.getSiblings().isEmpty();
     }
 
-    public static MutableText toGradient(Text base, GradientNode.GradientProvider posToColor) {
+    public static MutableComponent toGradient(Component base, GradientNode.GradientProvider posToColor) {
         return recursiveGradient(base, posToColor, 0, getGradientLength(base),
                 text -> text.getStyle().getColor() == null,
                 Style::withColor,
-                Text::copy
+                Component::copy
                 ).text();
     }
 
-    public static MutableText toGradientShadow(Text base, float scale, float alpha, GradientNode.GradientProvider posToColor) {
+    public static MutableComponent toGradientShadow(Component base, float scale, float alpha, GradientNode.GradientProvider posToColor) {
         return recursiveGradient(base, posToColor, 0, getGradientLength(base),
                 text -> text.getStyle().getShadowColor() == null && text.getStyle().getColor() == null,
-                ((style, textColor) -> style.withShadowColor(DynamicShadowNode.modifiedColor(textColor.getRgb(), scale, alpha))),
+                ((style, textColor) -> style.withShadowColor(DynamicShadowNode.modifiedColor(textColor.getValue(), scale, alpha))),
                 text2 -> text2.getStyle().getShadowColor() != null ? text2.copy() : GeneralUtils.cloneTransformText(text2, text -> {
                     var color = text.getStyle().getColor();
-                    return text.setStyle(text.getStyle().withShadowColor(DynamicShadowNode.modifiedColor(Objects.requireNonNull(color).getRgb(), scale, alpha)));
+                    return text.setStyle(text.getStyle().withShadowColor(DynamicShadowNode.modifiedColor(Objects.requireNonNull(color).getValue(), scale, alpha)));
                 }, text -> text == text2 || text.getStyle().getShadowColor() == null && text.getStyle().getColor() != null)).text();
     }
 
-    private static int getGradientLength(Text base) {
-        int length = base.getContent() instanceof PlainTextContent.Literal l
-                ? l.string().codePointCount(0, l.string().length())
-                : base.getContent() == PlainTextContent.EMPTY ? 0 : 1;
+    private static int getGradientLength(Component base) {
+        int length = base.getContents() instanceof PlainTextContents.LiteralContents l
+                ? l.text().codePointCount(0, l.text().length())
+                : base.getContents() == PlainTextContents.EMPTY ? 0 : 1;
 
         for (var text : base.getSiblings()) {
             length += getGradientLength(text);
@@ -80,19 +81,19 @@ public class GeneralUtils {
         return length;
     }
 
-    private static TextLengthPair recursiveGradient(Text base, GradientNode.GradientProvider posToColor, int pos, int totalLength,
-                                                    Predicate<Text> canContinue,
+    private static TextLengthPair recursiveGradient(Component base, GradientNode.GradientProvider posToColor, int pos, int totalLength,
+                                                    Predicate<Component> canContinue,
                                                     BiFunction<Style, TextColor, Style> apply,
-                                                    Function<Text, MutableText> passthroughApply) {
+                                                    Function<Component, MutableComponent> passthroughApply) {
         if (canContinue.test(base)) {
-            MutableText out = Text.empty().setStyle(base.getStyle());
-            if (base.getContent() instanceof PlainTextContent.Literal literalTextContent) {
-                var l = literalTextContent.string().length();
+            MutableComponent out = Component.empty().setStyle(base.getStyle());
+            if (base.getContents() instanceof PlainTextContents.LiteralContents literalTextContent) {
+                var l = literalTextContent.text().length();
                 for (var i = 0; i < l; i++) {
-                    var character = literalTextContent.string().charAt(i);
+                    var character = literalTextContent.text().charAt(i);
                     int value;
                     if (Character.isHighSurrogate(character) && i + 1 < l) {
-                        var next = literalTextContent.string().charAt(++i);
+                        var next = literalTextContent.text().charAt(++i);
                         if (Character.isLowSurrogate(next)) {
                             value = Character.toCodePoint(character, next);
                         } else {
@@ -102,14 +103,14 @@ public class GeneralUtils {
                         value = character;
                     }
 
-                    out.append(Text.literal(Character.toString(value)).setStyle(apply.apply(Style.EMPTY, posToColor.getColorAt(pos++, totalLength))));
+                    out.append(Component.literal(Character.toString(value)).setStyle(apply.apply(Style.EMPTY, posToColor.getColorAt(pos++, totalLength))));
 
                 }
-            } else if (base.getContent() != PlainTextContent.EMPTY) {
-                out.append(base.copyContentOnly().setStyle(apply.apply(Style.EMPTY, posToColor.getColorAt(pos++, totalLength))));
+            } else if (base.getContents() != PlainTextContents.EMPTY) {
+                out.append(base.plainCopy().setStyle(apply.apply(Style.EMPTY, posToColor.getColorAt(pos++, totalLength))));
             }
 
-            for (Text sibling : base.getSiblings()) {
+            for (Component sibling : base.getSiblings()) {
                 var pair = recursiveGradient(sibling, posToColor, pos, totalLength, canContinue, apply, passthroughApply);
                 pos = pair.length;
                 out.append(pair.text);
@@ -123,54 +124,54 @@ public class GeneralUtils {
         return (((int) (r * 0xff)) & 0xFF) << 16 | (((int) (g * 0xff)) & 0xFF) << 8 | (((int) (b * 0xff) & 0xFF));
     }
 
-    public static Text deepTransform(Text input) {
+    public static Component deepTransform(Component input) {
         var output = cloneText(input);
         removeHoverAndClick(output);
         return output;
     }
 
-    public static Text removeHoverAndClick(Text input) {
+    public static Component removeHoverAndClick(Component input) {
         var output = cloneText(input);
         removeHoverAndClick(output);
         return output;
     }
 
-    private static void removeHoverAndClick(MutableText input) {
+    private static void removeHoverAndClick(MutableComponent input) {
         if (input.getStyle() != null) {
             input.setStyle(input.getStyle().withHoverEvent(null).withClickEvent(null));
         }
 
-        if (input.getContent() instanceof TranslatableTextContent text) {
+        if (input.getContents() instanceof TranslatableContents text) {
             for (int i = 0; i < text.getArgs().length; i++) {
                 var arg = text.getArgs()[i];
-                if (arg instanceof MutableText argText) {
+                if (arg instanceof MutableComponent argText) {
                     removeHoverAndClick(argText);
                 }
             }
         }
 
         for (var sibling : input.getSiblings()) {
-            removeHoverAndClick((MutableText) sibling);
+            removeHoverAndClick((MutableComponent) sibling);
         }
 
     }
 
-    public static MutableText cloneText(Text input) {
-        MutableText baseText;
-        if (input.getContent() instanceof TranslatableTextContent translatable) {
+    public static MutableComponent cloneText(Component input) {
+        MutableComponent baseText;
+        if (input.getContents() instanceof TranslatableContents translatable) {
             var obj = new ArrayList<>();
 
             for (var arg : translatable.getArgs()) {
-                if (arg instanceof Text argText) {
+                if (arg instanceof Component argText) {
                     obj.add(cloneText(argText));
                 } else {
                     obj.add(arg);
                 }
             }
 
-            baseText = Text.translatable(translatable.getKey(), obj.toArray());
+            baseText = Component.translatable(translatable.getKey(), obj.toArray());
         } else {
-            baseText = input.copyContentOnly();
+            baseText = input.plainCopy();
         }
 
         for (var sibling : input.getSiblings()) {
@@ -181,30 +182,30 @@ public class GeneralUtils {
         return baseText;
     }
 
-    public static MutableText cloneTransformText(Text input, Function<MutableText, MutableText> transform) {
+    public static MutableComponent cloneTransformText(Component input, Function<MutableComponent, MutableComponent> transform) {
         return cloneTransformText(input, transform, text -> true);
     }
 
-    public static MutableText cloneTransformText(Text input, Function<MutableText, MutableText> transform, Predicate<Text> canContinue) {
+    public static MutableComponent cloneTransformText(Component input, Function<MutableComponent, MutableComponent> transform, Predicate<Component> canContinue) {
         if (!canContinue.test(input)) {
             return input.copy();
         }
 
-        MutableText baseText;
-        if (input.getContent() instanceof TranslatableTextContent translatable) {
+        MutableComponent baseText;
+        if (input.getContents() instanceof TranslatableContents translatable) {
             var obj = new ArrayList<>();
 
             for (var arg : translatable.getArgs()) {
-                if (arg instanceof Text argText) {
+                if (arg instanceof Component argText) {
                     obj.add(cloneTransformText(argText, transform));
                 } else {
                     obj.add(arg);
                 }
             }
 
-            baseText = Text.translatable(translatable.getKey(), obj.toArray());
+            baseText = Component.translatable(translatable.getKey(), obj.toArray());
         } else {
-            baseText = input.copyContentOnly();
+            baseText = input.plainCopy();
         }
 
         for (var sibling : input.getSiblings()) {
@@ -215,33 +216,33 @@ public class GeneralUtils {
         return transform.apply(baseText);
     }
 
-    public static Text getItemText(ItemStack stack, boolean rarity) {
+    public static Component getItemText(ItemStack stack, boolean rarity) {
         if (!stack.isEmpty()) {
-            MutableText mutableText = Text.empty().append(stack.getName());
-            if (stack.contains(DataComponentTypes.CUSTOM_NAME)) {
-                mutableText.formatted(Formatting.ITALIC);
+            MutableComponent mutableText = Component.empty().append(stack.getHoverName());
+            if (stack.has(DataComponents.CUSTOM_NAME)) {
+                mutableText.withStyle(ChatFormatting.ITALIC);
             }
 
             if (rarity) {
-                mutableText.formatted(stack.getRarity().getFormatting());
+                mutableText.withStyle(stack.getRarity().color());
             }
-            mutableText.styled((style) -> style.withHoverEvent(new HoverEvent.ShowItem(stack)));
+            mutableText.withStyle((style) -> style.withHoverEvent(new HoverEvent.ShowItem(stack)));
 
             return mutableText;
         }
 
-        return Text.empty().append(ItemStack.EMPTY.getName());
+        return Component.empty().append(ItemStack.EMPTY.getHoverName());
     }
 
-    public static ParentNode convertToNodes(Text input) {
+    public static ParentNode convertToNodes(Component input) {
         var list = new ArrayList<TextNode>();
 
-        if (input.getContent() instanceof PlainTextContent.Literal content) {
-            list.add(new LiteralNode(content.string()));
-        } else if (input.getContent() instanceof TranslatableTextContent content) {
+        if (input.getContents() instanceof PlainTextContents.LiteralContents content) {
+            list.add(new LiteralNode(content.text()));
+        } else if (input.getContents() instanceof TranslatableContents content) {
             var args = new ArrayList<>();
             for (var arg : content.getArgs()) {
-                if (arg instanceof Text text) {
+                if (arg instanceof Component text) {
                     args.add(convertToNodes(text));
                 } else if (arg instanceof String s) {
                     args.add(new LiteralNode(s));
@@ -251,15 +252,15 @@ public class GeneralUtils {
             }
 
             list.add(TranslatedNode.ofFallback(content.getKey(), content.getFallback(), args.toArray()));
-        } else if (input.getContent() instanceof ScoreTextContent content) {
+        } else if (input.getContents() instanceof ScoreContents content) {
             list.add(new ScoreNode(content.name(), content.objective()));
-        } else if (input.getContent() instanceof KeybindTextContent content) {
-            list.add(new KeybindNode(content.getKey()));
-        } else if (input.getContent() instanceof SelectorTextContent content) {
+        } else if (input.getContents() instanceof KeybindContents content) {
+            list.add(new KeybindNode(content.getName()));
+        } else if (input.getContents() instanceof SelectorContents content) {
             list.add(new SelectorNode(content.selector(), content.separator().map(GeneralUtils::convertToNodes)));
-        } else if (input.getContent() instanceof NbtTextContent content) {
-            list.add(new NbtNode(content.getPath(), content.shouldInterpret(), content.getSeparator().map(GeneralUtils::convertToNodes), content.getDataSource()));
-        } else if (input.getContent() instanceof ObjectTextContent content) {
+        } else if (input.getContents() instanceof NbtContents content) {
+            list.add(new NbtNode(content.getNbtPath(), content.isInterpreting(), content.getSeparator().map(GeneralUtils::convertToNodes), content.getDataSource()));
+        } else if (input.getContents() instanceof ObjectContents content) {
             list.add(new ObjectNode(content.contents()));
         }
 
@@ -285,7 +286,7 @@ public class GeneralUtils {
                 return new StyledNode.HoverData<>(HoverNode.Action.TEXT_NODE, convertToNodes(showText.value()));
             } else if (style.getHoverEvent() instanceof HoverEvent.ShowEntity showEntity) {
                 return new StyledNode.HoverData<>(HoverNode.Action.ENTITY_NODE,
-                        new HoverNode.EntityNodeContent(showEntity.entity().entityType, showEntity.entity().uuid, showEntity.entity().name.map(GeneralUtils::convertToNodes).orElse(null)));
+                        new HoverNode.EntityNodeContent(showEntity.entity().type, showEntity.entity().uuid, showEntity.entity().name.map(GeneralUtils::convertToNodes).orElse(null)));
             } else if (style.getHoverEvent() instanceof HoverEvent.ShowItem showItem) {
                 return new StyledNode.HoverData<>(HoverNode.Action.VANILLA_ITEM_STACK, showItem);
             }
@@ -331,22 +332,22 @@ public class GeneralUtils {
         }
     }
 
-    public record TextLengthPair(MutableText text, int length) {
+    public record TextLengthPair(MutableComponent text, int length) {
         public static final TextLengthPair EMPTY = new TextLengthPair(null, 0);
     }
 
     public record Pair<L, R>(L left, R right) {
     }
 
-    public record MutableTransformer(Function<Style, Style> textMutableTextFunction) implements Function<MutableText, Text> {
+    public record MutableTransformer(Function<Style, Style> textMutableTextFunction) implements Function<MutableComponent, Component> {
         public static final MutableTransformer CLEAR = new MutableTransformer(x -> Style.EMPTY);
 
         @Override
-        public Text apply(MutableText text) {
+        public Component apply(MutableComponent text) {
             return GeneralUtils.cloneTransformText(text, this::transformStyle);
         }
 
-        private MutableText transformStyle(MutableText mutableText) {
+        private MutableComponent transformStyle(MutableComponent mutableText) {
             return mutableText.setStyle(textMutableTextFunction.apply(mutableText.getStyle()));
         }
     }

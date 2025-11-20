@@ -2,30 +2,27 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
-import net.minecraft.util.Formatting;
-
 import java.util.Arrays;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 
 public final class FormattingNode extends SimpleStylingNode implements DynamicShadowNode.SimpleColoredTransformer {
-    private final Formatting[] formatting;
+    private final ChatFormatting[] formatting;
 
-    public FormattingNode(TextNode[] children, Formatting formatting) {
-        this(children, new Formatting[]{ formatting });
+    public FormattingNode(TextNode[] children, ChatFormatting formatting) {
+        this(children, new ChatFormatting[]{ formatting });
     }
 
-    public FormattingNode(TextNode[] children, Formatting... formatting) {
+    public FormattingNode(TextNode[] children, ChatFormatting... formatting) {
         super(children);
         this.formatting = formatting;
     }
 
     @Override
     protected Style style(ParserContext context) {
-        return Style.EMPTY.withFormatting(this.formatting);
+        return Style.EMPTY.applyFormats(this.formatting);
     }
 
     @Override
@@ -42,11 +39,11 @@ public final class FormattingNode extends SimpleStylingNode implements DynamicSh
     }
 
     @Override
-    public int getDefaultShadowColor(Text out, float scale, float alpha, ParserContext context) {
+    public int getDefaultShadowColor(Component out, float scale, float alpha, ParserContext context) {
         for (var form : formatting) {
             if (form.isColor()) {
                 //noinspection DataFlowIssue
-                return DynamicShadowNode.modifiedColor(form.getColorValue(), scale, alpha);
+                return DynamicShadowNode.modifiedColor(form.getColor(), scale, alpha);
             }
         }
         return -1;

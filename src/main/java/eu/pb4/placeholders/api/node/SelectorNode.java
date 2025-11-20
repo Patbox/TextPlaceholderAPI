@@ -1,15 +1,14 @@
 package eu.pb4.placeholders.api.node;
 
 import eu.pb4.placeholders.api.ParserContext;
-import net.minecraft.text.ParsedSelector;
-import net.minecraft.text.Text;
-
 import java.util.Optional;
+import net.minecraft.commands.arguments.selector.SelectorPattern;
+import net.minecraft.network.chat.Component;
 
-public record SelectorNode(ParsedSelector selector, Optional<TextNode> separator) implements TextNode {
+public record SelectorNode(SelectorPattern selector, Optional<TextNode> separator) implements TextNode {
     @Override
-    public Text toText(ParserContext context, boolean removeBackslashes) {
-        return Text.selector(selector, separator.map(x -> x.toText(context, removeBackslashes)));
+    public Component toText(ParserContext context, boolean removeBackslashes) {
+        return Component.selector(selector, separator.map(x -> x.toText(context, removeBackslashes)));
     }
 
     @Override

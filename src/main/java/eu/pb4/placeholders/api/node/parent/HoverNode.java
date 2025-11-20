@@ -5,20 +5,20 @@ import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import net.minecraft.component.ComponentChanges;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.text.HoverEvent;
-import net.minecraft.text.Style;
-import net.minecraft.util.Identifier;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.UUID;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.ItemStack;
 
 public final class HoverNode<T, H> extends SimpleStylingNode {
     private final Action<T, H> action;
@@ -98,11 +98,11 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
         } else if (action == Action.ENTITY_NODE) {
             return new HoverEvent.ShowEntity(((EntityNodeContent) value).toVanilla(context.copyWithoutNodeContext()));
         } else if (action == Action.LAZY_ITEM_STACK) {
-            RegistryWrapper.WrapperLookup wrapper;
+            HolderLookup.Provider wrapper;
             if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
                 wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
             } else if (context.contains(PlaceholderContext.KEY)) {
-                wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
+                wrapper = context.getOrThrow(PlaceholderContext.KEY).server().registryAccess();
             } else {
                 return null;
             }
@@ -146,28 +146,28 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
     }
 
     public record EntityNodeContent(EntityType<?>entityType, UUID uuid, @Nullable TextNode name) {
-        public HoverEvent.EntityContent toVanilla(ParserContext context) {
-            return new HoverEvent.EntityContent(this.entityType, this.uuid, Optional.ofNullable(this.name != null ? this.name.toText(context, true) : null));
+        public HoverEvent.EntityTooltipInfo toVanilla(ParserContext context) {
+            return new HoverEvent.EntityTooltipInfo(this.entityType, this.uuid, Optional.ofNullable(this.name != null ? this.name.toText(context, true) : null));
         }
 
         @Override
         public String toString() {
             return "HoverNode$EntityNodeContent{id="+
-                    EntityType.getId(entityType).toString()
+                    EntityType.getKey(entityType).toString()
                     + ",uuid=["+
                     uuid.toString()
                     + "],name={" +
-                    (name != null ? name.toText().getLiteralString() : "<NULL>")
+                    (name != null ? name.toText().tryCollapseToString() : "<NULL>")
                     + "}}";
         }
     }
 
-    public record LazyItemStackNodeContent<T>(Identifier identifier, int count, DynamicOps<T> ops, T componentMap) {
-        public ItemStack toVanilla(RegistryWrapper.WrapperLookup lookup) {
-            var stack = new ItemStack(lookup.getOrThrow(RegistryKeys.ITEM).getOrThrow(RegistryKey.of(RegistryKeys.ITEM, identifier)));
+    public record LazyItemStackNodeContent<T>(ResourceLocation identifier, int count, DynamicOps<T> ops, T componentMap) {
+        public ItemStack toVanilla(HolderLookup.Provider lookup) {
+            var stack = new ItemStack(lookup.lookupOrThrow(Registries.ITEM).getOrThrow(ResourceKey.create(Registries.ITEM, identifier)));
             stack.setCount(count);
             if (componentMap != null) {
-                stack.applyChanges(ComponentChanges.CODEC.decode(lookup.getOps(ops), componentMap).getOrThrow().getFirst());
+                stack.applyComponentsAndValidate(DataComponentPatch.CODEC.decode(lookup.createSerializationContext(ops), componentMap).getOrThrow().getFirst());
             }
             return stack;
         }

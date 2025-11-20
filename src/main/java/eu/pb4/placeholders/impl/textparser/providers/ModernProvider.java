@@ -5,7 +5,7 @@ import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.parent.ColorNode;
 import eu.pb4.placeholders.api.parsers.TagLikeParser;
 import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
-import net.minecraft.text.TextColor;
+import net.minecraft.network.chat.TextColor;
 
 public record ModernProvider(TagRegistry registry) implements TagLikeParser.Provider {
     @Override
@@ -38,7 +38,7 @@ public record ModernProvider(TagRegistry registry) implements TagLikeParser.Prov
         }
 
         if (id.startsWith("#")) {
-            var text = TextColor.parse(id);
+            var text = TextColor.parseColor(id);
             if (text.result().isPresent()) {
                 context.push(id, x -> new ColorNode(x, text.result().get()));
             }
