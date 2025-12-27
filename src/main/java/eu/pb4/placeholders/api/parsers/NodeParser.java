@@ -20,12 +20,12 @@ public interface NodeParser {
         return this.parseNode(TextNode.of(input));
     }
 
-    default Component parseText(TextNode input, ParserContext context) {
-        return TextNode.asSingle(this.parseNodes(input)).toText(context, true);
+    default Component parseComponent(TextNode input, ParserContext context) {
+        return TextNode.asSingle(this.parseNodes(input)).toComponent(context, true);
     }
 
-    default Component parseText(String input, ParserContext context) {
-        return parseText(TextNode.of(input), context);
+    default Component parseComponent(String input, ParserContext context) {
+        return parseComponent(TextNode.of(input), context);
     }
 
     default Codec<WrappedText> codec() {

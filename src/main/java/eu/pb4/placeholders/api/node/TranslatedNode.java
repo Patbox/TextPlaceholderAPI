@@ -2,18 +2,12 @@ package eu.pb4.placeholders.api.node;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import eu.pb4.placeholders.api.parsers.TagLikeParser;
-import eu.pb4.placeholders.impl.GeneralUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import net.minecraft.network.chat.Component;
 
 public record TranslatedNode(String key, @Nullable String fallback, Object[] args) implements TextNode {
-    @Deprecated
-    public TranslatedNode(String key, Object[] args) {
-        this(key, null, new Object[0]);
-    }
     public static TranslatedNode of(String key, Object... args) {
         return new TranslatedNode(key, null, args);
     }
@@ -23,14 +17,14 @@ public record TranslatedNode(String key, @Nullable String fallback, Object[] arg
     }
 
     public TranslatedNode(String key) {
-        this(key, new Object[0]);
+        this(key, null, new Object[0]);
     }
 
     @Override
-    public Component toText(ParserContext context, boolean removeBackslashes) {
+    public Component toComponent(ParserContext context, boolean removeBackslashes) {
         var args = new Object[this.args.length];
         for (int i = 0; i < this.args.length; i++) {
-            args[i] = this.args[i] instanceof TextNode textNode ? textNode.toText(context, removeBackslashes) : this.args[i];
+            args[i] = this.args[i] instanceof TextNode textNode ? textNode.toComponent(context, removeBackslashes) : this.args[i];
         }
 
 

@@ -42,7 +42,7 @@ public final class DynamicColorNode extends SimpleStylingNode implements Dynamic
 
     @Override
     protected Style style(ParserContext context) {
-        var c = this.resolver.apply(color.toText(context).getString());
+        var c = this.resolver.apply(color.toComponent(context).getString());
         return c != null ? Style.EMPTY.withColor(c) : Style.EMPTY;
     }
 
@@ -66,7 +66,7 @@ public final class DynamicColorNode extends SimpleStylingNode implements Dynamic
 
     @Override
     public int getDefaultShadowColor(Component out, float scale, float alpha, ParserContext context) {
-        var color = TextColor.parseColor(this.color.toText(context).getString());
+        var color = TextColor.parseColor(this.color.toComponent(context).getString());
 
         if (color.result().isPresent()) {
             return DynamicShadowNode.modifiedColor(color.getOrThrow().getValue(), scale, alpha);
@@ -76,6 +76,6 @@ public final class DynamicColorNode extends SimpleStylingNode implements Dynamic
 
     @Override
     public boolean hasShadowColor(ParserContext context) {
-        return TextColor.parseColor(this.color.toText(context).getString()).result().isPresent();
+        return TextColor.parseColor(this.color.toComponent(context).getString()).result().isPresent();
     }
 }

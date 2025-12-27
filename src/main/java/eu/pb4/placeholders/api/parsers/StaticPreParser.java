@@ -20,7 +20,7 @@ public record StaticPreParser() implements NodeParser {
 
     public static TextNode parse(TextNode node) {
         if (!node.isDynamic()) {
-            return new DirectTextNode(node.toText());
+            return new DirectTextNode(node.toComponent());
         }
 
         if (node instanceof ParentNode parentNode) {

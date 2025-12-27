@@ -13,7 +13,7 @@ public record ScoreNode(Either<SelectorPattern, String> name, String objective) 
     }
 
     @Override
-    public Component toText(ParserContext context, boolean removeBackslashes) {
+    public Component toComponent(ParserContext context, boolean removeBackslashes) {
         return name.map(selector -> Component.score(selector, objective), name -> Component.score(name, objective));
     }
 }

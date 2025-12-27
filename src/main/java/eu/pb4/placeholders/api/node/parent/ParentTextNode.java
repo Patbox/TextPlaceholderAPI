@@ -2,7 +2,6 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import eu.pb4.placeholders.impl.textparser.TextParserImpl;
 
 import java.util.Collection;
 
@@ -12,7 +11,7 @@ public interface ParentTextNode extends TextNode {
     ParentTextNode copyWith(TextNode[] children);
 
     default ParentTextNode copyWith(Collection<TextNode> children) {
-        return this.copyWith(children.toArray(TextParserImpl.CASTER));
+        return this.copyWith(children.toArray(TextNode[]::new));
     }
 
     default boolean isDynamicNoChildren() {
@@ -33,12 +32,6 @@ public interface ParentTextNode extends TextNode {
     }
 
     default ParentTextNode copyWith(Collection<TextNode> children, NodeParser parser) {
-        return this.copyWith(children.toArray(TextParserImpl.CASTER), parser);
-    }
-
-    @Deprecated(forRemoval = true)
-    @FunctionalInterface
-    interface Constructor {
-        ParentTextNode createNode(String definition, Collection<ParentTextNode> children);
+        return this.copyWith(children.toArray(TextNode[]::new), parser);
     }
 }

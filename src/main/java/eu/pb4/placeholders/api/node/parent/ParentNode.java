@@ -32,7 +32,7 @@ public class ParentNode implements ParentTextNode {
     }
 
     @Override
-    public final Component toText(ParserContext context, boolean removeBackslashes) {
+    public final Component toComponent(ParserContext context, boolean removeBackslashes) {
         var compact = context != null && context.get(ParserContext.Key.COMPACT_TEXT) != Boolean.FALSE;
         var oldShadow = context.get(ParserContext.Key.DEFAULT_SHADOW_STYLER);
 
@@ -44,7 +44,7 @@ public class ParentNode implements ParentTextNode {
             context.with(ParserContext.Key.DEFAULT_SHADOW_STYLER, oldShadow);
             return Component.empty();
         } else if ((this.children.length == 1 && this.children[0] != null) && compact) {
-            var out = this.children[0].toText(context, true);
+            var out = this.children[0].toComponent(context, true);
             if (GeneralUtils.isEmpty(out)) {
                 return out;
             }
@@ -55,7 +55,7 @@ public class ParentNode implements ParentTextNode {
 
             for (int i = 0; i < this.children.length; i++) {
                 if (this.children[i] != null) {
-                    var child = this.children[i].toText(context, true);
+                    var child = this.children[i].toComponent(context, true);
 
                     if (!GeneralUtils.isEmpty(child)) {
                         if (base == null) {

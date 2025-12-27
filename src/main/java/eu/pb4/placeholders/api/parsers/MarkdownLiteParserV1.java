@@ -8,7 +8,6 @@ import eu.pb4.placeholders.api.node.parent.ClickActionNode;
 import eu.pb4.placeholders.api.node.parent.FormattingNode;
 import eu.pb4.placeholders.api.node.parent.HoverNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
-import eu.pb4.placeholders.impl.textparser.TextParserImpl;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -178,7 +177,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                     if (!builder.isEmpty()) {
                         out.add(new LiteralNode(builder.toString()));
                     }
-                    return out.toArray(TextParserImpl.CASTER);
+                    return out.toArray(TextNode[]::new);
                 }
 
                 var xStart = nodes.nextIndex();
@@ -197,7 +196,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                             if (!builder.isEmpty()) {
                                 out.add(new LiteralNode(builder.toString()));
                             }
-                            return out.toArray(TextParserImpl.CASTER);
+                            return out.toArray(TextNode[]::new);
                         }
                     } else {
                         break;
@@ -330,7 +329,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
             if (!builder.isEmpty()) {
                 out.add(new LiteralNode(builder.toString()));
             }
-            return out.toArray(TextParserImpl.CASTER);
+            return out.toArray(TextNode[]::new);
         } else {
             while (startIndex != nodes.nextIndex()) {
                 nodes.previous();

@@ -94,7 +94,7 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
     @Nullable
     public static <T> HoverEvent toVanilla(HoverNode.Action<T, ?> action, T value, ParserContext context) {
         if (action == Action.TEXT_NODE) {
-            return new HoverEvent.ShowText(((TextNode) value).toText(context.copyWithoutNodeContext(), true));
+            return new HoverEvent.ShowText(((TextNode) value).toComponent(context.copyWithoutNodeContext(), true));
         } else if (action == Action.ENTITY_NODE) {
             return new HoverEvent.ShowEntity(((EntityNodeContent) value).toVanilla(context.copyWithoutNodeContext()));
         } else if (action == Action.LAZY_ITEM_STACK) {
@@ -147,7 +147,7 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
 
     public record EntityNodeContent(EntityType<?>entityType, UUID uuid, @Nullable TextNode name) {
         public HoverEvent.EntityTooltipInfo toVanilla(ParserContext context) {
-            return new HoverEvent.EntityTooltipInfo(this.entityType, this.uuid, Optional.ofNullable(this.name != null ? this.name.toText(context, true) : null));
+            return new HoverEvent.EntityTooltipInfo(this.entityType, this.uuid, Optional.ofNullable(this.name != null ? this.name.toComponent(context, true) : null));
         }
 
         @Override
@@ -157,7 +157,7 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
                     + ",uuid=["+
                     uuid.toString()
                     + "],name={" +
-                    (name != null ? name.toText().tryCollapseToString() : "<NULL>")
+                    (name != null ? name.toComponent().tryCollapseToString() : "<NULL>")
                     + "}}";
         }
     }

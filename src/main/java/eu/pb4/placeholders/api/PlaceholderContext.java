@@ -28,30 +28,9 @@ public record PlaceholderContext(MinecraftServer server,
                                  ViewObject view
 ) {
 
-    public PlaceholderContext(MinecraftServer server,
-                              CommandSourceStack source,
-                              @Nullable ServerLevel world,
-                              @Nullable ServerPlayer player,
-                              @Nullable Entity entity,
-                              @Nullable GameProfile gameProfile,
-                              ViewObject view
-    ) {
-        this(server, () -> source, world, player, entity, gameProfile, view);
-    }
-
     public CommandSourceStack source() {
         return this.lazySource.get();
     }
-
-    public PlaceholderContext(MinecraftServer server,
-                              CommandSourceStack source,
-                              @Nullable ServerLevel world,
-                              @Nullable ServerPlayer player,
-                              @Nullable Entity entity,
-                              @Nullable GameProfile gameProfile) {
-        this(server, source, world, player, entity, gameProfile, ViewObject.DEFAULT);
-    }
-
 
     public static ParserContext.Key<PlaceholderContext> KEY = new ParserContext.Key<>("placeholder_context", PlaceholderContext.class);
 
@@ -115,7 +94,7 @@ public record PlaceholderContext(MinecraftServer server,
     }
 
     public static PlaceholderContext of(CommandSourceStack source, ViewObject view) {
-        return new PlaceholderContext(source.getServer(), source, source.getLevel(), source.getPlayer(), source.getEntity(), source.getPlayer() != null ? source.getPlayer().getGameProfile() : null, view);
+        return new PlaceholderContext(source.getServer(), () -> source, source.getLevel(), source.getPlayer(), source.getEntity(), source.getPlayer() != null ? source.getPlayer().getGameProfile() : null, view);
     }
 
     public static PlaceholderContext of(Entity entity) {

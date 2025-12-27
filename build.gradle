@@ -1,5 +1,5 @@
 plugins {
-	id 'fabric-loom' version '1.13.+'
+	id 'net.fabricmc.fabric-loom' version '1.14.+'
 	id 'maven-publish'
 	id "com.modrinth.minotaur" version "2.+"
 	id 'com.matthewprenger.cursegradle' version '1.4.0'
@@ -50,13 +50,12 @@ loom {
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
-	mappings loom.officialMojangMappings()
-	modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+	implementation "net.fabricmc:fabric-loader:${project.loader_version}"
 
 	// Fabric API. This is technically optional, but you probably want it anyway.
 	//modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
-	modCompileOnly("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
-	modLocalRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
+	compileOnly("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
+	localRuntime("net.fabricmc.fabric-api:fabric-api:${project.fabric_version}")
 
 	// PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
 	// You may need to force-disable transitiveness on them.
@@ -81,12 +80,12 @@ tasks.withType(JavaCompile).configureEach {
 	// The Minecraft launcher currently installs Java 8 for users, so your mod probably wants to target Java 8 too
 	// JDK 9 introduced a new way of specifying this that will make sure no newer classes or methods are used.
 	// We'll use that if it's available, but otherwise we'll use the older option.
-	it.options.release = 21
+	it.options.release = 25
 }
 
 java {
-	sourceCompatibility = JavaVersion.VERSION_21
-	targetCompatibility = JavaVersion.VERSION_21
+	sourceCompatibility = JavaVersion.VERSION_25
+	targetCompatibility = JavaVersion.VERSION_25
 	// Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
 	// if it is present.
 	// If you remove this line, sources will not be generated.
@@ -107,11 +106,11 @@ publishing {
 		mavenJava(MavenPublication) {
 			//artifactId = base.archivesName.get()
 			// add all the jars that should be included when publishing to maven
-			artifact(remapJar) {
-				builtBy remapJar
+			artifact(jar) {
+				builtBy jar
 			}
 			artifact(sourcesJar) {
-				builtBy remapSourcesJar
+				builtBy sourcesJar
 			}
 		}
 	}
@@ -144,13 +143,13 @@ if (System.getenv("MODRINTH")) {
 		projectId = 'eXts2L7r'// The ID of your modrinth project, slugs will not work.
 		versionNumber = "" + version // The version of the mod to upload.
 		versionType = "release"
-		uploadFile = remapJar // This links to a task that builds your mod jar and sets "uploadFile" to the mod jar.
+		uploadFile = jar // This links to a task that builds your mod jar and sets "uploadFile" to the mod jar.
 		gameVersions = [((String) project.minecraft_version)]
 		changelog = System.getenv("CHANGELOG")
 		loaders = ["fabric", "quilt"]
 	}
 
-	remapJar {
+	jar {
 		finalizedBy project.tasks.modrinth
 	}
 }
@@ -168,10 +167,10 @@ curseforge {
 			addGameVersion((project.minecraft_version.contains("-") ? ((String) project.minecraft_version.split("-")[0] + "-snapshot") : project.minecraft_version))
 			addGameVersion "Fabric"
 			addGameVersion "Quilt"
-			mainArtifact(remapJar)
+			mainArtifact(jar)
 
 			afterEvaluate {
-				uploadTask.dependsOn("remapJar")
+				uploadTask.dependsOn("jar")
 			}
 		}
 	}
@@ -179,7 +178,7 @@ curseforge {
 	options {
 		forgeGradleIntegration = false
 	}
-	remapJar {
+	jar {
 		finalizedBy project.tasks.curseforge
 	}
 }

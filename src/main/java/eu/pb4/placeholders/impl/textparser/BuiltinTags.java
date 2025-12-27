@@ -288,7 +288,7 @@ public final class BuiltinTags {
                                 textList.add(parser.parseNode(part));
                             }
 
-                            return TranslatedNode.ofFallback(key, fallback, (Object[]) textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.ofFallback(key, fallback, (Object[]) textList.toArray(TextNode[]::new));
                         }
                         return TextNode.empty();
                     })
@@ -316,7 +316,7 @@ public final class BuiltinTags {
                                 textList.add(parser.parseNode(part));
                             }
 
-                            return TranslatedNode.ofFallback(key, fallback, (Object[]) textList.toArray(TextParserImpl.CASTER));
+                            return TranslatedNode.ofFallback(key, fallback, (Object[]) textList.toArray(TextNode[]::new));
                         }
                         return TextNode.empty();
                     })

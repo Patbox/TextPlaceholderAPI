@@ -17,7 +17,7 @@ public record DynamicTextNode(String id, ParserContext.Key<Function<String, Comp
     }
 
     @Override
-    public Component toText(ParserContext context, boolean removeBackslashes) {
+    public Component toComponent(ParserContext context, boolean removeBackslashes) {
         var x = context.get(key);
         if (x != null) {
             var t = x.apply(id);

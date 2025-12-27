@@ -8,8 +8,8 @@ import net.minecraft.world.item.component.ResolvableProfile;
 
 public record DynamicPlayerHeadNode(TextNode name, boolean hat, Type type) implements TextNode {
     @Override
-    public Component toText(ParserContext context, boolean removeBackslashes) {
-        var val = this.name.toText(context).getString();
+    public Component toComponent(ParserContext context, boolean removeBackslashes) {
+        var val = this.name.toComponent(context).getString();
 
         if (type == Type.UUID || type == Type.EITHER) {
             try {

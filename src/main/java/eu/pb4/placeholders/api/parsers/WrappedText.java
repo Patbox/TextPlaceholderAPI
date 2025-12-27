@@ -8,6 +8,6 @@ public record WrappedText(String input, TextNode textNode, Component text) {
     public static WrappedText from(NodeParser parser, String input) {
         var node = TextNode.asSingle(parser.parseNodes(TextNode.of(input)));
 
-        return new WrappedText(input, node, node.toText(ParserContext.of(), true));
+        return new WrappedText(input, node, node.toComponent(ParserContext.of(), true));
     }
 }

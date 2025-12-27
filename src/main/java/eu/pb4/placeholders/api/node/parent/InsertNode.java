@@ -20,7 +20,7 @@ public final class InsertNode extends SimpleStylingNode {
 
     @Override
     protected Style style(ParserContext context) {
-        return Style.EMPTY.withInsertion(value.toText(context, true).getString());
+        return Style.EMPTY.withInsertion(value.toComponent(context, true).getString());
     }
 
     @Override

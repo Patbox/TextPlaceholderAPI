@@ -7,8 +7,8 @@ import net.minecraft.network.chat.Component;
 
 public record SelectorNode(SelectorPattern selector, Optional<TextNode> separator) implements TextNode {
     @Override
-    public Component toText(ParserContext context, boolean removeBackslashes) {
-        return Component.selector(selector, separator.map(x -> x.toText(context, removeBackslashes)));
+    public Component toComponent(ParserContext context, boolean removeBackslashes) {
+        return Component.selector(selector, separator.map(x -> x.toComponent(context, removeBackslashes)));
     }
 
     @Override

@@ -1,13 +1,12 @@
 package eu.pb4.placeholders.api;
 
-import eu.pb4.placeholders.api.parsers.TextParserV1;
+import eu.pb4.placeholders.api.parsers.TagParser;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
 public final class PlaceholderResult {
     private final Component text;
-    private String string;
     private final boolean valid;
 
     private PlaceholderResult(Component text, String reason) {
@@ -27,21 +26,6 @@ public final class PlaceholderResult {
      */
     public Component text() {
         return this.text;
-    }
-
-    /**
-     * Returns text component as String (without formatting) from placeholder
-     * It's not recommended for general usage, as it makes it text static/unable to change depending on player's language or other settings
-     * and removes all styling.
-     *
-     * @return String
-     */
-    @Deprecated
-    public String string() {
-        if (this.string == null) {
-            this.string = this.text.getString();
-        }
-        return this.string;
     }
 
     /**
@@ -86,7 +70,16 @@ public final class PlaceholderResult {
      * @return PlaceholderResult
      */
     public static PlaceholderResult value(String text) {
-        return new PlaceholderResult(TextParserV1.DEFAULT.parseText(text, null), null);
+        return new PlaceholderResult(TagParser.DEFAULT.parseComponent(text, ParserContext.of()), null);
+    }
+
+    /**
+     * Create result for placeholder
+     *
+     * @return PlaceholderResult
+     */
+    public static PlaceholderResult value(String text, ParserContext context) {
+        return new PlaceholderResult(TagParser.DEFAULT.parseComponent(text,context), null);
     }
 }
 

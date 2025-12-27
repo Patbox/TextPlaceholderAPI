@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 @ApiStatus.Internal
 public record PlaceholderNode(ParserContext.Key<PlaceholderContext> contextKey, String placeholder, Placeholders.PlaceholderGetter getter, boolean optionalContext, @Nullable String argument) implements TextNode {
     @Override
-    public Component toText(ParserContext context, boolean removeBackslashes) {
+    public Component toComponent(ParserContext context, boolean removeBackslashes) {
         var ctx = context.get(contextKey);
         var handler = getter.getPlaceholder(placeholder, context);
         if ((ctx != null || this.optionalContext) && handler != null) {

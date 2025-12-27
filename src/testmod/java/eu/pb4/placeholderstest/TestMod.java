@@ -6,7 +6,6 @@ import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.Placeholders;
-import eu.pb4.placeholders.api.TextParserUtils;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.TextNode;
@@ -37,7 +36,6 @@ public class TestMod implements ModInitializer {
         // old = NodeParser.merge(TextParserV1.DEFAULT, MarkdownLiteParserV1.ALL, LegacyFormattingParser.ALL)
 
         for (var pair : List.of(
-                Pair.of(TextParserV1.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_PARSER),
                 Pair.of(TagParser.SIMPLIFIED_TEXT_FORMAT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
                         TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER))),
                 Pair.of(NodeParser.merge(TagParser.SIMPLIFIED_TEXT_FORMAT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
@@ -68,7 +66,7 @@ public class TestMod implements ModInitializer {
                     contextTimeTotal += System.nanoTime() - time;
                     time = System.nanoTime();
 
-                    Component text = placeholders.toText(ctx, true);
+                    Component text = placeholders.toComponent(ctx, true);
                     textTimeTotal += System.nanoTime() - time;
                     output = text;
                 }
@@ -107,7 +105,7 @@ public class TestMod implements ModInitializer {
     private static int test(CommandContext<CommandSourceStack> context) {
         try {
             ServerPlayer player = context.getSource().getPlayer();
-            player.displayClientMessage(Placeholders.parseText(context.getArgument("text", Component.class), PlaceholderContext.of(player)), false);
+            player.displayClientMessage(Placeholders.parseComponent(context.getArgument("text", Component.class), PlaceholderContext.of(player)), false);
             player.displayClientMessage(Component.literal(TextNode.convert(context.getArgument("text", Component.class)).toString()), false);
             player.displayClientMessage(Component.literal(Placeholders.parseNodes(TextNode.convert(context.getArgument("text", Component.class))).toString()), false);
         } catch (Exception e) {
@@ -119,19 +117,7 @@ public class TestMod implements ModInitializer {
     private static int markqt(CommandContext<CommandSourceStack> context) {
         try {
             ServerPlayer player = context.getSource().getPlayer();
-            player.displayClientMessage(NodeParser.builder().markdown().quickText().build().parseText(context.getArgument("text", String.class), ParserContext.of()), false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    private static int test2(CommandContext<CommandSourceStack> context) {
-        try {
-            ServerPlayer player = context.getSource().getPlayer();
-            Component text = TextParserUtils.formatText(context.getArgument("text", String.class));
-            player.displayClientMessage(Component.literal(toJsonString(text, context.getSource().registryAccess())), false);
-            player.displayClientMessage(text, false);
+            player.displayClientMessage(NodeParser.builder().markdown().quickText().build().parseComponent(context.getArgument("text", String.class), ParserContext.of()), false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,40 +126,6 @@ public class TestMod implements ModInitializer {
 
     private static String toJsonString(Component text, RegistryAccess registryManager) {
         return ComponentSerialization.CODEC.encodeStart(registryManager.createSerializationContext(JsonOps.INSTANCE), text).getOrThrow().toString();
-    }
-
-    private static int test2oldnew(CommandContext<CommandSourceStack> context) {
-        try {
-            ServerPlayer player = context.getSource().getPlayer();
-            var form = context.getArgument("text", String.class);
-            Component text = TextParserV1.DEFAULT.parseNode(form).toText();
-            Component text2 = TagParser.SIMPLIFIED_TEXT_FORMAT.parseNode(form).toText();
-            player.displayClientMessage(Component.literal("v1"), false);
-            player.displayClientMessage(text, false);
-            player.displayClientMessage(Component.literal("v2"), false);
-            player.displayClientMessage(text2, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    private static int test2oldnewjson(CommandContext<CommandSourceStack> context) {
-        try {
-            ServerPlayer player = context.getSource().getPlayer();
-            var form = context.getArgument("text", String.class);
-            Component text = TextParserV1.DEFAULT.parseNode(form).toText();
-            Component text2 = TagParser.SIMPLIFIED_TEXT_FORMAT.parseNode(form).toText();
-            player.displayClientMessage(Component.literal("v1"), false);
-            player.displayClientMessage(Component.literal(toJsonString(text, context.getSource().registryAccess())), false);
-            player.displayClientMessage(text, false);
-            player.displayClientMessage(Component.literal("v2"), false);
-            player.displayClientMessage(Component.literal(toJsonString(text2, context.getSource().registryAccess())), false);
-            player.displayClientMessage(text2, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
     }
 
     private static int test3(CommandContext<CommandSourceStack> context) {
@@ -198,7 +150,7 @@ public class TestMod implements ModInitializer {
             var placeholderTime = System.nanoTime() - time;
             time = System.nanoTime();
 
-            Component text = placeholders.toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
+            Component text = placeholders.toComponent(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
             var textTime = System.nanoTime() - time;
 
             player.displayClientMessage(Component.literal(toJsonString(text, context.getSource().registryAccess())), false);
@@ -215,38 +167,6 @@ public class TestMod implements ModInitializer {
         return 0;
     }
 
-    private static int test4Text(CommandContext<CommandSourceStack> context) {
-        try {
-            ServerPlayer player = context.getSource().getPlayer();
-            Component text = Placeholders.parseText(
-                    Placeholders.parseText(TextParserUtils.formatText(context.getArgument("text", String.class)), PlaceholderContext.of(player)),
-                    Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
-                    Map.of("player", player.getName())
-            );
-            player.displayClientMessage(Component.literal(toJsonString(text, context.getSource().registryAccess())), false);
-            player.displayClientMessage(text, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
-    private static int test4nodes(CommandContext<CommandSourceStack> context) {
-        try {
-            ServerPlayer player = context.getSource().getPlayer();
-            Component text = Placeholders.parseNodes(
-                    Placeholders.parseNodes(TextParserUtils.formatNodes(context.getArgument("text", String.class))),
-                    Placeholders.PREDEFINED_PLACEHOLDER_PATTERN,
-                    Map.of("player", player.getName())
-            ).toText(ParserContext.of(PlaceholderContext.KEY, PlaceholderContext.of(player)), true);
-            player.displayClientMessage(Component.literal(toJsonString(text, context.getSource().registryAccess())), false);
-            player.displayClientMessage(text, false);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return 0;
-    }
-
     private static int test5(CommandContext<CommandSourceStack> context) {
         try {
             ServerPlayer player = context.getSource().getPlayer();
@@ -256,7 +176,7 @@ public class TestMod implements ModInitializer {
                     .globalPlaceholders()
                     .simplifiedTextFormat()
                     .build()
-                    .parseText(form, PlaceholderContext.of(player).asParserContext());
+                    .parseComponent(form, PlaceholderContext.of(player).asParserContext());
             player.displayClientMessage(Component.literal(toJsonString(text2, context.getSource().registryAccess())), false);
             player.displayClientMessage(text2, false);
         } catch (Exception e) {
@@ -273,10 +193,9 @@ public class TestMod implements ModInitializer {
             var form = context.getArgument("text", String.class);
             player.displayClientMessage(Component.literal("------------------------------"), false);
             player.displayClientMessage(Component.literal("Input.   | " + form), false);
-            player.displayClientMessage(Component.literal("STF-V1 | ").append(TextParserV1.DEFAULT.parseText(form, parsingContext)), false);
-            player.displayClientMessage(Component.literal("STF-V2 | ").append(TagParser.SIMPLIFIED_TEXT_FORMAT.parseText(form, parsingContext)), false);
-            player.displayClientMessage(Component.literal("STF+QT | ").append(TagParser.QUICK_TEXT_WITH_STF.parseText(form, parsingContext)), false);
-            player.displayClientMessage(Component.literal("QT       | ").append(TagParser.QUICK_TEXT.parseText(form, parsingContext)), false);
+            player.displayClientMessage(Component.literal("STF-V2 | ").append(TagParser.SIMPLIFIED_TEXT_FORMAT.parseComponent(form, parsingContext)), false);
+            player.displayClientMessage(Component.literal("STF+QT | ").append(TagParser.QUICK_TEXT_WITH_STF.parseComponent(form, parsingContext)), false);
+            player.displayClientMessage(Component.literal("QT       | ").append(TagParser.QUICK_TEXT.parseComponent(form, parsingContext)), false);
         } catch (Throwable e) {
             e.printStackTrace();
         }
@@ -287,7 +206,7 @@ public class TestMod implements ModInitializer {
         try {
             ServerPlayer player = context.getSource().getPlayer();
 
-            var text = Placeholders.parseText(Component.translatable("death.attack.outOfWorld", player.getDisplayName()), PlaceholderContext.of(player));
+            var text = Placeholders.parseComponent(Component.translatable("death.attack.outOfWorld", player.getDisplayName()), PlaceholderContext.of(player));
             player.sendSystemMessage(text);
         } catch (Exception e) {
             e.printStackTrace();
@@ -298,7 +217,7 @@ public class TestMod implements ModInitializer {
     private static int test8(CommandContext<CommandSourceStack> context) {
         try {
             var parser = NodeParser.builder().quickText().globalPlaceholders().build();
-            context.getSource().sendSystemMessage(parser.parseText(StringArgumentType.getString(context, "text"), PlaceholderContext.of(context.getSource()).asParserContext()));
+            context.getSource().sendSystemMessage(parser.parseComponent(StringArgumentType.getString(context, "text"), PlaceholderContext.of(context.getSource()).asParserContext()));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -313,17 +232,8 @@ public class TestMod implements ModInitializer {
             dispatcher.register(
                     literal("argtest").then(argument("arg", StringArgumentType.greedyString()).executes(TestMod::argTest))
             );
-            dispatcher.register(
-                    literal("test2").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2))
-            );
 
-            dispatcher.register(
-                    literal("test2oldnew").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2oldnew))
-            );
 
-            dispatcher.register(
-                    literal("test2oldnewj").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test2oldnewjson))
-            );
 
             dispatcher.register(
                     literal("test3").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test3))
@@ -332,12 +242,7 @@ public class TestMod implements ModInitializer {
             dispatcher.register(
                     literal("perm").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::perf))
             );
-            dispatcher.register(
-                    literal("test4text").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test4Text))
-            );
-            dispatcher.register(
-                    literal("test4nodes").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test4nodes))
-            );
+            
             dispatcher.register(
                     literal("test5").then(argument("text", StringArgumentType.greedyString()).executes(TestMod::test5))
             );
