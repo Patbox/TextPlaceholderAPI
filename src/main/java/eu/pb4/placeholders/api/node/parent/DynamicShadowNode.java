@@ -3,9 +3,9 @@ package eu.pb4.placeholders.api.node.parent;
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.impl.GeneralUtils;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.ColorHelper;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.ARGB;
 
 public final class DynamicShadowNode extends ParentNode {
     private final float scale;
@@ -22,14 +22,14 @@ public final class DynamicShadowNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
+    protected Component applyFormatting(MutableComponent out, ParserContext context) {
         var transformer = context.get(ParserContext.Key.DEFAULT_SHADOW_STYLER);
         if (transformer == null) {
-            var defaultColor = modifiedColor(out.getStyle().getColor() != null ? out.getStyle().getColor().getRgb() : 0xFFFFFF, this.scale, this.alpha);
+            var defaultColor = modifiedColor(out.getStyle().getColor() != null ? out.getStyle().getColor().getValue() : 0xFFFFFF, this.scale, this.alpha);
 
             return GeneralUtils.cloneTransformText(out, text -> {
                 var color = text.getStyle().getColor();
-                return text.setStyle(text.getStyle().withShadowColor(color != null ? modifiedColor(color.getRgb(), this.scale, this.alpha) : defaultColor));
+                return text.setStyle(text.getStyle().withShadowColor(color != null ? modifiedColor(color.getValue(), this.scale, this.alpha) : defaultColor));
             }, text -> text == out || text.getStyle().getShadowColor() == null && text.getStyle().getColor() != null);
         }
 
@@ -38,7 +38,7 @@ public final class DynamicShadowNode extends ParentNode {
     }
 
     public static int modifiedColor(int color, float scale, float alpha) {
-        return ColorHelper.scaleRgb(color, scale) | 0xFF000000;
+        return ARGB.scaleRGB(color, scale) | 0xFF000000;
     }
 
     @Override
@@ -54,7 +54,7 @@ public final class DynamicShadowNode extends ParentNode {
     }
 
     public interface Transformer {
-        Text applyShadowColors(Text text, float scale, float alpha, ParserContext context);
+        Component applyShadowColors(Component text, float scale, float alpha, ParserContext context);
 
         default boolean hasShadowColor(ParserContext context) {
             return true;
@@ -63,14 +63,14 @@ public final class DynamicShadowNode extends ParentNode {
 
     public interface SimpleColoredTransformer extends Transformer {
         @Override
-        default Text applyShadowColors(Text out, float scale, float alpha, ParserContext context) {
+        default Component applyShadowColors(Component out, float scale, float alpha, ParserContext context) {
             var defaultColor = this.getDefaultShadowColor(out, scale, alpha, context);
             return GeneralUtils.cloneTransformText(out, text -> {
                 var color = text.getStyle().getColor();
-                return text.setStyle(text.getStyle().withShadowColor(color != null ? modifiedColor(color.getRgb(), scale, alpha) : defaultColor));
+                return text.setStyle(text.getStyle().withShadowColor(color != null ? modifiedColor(color.getValue(), scale, alpha) : defaultColor));
             }, text -> text == out || text.getStyle().getShadowColor() == null && text.getStyle().getColor() != null);
         }
 
-        int getDefaultShadowColor(Text out, float scale, float alpha, ParserContext context);
+        int getDefaultShadowColor(Component out, float scale, float alpha, ParserContext context);
     }
 }

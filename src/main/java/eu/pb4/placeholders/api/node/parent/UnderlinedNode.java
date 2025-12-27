@@ -2,13 +2,12 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.Style;
-
 import java.util.Arrays;
+import net.minecraft.network.chat.Style;
 
 public final class UnderlinedNode extends SimpleStylingNode {
-    private static final Style TRUE = Style.EMPTY.withUnderline(true);
-    private static final Style FALSE = Style.EMPTY.withUnderline(false);
+    private static final Style TRUE = Style.EMPTY.withUnderlined(true);
+    private static final Style FALSE = Style.EMPTY.withUnderlined(false);
     private final boolean value;
 
     public UnderlinedNode(TextNode[] nodes, boolean value) {

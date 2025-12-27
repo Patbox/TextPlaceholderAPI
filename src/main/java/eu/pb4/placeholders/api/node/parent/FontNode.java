@@ -2,11 +2,10 @@ package eu.pb4.placeholders.api.node.parent;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.node.TextNode;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.util.Identifier;
-
 import java.util.Arrays;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 
 public final class FontNode extends SimpleStylingNode {
     private final Identifier font;
@@ -18,7 +17,7 @@ public final class FontNode extends SimpleStylingNode {
 
     @Override
     protected Style style(ParserContext context) {
-        return Style.EMPTY.withFont(new StyleSpriteSource.Font(font));
+        return Style.EMPTY.withFont(new FontDescription.Resource(font));
     }
 
     @Override

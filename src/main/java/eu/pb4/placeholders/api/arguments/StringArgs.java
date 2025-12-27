@@ -5,14 +5,14 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import eu.pb4.placeholders.impl.StringArgOps;
-import net.minecraft.registry.RegistryWrapper;
-import net.minecraft.util.function.CharPredicate;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import net.minecraft.CharPredicate;
+import net.minecraft.core.HolderLookup;
 
 public final class StringArgs {
     private static final StringArgs EMPTY = new StringArgs("");
@@ -193,11 +193,11 @@ public final class StringArgs {
                 val != null ? Either.left(val) : Either.right(map)).map(Pair::getFirst);
     }
 
-    public <T> DataResult<T> get(String name, Codec<T> codec, RegistryWrapper.WrapperLookup wrapperLookup) {
+    public <T> DataResult<T> get(String name, Codec<T> codec, HolderLookup.Provider wrapperLookup) {
         var val = get(name);
         var map = getNested(name);
         return val == null && map == null ? DataResult.error(() -> "Empty")
-                : codec.decode(wrapperLookup.getOps(StringArgOps.INSTANCE),
+                : codec.decode(wrapperLookup.createSerializationContext(StringArgOps.INSTANCE),
                 val != null ? Either.left(val) : Either.right(map)).map(Pair::getFirst);
     }
 

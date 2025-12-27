@@ -2,7 +2,7 @@ package eu.pb4.placeholders.api.node;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.impl.textparser.TextParserImpl;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 public record LiteralNode(String value) implements TextNode {
 
@@ -10,9 +10,9 @@ public record LiteralNode(String value) implements TextNode {
         this(builder.toString());
     }
     @Override
-    public Text toText(ParserContext context, boolean removeBackslashes) {
+    public Component toText(ParserContext context, boolean removeBackslashes) {
         if (this.value.isEmpty()) {
-            return Text.empty();
+            return Component.empty();
         }
 
         if (removeBackslashes) {
@@ -35,9 +35,9 @@ public record LiteralNode(String value) implements TextNode {
                 }
             }
 
-            return Text.literal(builder.toString());
+            return Component.literal(builder.toString());
         } else {
-            return Text.literal(this.value());
+            return Component.literal(this.value());
         }
     }
 }

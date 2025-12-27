@@ -9,8 +9,6 @@ import eu.pb4.placeholders.api.node.parent.FormattingNode;
 import eu.pb4.placeholders.api.node.parent.HoverNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.impl.textparser.TextParserImpl;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.util.Formatting;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -20,6 +18,8 @@ import java.util.ListIterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.ClickEvent;
 
 /**
  * Basic markdown parser supporting only single-line vanilla text compatible formatting.
@@ -59,17 +59,17 @@ public final class MarkdownLiteParserV1 implements NodeParser {
         return new HoverNode<>(TextNode.array(
                 new FormattingNode(
                         TextNode.array(TextNode.of("["), TranslatedNode.of("options.hidden"), TextNode.of("]")),
-                        Formatting.GRAY, Formatting.ITALIC
+                        ChatFormatting.GRAY, ChatFormatting.ITALIC
                 )
         ), HoverNode.Action.TEXT_NODE, TextNode.asSingle(textNodes));
     }
 
     public static TextNode defaultQuoteFormatting(TextNode[] textNodes) {
-        return new FormattingNode(textNodes, Formatting.GRAY, Formatting.ITALIC);
+        return new FormattingNode(textNodes, ChatFormatting.GRAY, ChatFormatting.ITALIC);
     }
 
     public static TextNode defaultUrlFormatting(TextNode[] textNodes, TextNode url) {
-        return new ClickActionNode(TextNode.array(new FormattingNode(textNodes, Formatting.BLUE, Formatting.UNDERLINE)), ClickEvent.Action.OPEN_URL, url);
+        return new ClickActionNode(TextNode.array(new FormattingNode(textNodes, ChatFormatting.BLUE, ChatFormatting.UNDERLINE)), ClickEvent.Action.OPEN_URL, url);
     }
 
     @Override
@@ -249,7 +249,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                         out.add(new LiteralNode(builder.toString()));
                         builder = new StringBuilder();
                     }
-                    out.add(new FormattingNode(value, Formatting.STRIKETHROUGH));
+                    out.add(new FormattingNode(value, ChatFormatting.STRIKETHROUGH));
                     continue;
                 }
             } else if (next.type == SubNodeType.DOUBLE_STAR && this.allowedFormatting.contains(MarkdownFormat.BOLD)) {
@@ -260,7 +260,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                         out.add(new LiteralNode(builder.toString()));
                         builder = new StringBuilder();
                     }
-                    out.add(new FormattingNode(value, Formatting.BOLD));
+                    out.add(new FormattingNode(value, ChatFormatting.BOLD));
                     continue;
                 }
             } else if (next.type == SubNodeType.DOUBLE_FLOOR && this.allowedFormatting.contains(MarkdownFormat.UNDERLINE)) {
@@ -271,7 +271,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                         out.add(new LiteralNode(builder.toString()));
                         builder = new StringBuilder();
                     }
-                    out.add(new FormattingNode(value, Formatting.UNDERLINE));
+                    out.add(new FormattingNode(value, ChatFormatting.UNDERLINE));
                     continue;
                 }
             } else if ((next.type == SubNodeType.STAR || next.type == SubNodeType.FLOOR) && this.allowedFormatting.contains(MarkdownFormat.ITALIC)) {
@@ -292,7 +292,7 @@ public final class MarkdownLiteParserV1 implements NodeParser {
                             out.add(new LiteralNode(builder.toString()));
                             builder = new StringBuilder();
                         }
-                        out.add(new FormattingNode(value, Formatting.ITALIC));
+                        out.add(new FormattingNode(value, ChatFormatting.ITALIC));
                         continue;
                     }
 

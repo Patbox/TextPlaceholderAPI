@@ -4,7 +4,7 @@ import eu.pb4.placeholders.api.node.LiteralNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
 
 
 /**
@@ -15,15 +15,15 @@ import net.minecraft.text.Text;
 public final class TextParserUtils {
     private TextParserUtils() {}
 
-    public static Text formatText(String text) {
+    public static Component formatText(String text) {
         return formatNodes(text).toText(ParserContext.of(), true);
     }
 
-    public static Text formatTextSafe(String text) {
+    public static Component formatTextSafe(String text) {
         return formatNodesSafe(text).toText(ParserContext.of(), true);
     }
 
-    public static Text formatText(String text, TextParserV1.TagParserGetter getter) {
+    public static Component formatText(String text, TextParserV1.TagParserGetter getter) {
         return formatNodes(text, getter).toText(null, true);
     }
 

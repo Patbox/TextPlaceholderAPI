@@ -6,14 +6,17 @@ import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import eu.pb4.placeholders.api.parsers.TextParserV1;
 import eu.pb4.placeholders.impl.GeneralUtils;
-import net.minecraft.entity.EntityType;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.selector.SelectorPattern;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registries;
-import net.minecraft.text.*;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.*;
+import net.minecraft.network.chat.contents.data.BlockDataSource;
+import net.minecraft.network.chat.contents.data.EntityDataSource;
+import net.minecraft.network.chat.contents.data.StorageDataSource;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.EntityType;
 import org.jetbrains.annotations.ApiStatus;
 
 import java.util.*;
@@ -33,8 +36,8 @@ public final class TextTagsV1 {
             aliases.put("light_purple", List.of("pink"));
             aliases.put("dark_gray", List.of("dark_grey"));
 
-            for (Formatting formatting : Formatting.values()) {
-                if (formatting.isModifier()) {
+            for (ChatFormatting formatting : ChatFormatting.values()) {
+                if (formatting.isFormat()) {
                     continue;
                 }
 
@@ -109,7 +112,7 @@ public final class TextTagsV1 {
                             List.of("colour", "c"),
                             "color",
                             true,
-                            wrap((nodes, data) -> new ColorNode(nodes, TextColor.parse(cleanArgument(data)).result().orElse(null)))
+                            wrap((nodes, data) -> new ColorNode(nodes, TextColor.parseColor(cleanArgument(data)).result().orElse(null)))
                     )
             );
         }
@@ -195,7 +198,7 @@ public final class TextTagsV1 {
                 var out = recursiveParsing(input, handlers, endAt);
                 if (lines.length > 1) {
                     for (var action : ClickEvent.Action.values()) {
-                        if (action.asString().equals(cleanArgument(lines[0])) && action.isUserDefinable()) {
+                        if (action.getSerializedName().equals(cleanArgument(lines[0])) && action.isAllowedFromServer()) {
                             return out.value(new ClickActionNode(out.nodes(), action, new LiteralNode(restoreOriginalEscaping(cleanArgument(lines[1])))));
                         }
                     }
@@ -306,53 +309,53 @@ public final class TextTagsV1 {
                                         HoverEvent.Action action = HoverEvent.Action.CODEC.parse(JsonOps.INSTANCE, JsonParser.parseString(cleanArgument(lines[0].toLowerCase(Locale.ROOT)))).result().orElse(null);
                                         if (action == HoverEvent.Action.SHOW_TEXT) {
                                             return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT_NODE,
-                                                                             new ParentNode(parse(restoreOriginalEscaping(cleanArgument(lines[1])), handlers)
-                                                                             )
+                                                    new ParentNode(parse(restoreOriginalEscaping(cleanArgument(lines[1])), handlers)
+                                                    )
                                             ));
                                         } else if (action == HoverEvent.Action.SHOW_ENTITY) {
                                             lines = lines[1].split(":", 3);
                                             if (lines.length == 3) {
                                                 return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.ENTITY_NODE,
-                                                                                 new HoverNode.EntityNodeContent(
-                                                                                         EntityType.get(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[0])))).orElse(EntityType.PIG),
-                                                                                         UUID.fromString(cleanArgument(lines[1])),
-                                                                                         new ParentNode(parse(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[2]))), handlers)))
+                                                        new HoverNode.EntityNodeContent(
+                                                                EntityType.byString(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[0])))).orElse(EntityType.PIG),
+                                                                UUID.fromString(cleanArgument(lines[1])),
+                                                                new ParentNode(parse(restoreOriginalEscaping(restoreOriginalEscaping(cleanArgument(lines[2]))), handlers)))
                                                 ));
                                             }
                                         } else if (action == HoverEvent.Action.SHOW_ITEM) {
                                             try {
-                                                var nbt = StringNbtReader.readCompound(restoreOriginalEscaping(cleanArgument(lines[1])));
+                                                var nbt = TagParser.parseCompoundFully(restoreOriginalEscaping(cleanArgument(lines[1])));
                                                 return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.LAZY_ITEM_STACK,
-                                                                                 new HoverNode.LazyItemStackNodeContent<>(
-                                                                                         Identifier.of(nbt.getString("id", "")),
-                                                                                         nbt.contains("count") ? nbt.getInt("count", 1) : 1,
-                                                                                         NbtOps.INSTANCE,
-                                                                                         nbt.contains("components") ? nbt.getCompound("components").orElse(null) : null
-                                                                                 )
+                                                        new HoverNode.LazyItemStackNodeContent<>(
+                                                                Identifier.parse(nbt.getStringOr("id", "")),
+                                                                nbt.contains("count") ? nbt.getIntOr("count", 1) : 1,
+                                                                NbtOps.INSTANCE,
+                                                                nbt.contains("components") ? nbt.getCompound("components").orElse(null) : null
+                                                        )
                                                 ));
                                             } catch (Throwable e) {
                                                 lines = lines[1].split(":", 2);
                                                 if (lines.length > 0) {
-                                                    var stack = Registries.ITEM.get(Identifier.of(lines[0])).getDefaultStack();
+                                                    var stack = BuiltInRegistries.ITEM.getValue(Identifier.parse(lines[0])).getDefaultInstance();
 
                                                     if (lines.length > 1) {
                                                         stack.setCount(Integer.parseInt(lines[1]));
                                                     }
 
                                                     return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.VANILLA_ITEM_STACK,
-                                                                                     new HoverEvent.ShowItem(stack)
+                                                            new HoverEvent.ShowItem(stack)
                                                     ));
                                                 }
                                             }
                                         } else {
                                             return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT_NODE,
-                                                                             new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers))
+                                                    new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers))
                                             ));
                                         }
                                     } else {
                                         return out.value(new HoverNode<>(out.nodes(), HoverNode.Action.TEXT_NODE,
-                                                                         new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers)
-                                                                         )
+                                                new ParentNode(parse(restoreOriginalEscaping(cleanArgument(data)), handlers)
+                                                )
                                         ));
                                     }
                                 } catch (Exception e) {
@@ -439,7 +442,7 @@ public final class TextTagsV1 {
 
                                 return out.value(overriddenLength < 0
                                         ? GradientNode.rainbow(saturation, 1, freq, offset, out.nodes())
-                                        : GradientNode.rainbow(saturation, 1,  freq, offset, overriddenLength, out.nodes())
+                                        : GradientNode.rainbow(saturation, 1, freq, offset, overriddenLength, out.nodes())
                                 );
                             }
                     )
@@ -459,7 +462,7 @@ public final class TextTagsV1 {
                                 var out = recursiveParsing(input, handlers, endAt);
                                 List<TextColor> textColors = new ArrayList<>();
                                 for (String string : val) {
-                                    TextColor.parse(string).result().ifPresent(textColors::add);
+                                    TextColor.parseColor(string).result().ifPresent(textColors::add);
                                 }
                                 return out.value(GradientNode.colors(textColors, out.nodes()));
                             }
@@ -482,7 +485,7 @@ public final class TextTagsV1 {
                                 var textColors = new ArrayList<TextColor>();
 
                                 for (String string : val) {
-                                    TextColor.parse(string).result().ifPresent(textColors::add);
+                                    TextColor.parseColor(string).result().ifPresent(textColors::add);
                                 }
                                 // We cannot have an empty list!
                                 if (textColors.isEmpty()) {
@@ -548,7 +551,7 @@ public final class TextTagsV1 {
                             false, (tag, data, input, handlers, endAt) -> {
                                 String[] lines = data.split(":");
                                 String pattern = restoreOriginalEscaping(cleanArgument(lines[0]));
-                                Optional<ParsedSelector> optional = ParsedSelector.parse(pattern).result();
+                                Optional<SelectorPattern> optional = SelectorPattern.parse(pattern).result();
                                 if (optional.isEmpty()) {
                                     return TextParserV1.TagNodeValue.EMPTY;
                                 }
@@ -578,9 +581,9 @@ public final class TextTagsV1 {
                                 var cleanLine1 = restoreOriginalEscaping(cleanArgument(lines[1]));
 
                                 var type = switch (lines[0]) {
-                                    case "block" -> new BlockNbtDataSource(cleanLine1);
-                                    case "entity" -> new EntityNbtDataSource(cleanLine1);
-                                    case "storage" -> new StorageNbtDataSource(Identifier.tryParse(cleanLine1));
+                                    case "block" -> new BlockDataSource(cleanLine1);
+                                    case "entity" -> new EntityDataSource(cleanLine1);
+                                    case "storage" -> new StorageDataSource(Identifier.tryParse(cleanLine1));
                                     default -> null;
                                 };
 
@@ -598,7 +601,7 @@ public final class TextTagsV1 {
         }
     }
 
-    private static Function<MutableText, Text> getTransform(String[] val) {
+    private static Function<MutableComponent, Component> getTransform(String[] val) {
         if (val.length == 0) {
             return GeneralUtils.MutableTransformer.CLEAR;
         }
@@ -614,7 +617,7 @@ public final class TextTagsV1 {
                 case "font" -> x -> x.withFont(null);
                 case "bold" -> x -> x.withBold(null);
                 case "italic" -> x -> x.withItalic(null);
-                case "underline" -> x -> x.withUnderline(null);
+                case "underline" -> x -> x.withUnderlined(null);
                 case "strikethrough" -> x -> x.withStrikethrough(null);
                 case "all" -> x -> Style.EMPTY;
                 default -> x -> x;
@@ -641,7 +644,6 @@ public final class TextTagsV1 {
             return new TextParserV1.TagNodeValue(wrapper.wrap(out.nodes(), isntFalse(data)), out.length());
         };
     }
-
 
 
     interface Wrapper {

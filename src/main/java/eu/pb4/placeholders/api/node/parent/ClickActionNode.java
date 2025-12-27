@@ -8,38 +8,47 @@ import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.StringArgOps;
-import net.minecraft.dialog.type.Dialog;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.SnbtOperation;
-import net.minecraft.nbt.SnbtParsing;
-import net.minecraft.nbt.StringNbtReader;
-import net.minecraft.registry.*;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.text.ClickEvent;
-import net.minecraft.text.Style;
-import net.minecraft.util.Identifier;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.dialog.Dialog;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
 import java.util.Optional;
 
 public final class ClickActionNode extends SimpleStylingNode {
+    private static final HolderLookup.Provider DEFAULT_WRAPPER = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     private final ClickEvent.Action action;
     private final TextNode value;
     private final @Nullable Either<TextNode, StringArgs> data;
 
-    private static final RegistryWrapper.WrapperLookup DEFAULT_WRAPPER = DynamicRegistryManager.of(Registries.REGISTRIES);
-
     public ClickActionNode(TextNode[] children, ClickEvent.Action action, TextNode value) {
         this(children, action, value, null);
     }
+
     public ClickActionNode(TextNode[] children, ClickEvent.Action action, TextNode value, @Nullable Either<TextNode, StringArgs> data) {
         super(children);
         this.action = action;
         this.value = value;
         this.data = data;
+    }
+
+    @Deprecated(forRemoval = true)
+    public ClickActionNode(TextNode[] children, Action action, TextNode value) {
+        super(children);
+        this.action = action.vanillaType();
+        this.value = value;
+        this.data = null;
     }
 
     public ClickEvent.Action clickEventAction() {
@@ -55,9 +64,9 @@ public final class ClickActionNode extends SimpleStylingNode {
         return switch (this.action) {
             case OPEN_URL -> {
                 try {
-                    yield  Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create(this.value.toText(context).getString())));
+                    yield Style.EMPTY.withClickEvent(new ClickEvent.OpenUrl(URI.create(this.value.toText(context).getString())));
                 } catch (Exception ignored) {
-                    yield  Style.EMPTY;
+                    yield Style.EMPTY;
                 }
             }
             case CHANGE_PAGE -> {
@@ -67,27 +76,31 @@ public final class ClickActionNode extends SimpleStylingNode {
                     yield Style.EMPTY;
                 }
             }
-            case OPEN_FILE -> Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(this.value.toText(context).getString()));
-            case RUN_COMMAND -> Style.EMPTY.withClickEvent(new ClickEvent.RunCommand(this.value.toText(context).getString()));
-            case SUGGEST_COMMAND -> Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand(this.value.toText(context).getString()));
-            case COPY_TO_CLIPBOARD -> Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(this.value.toText(context).getString()));
+            case OPEN_FILE ->
+                    Style.EMPTY.withClickEvent(new ClickEvent.OpenFile(this.value.toText(context).getString()));
+            case RUN_COMMAND ->
+                    Style.EMPTY.withClickEvent(new ClickEvent.RunCommand(this.value.toText(context).getString()));
+            case SUGGEST_COMMAND ->
+                    Style.EMPTY.withClickEvent(new ClickEvent.SuggestCommand(this.value.toText(context).getString()));
+            case COPY_TO_CLIPBOARD ->
+                    Style.EMPTY.withClickEvent(new ClickEvent.CopyToClipboard(this.value.toText(context).getString()));
             case CUSTOM -> {
                 try {
-                    RegistryWrapper.WrapperLookup wrapper;
+                    HolderLookup.Provider wrapper;
                     if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
                         wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
                     } else if (context.contains(PlaceholderContext.KEY)) {
-                        wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
+                        wrapper = context.getOrThrow(PlaceholderContext.KEY).server().registryAccess();
                     } else {
                         wrapper = DEFAULT_WRAPPER;
                     }
 
                     yield Style.EMPTY.withClickEvent(new ClickEvent.Custom(
-                            Identifier.of(this.value.toText(context).getString()),
+                            Identifier.parse(this.value.toText(context).getString()),
                             this.data == null ? Optional.empty() : Optional.of(data.left().isPresent()
-                                    ? StringNbtReader.fromOps(wrapper.getOps(NbtOps.INSTANCE)).read(this.data.left().orElseThrow().toText(context).getString())
+                                    ? TagParser.create(wrapper.createSerializationContext(NbtOps.INSTANCE)).parseFully(this.data.left().orElseThrow().toText(context).getString())
                                     : StringArgOps.INSTANCE.convertTo(NbtOps.INSTANCE, Either.right(this.data.right().orElseThrow()))
-                                    )
+                            )
                     ));
                 } catch (Throwable e) {
                     yield Style.EMPTY;
@@ -95,27 +108,27 @@ public final class ClickActionNode extends SimpleStylingNode {
 
             }
             case SHOW_DIALOG -> {
-                RegistryWrapper.WrapperLookup wrapper;
+                HolderLookup.Provider wrapper;
                 if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
                     wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
                 } else if (context.contains(PlaceholderContext.KEY)) {
-                    wrapper = context.getOrThrow(PlaceholderContext.KEY).server().getRegistryManager();
+                    wrapper = context.getOrThrow(PlaceholderContext.KEY).server().registryAccess();
                 } else {
                     wrapper = DEFAULT_WRAPPER;
                 }
-                RegistryEntry<Dialog> dialogRegistryEntry = null;
+                Holder<Dialog> dialogRegistryEntry = null;
                 var data = this.value.toText(context).getString();
 
                 var id = Identifier.tryParse(data);
 
                 if (id != null) {
-                    dialogRegistryEntry = wrapper.getOptionalEntry(RegistryKey.of(RegistryKeys.DIALOG, id)).orElse(null);
+                    dialogRegistryEntry = wrapper.get(ResourceKey.create(Registries.DIALOG, id)).orElse(null);
                 }
 
                 if (dialogRegistryEntry == null) {
                     try {
-                        dialogRegistryEntry =  Dialog.ENTRY_CODEC.decode(
-                                wrapper.getOps(JsonOps.INSTANCE), JsonParser.parseString(data)).getOrThrow().getFirst();
+                        dialogRegistryEntry = Dialog.CODEC.decode(
+                                wrapper.createSerializationContext(JsonOps.INSTANCE), JsonParser.parseString(data)).getOrThrow().getFirst();
                     } catch (Throwable e) {
                         // ignored
                     }
@@ -150,19 +163,10 @@ public final class ClickActionNode extends SimpleStylingNode {
     @Override
     public String toString() {
         return "ClickActionNode{" +
-                "action=" + action.asString() +
+                "action=" + action.getSerializedName() +
                 ", value=" + value +
                 ", data=" + data +
                 '}';
-    }
-
-
-    @Deprecated(forRemoval = true)
-    public ClickActionNode(TextNode[] children, Action action, TextNode value) {
-        super(children);
-        this.action = action.vanillaType();
-        this.value = value;
-        this.data = null;
     }
 
     @Deprecated(forRemoval = true)
@@ -178,6 +182,7 @@ public final class ClickActionNode extends SimpleStylingNode {
             case CUSTOM -> Action.CUSTOM;
         };
     }
+
     @Deprecated(forRemoval = true)
     public record Action(ClickEvent.Action vanillaType) {
         public static final Action OPEN_URL = new Action(ClickEvent.Action.OPEN_URL);
