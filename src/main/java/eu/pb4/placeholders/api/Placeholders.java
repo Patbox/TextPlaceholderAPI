@@ -88,7 +88,6 @@ public final class Placeholders {
 		return parseNodes(textNode).toText(ParserContext.of(PlaceholderContext.KEY, context));
 	}
 
-
 	@Deprecated(forRemoval = true)
 	public static ParentNode parseNodes(TextNode node, Pattern pattern) {
 		return parseNodes(node, pattern, PlaceholderContext.KEY);

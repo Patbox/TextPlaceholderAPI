@@ -37,6 +37,9 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%player:facing_axis%` (2.5.1+) - The player's horizontal direction in format of `+/-A` (A si replaced with axis).
 - `%player:horizontal_facing%` (2.5.1+) - The player's horizontal facing direction.
 - `%player:horizontal_facing_axis%` (2.5.1+) - The player's horizontal facing direction in format of `+/-A` (A si replaced with axis).
+- `%player:team_name%` - The name of player's team.
+- `%player:team_displayname%` - The display name of player's team.
+- `%player:team_displayname_formatted%` - The formatted display name of player's team.
 - `%player:health%` - The player's health.
 - `%player:max_health%` - The player's max health.
 - `%player:hunger%` - The player's hunger.
