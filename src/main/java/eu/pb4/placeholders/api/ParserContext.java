@@ -1,12 +1,11 @@
 package eu.pb4.placeholders.api;
 
 import eu.pb4.placeholders.api.node.parent.DynamicShadowNode;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import net.minecraft.core.HolderLookup;
 
@@ -30,11 +29,19 @@ public final class ParserContext {
     }
 
     public <T> ParserContext with(Key<T> key, T object) {
+        if (this.map.get(key) == object) {
+            return this;
+        }
+
         if (this.copyOnWrite) {
             this.map = new HashMap<>(this.map);
             this.copyOnWrite = false;
         }
-        this.map.put(key, object);
+        if (object == null) {
+            this.map.remove(key);
+        } else {
+            this.map.put(key, object);
+        }
         this.hasNodeContext |= key.nodeContext();
         return this;
     }
@@ -87,19 +94,26 @@ public final class ParserContext {
         return this.copy();
     }
 
-    public record Key<T>(String key, @Nullable Class<T> type, boolean nodeContext) {
-        public Key(String key, @Nullable Class<T> type) {
-            this(key, type, false);
+    public <T> ParserContext withIfNotSet(Key<T> key, T object) {
+        if (this.map.containsKey(key)) {
+            return this;
         }
+        return this.with(key, object);
+    }
 
-
-        public static final Key<Boolean> COMPACT_TEXT = new Key<>("compact_text", Boolean.class);
-        public static final Key<HolderLookup.Provider> WRAPPER_LOOKUP = new Key<>("wrapper_lookup", HolderLookup.Provider.class);
-        public static final Key<DynamicShadowNode.Transformer> DEFAULT_SHADOW_STYLER = Key.ofNode("default_shadow_styler");
+    public record Key<T>(String key, @Nullable Class<T> type, boolean nodeContext) {
+        public static final Key<Boolean> COMPACT_COMPONENT = of("compact_component", Boolean.class);
+        public static final Key<HolderLookup.Provider> HOLDER_LOOKUP = of("holder_lookup", HolderLookup.Provider.class);
+        public static final Key<DynamicShadowNode.Transformer> DEFAULT_SHADOW_STYLER = ofNode("default_shadow_styler", DynamicShadowNode.Transformer.class);
 
         public static <T> Key<T> of(String key, T type) {
             //noinspection unchecked
             return new Key<T>(key, (Class<T>) type.getClass(), false);
+        }
+
+        public static <T> Key<T> of(String key, Class<T> type) {
+            //noinspection unchecked
+            return new Key<T>(key, type, false);
         }
 
         public static <T> Key<T> of(String key) {
@@ -110,6 +124,11 @@ public final class ParserContext {
         public static <T> Key<T> ofNode(String key, T type) {
             //noinspection unchecked
             return new Key<T>(key, (Class<T>) type.getClass(), true);
+        }
+
+        public static <T> Key<T> ofNode(String key, Class<T> type) {
+            //noinspection unchecked
+            return new Key<T>(key, type, true);
         }
 
 

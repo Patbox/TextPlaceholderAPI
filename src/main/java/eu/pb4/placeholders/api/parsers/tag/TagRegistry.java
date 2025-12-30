@@ -2,7 +2,7 @@ package eu.pb4.placeholders.api.parsers.tag;
 
 import eu.pb4.placeholders.impl.textparser.tagreg.SimpleTagRegistry;
 import eu.pb4.placeholders.impl.textparser.tagreg.WrappingTagRegistry;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

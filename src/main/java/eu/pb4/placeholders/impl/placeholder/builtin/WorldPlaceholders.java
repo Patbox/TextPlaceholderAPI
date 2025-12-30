@@ -17,26 +17,22 @@ public class WorldPlaceholders {
     static final int CHUNK_AREA = (int)Math.pow(17.0D, 2.0D);
 
     public static void register() {
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "time"), (ctx, arg) -> {
-            ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
-            } else {
-                world = ctx.server().overworld();
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "time"), (ctx, arg) -> {
+            if (!ctx.hasLevel()) {
+                return PlaceholderResult.invalid("Missing world!");
             }
+            Level world = ctx.level();
 
             long dayTime = (long) (world.getDayTime() * 3.6 / 60);
 
             return PlaceholderResult.value(String.format("%02d:%02d", (dayTime / 60 + 6) % 24, dayTime % 60));
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "time_alt"), (ctx, arg) -> {
-            ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
-            } else {
-                world = ctx.server().overworld();
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "time_alt"), (ctx, arg) -> {
+            if (!ctx.hasLevel()) {
+                return PlaceholderResult.invalid("Missing world!");
             }
+            Level world = ctx.level();
 
             long dayTime = (long) (world.getDayTime() * 3.6 / 60);
             long x = (dayTime / 60 + 6) % 24;
@@ -47,35 +43,30 @@ public class WorldPlaceholders {
             return PlaceholderResult.value(String.format("%02d:%02d %s", y, dayTime % 60, x > 11 ? "PM" : "AM" ));
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "day"), (ctx, arg) -> {
-            ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
-            } else {
-                world = ctx.server().overworld();
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "day"), (ctx, arg) -> {
+            if (!ctx.hasLevel()) {
+                return PlaceholderResult.invalid("Missing world!");
             }
+            Level world = ctx.level();
 
             return PlaceholderResult.value("" + world.getDayTime() / 24000);
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "id"), (ctx, arg) -> {
-            ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
-            } else {
-                world = ctx.server().overworld();
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "id"), (ctx, arg) -> {
+            if (!ctx.hasLevel()) {
+                return PlaceholderResult.invalid("Missing world!");
             }
+            Level world = ctx.level();
 
             return PlaceholderResult.value(world.dimension().identifier().toString());
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "name"), (ctx, arg) -> {
-            ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
-            } else {
-                world = ctx.server().overworld();
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "name"), (ctx, arg) -> {
+            if (!ctx.hasLevel()) {
+                return PlaceholderResult.invalid("Missing world!");
             }
+            Level world = ctx.level();
+
             List<String> parts = new ArrayList<>();
             {
                 String[] words = world.dimension().identifier().getPath().split("_");
@@ -90,21 +81,19 @@ public class WorldPlaceholders {
 
 
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "player_count"), (ctx, arg) -> {
-            ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
-            } else {
-                world = ctx.server().overworld();
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "player_count"), (ctx, arg) -> {
+            if (!ctx.hasLevel()) {
+                return PlaceholderResult.invalid("Missing world!");
             }
+            Level world = ctx.level();
 
             return PlaceholderResult.value("" + world.players().size());
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "mob_count_colored"), (ctx, arg) -> {
+        Placeholders.registerServer(Identifier.fromNamespaceAndPath("world", "mob_count_colored"), (ctx, arg) -> {
             ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
+            if (ctx.serverPlayer() != null) {
+                world = ctx.serverPlayer().level();
             } else {
                 world = ctx.server().overworld();
             }
@@ -138,10 +127,10 @@ public class WorldPlaceholders {
             }
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "mob_count"), (ctx, arg) -> {
+        Placeholders.registerServer(Identifier.fromNamespaceAndPath("world", "mob_count"), (ctx, arg) -> {
             ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
+            if (ctx.serverPlayer() != null) {
+                world = ctx.serverPlayer().level();
             } else {
                 world = ctx.server().overworld();
             }
@@ -165,10 +154,10 @@ public class WorldPlaceholders {
             }
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "mob_cap"), (ctx, arg) -> {
+        Placeholders.registerServer(Identifier.fromNamespaceAndPath("world", "mob_cap"), (ctx, arg) -> {
             ServerLevel world;
-            if (ctx.player() != null) {
-                world = ctx.player().level();
+            if (ctx.serverPlayer() != null) {
+                world = ctx.serverPlayer().level();
             } else {
                 world = ctx.server().overworld();
             }
@@ -192,13 +181,11 @@ public class WorldPlaceholders {
             }
         });
 
-        Placeholders.register(Identifier.fromNamespaceAndPath("world", "weather"), (ctx, arg) -> {
-            Level world;
-            if (ctx.entity() != null) {
-                world = ctx.entity().level();
-            } else {
-                world = ctx.source().getLevel();
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "weather"), (ctx, arg) -> {
+            if (!ctx.hasLevel()) {
+                return PlaceholderResult.invalid("Missing world!");
             }
+            Level world = ctx.level();
 
            return PlaceholderResult.value(world.isThundering() ? "rain & thunder" : world.isRaining() ? "rain" : "clear");
         });

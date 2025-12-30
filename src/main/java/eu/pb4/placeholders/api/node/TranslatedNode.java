@@ -2,7 +2,7 @@ package eu.pb4.placeholders.api.node;
 
 import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import net.minecraft.network.chat.Component;

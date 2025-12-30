@@ -1,7 +1,7 @@
 package eu.pb4.placeholders.api.parsers.format;
 
 import eu.pb4.placeholders.api.parsers.TagLikeParser;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public interface BaseFormat extends TagLikeParser.Format {
     char[] DEFAULT_ARGUMENT_WRAPPER = new char[]{'"', '\'', '`'};
@@ -14,8 +14,7 @@ public interface BaseFormat extends TagLikeParser.Format {
     int matchArgument(String string, int index);
 
     @Override
-    @Nullable
-    default TagLikeParser.Format.Tag findAt(String string, int start, TagLikeParser.Provider provider, TagLikeParser.Context context) {
+    default TagLikeParser.Format.@Nullable Tag findAt(String string, int start, TagLikeParser.Provider provider, TagLikeParser.Context context) {
         if (string.charAt(start) == '\\') {
             return null;
         }

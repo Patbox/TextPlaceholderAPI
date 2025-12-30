@@ -8,7 +8,7 @@ import eu.pb4.placeholders.api.node.parent.ClickActionNode;
 import eu.pb4.placeholders.api.node.parent.FormattingNode;
 import eu.pb4.placeholders.api.node.parent.HoverNode;
 import eu.pb4.placeholders.api.node.parent.ParentTextNode;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;

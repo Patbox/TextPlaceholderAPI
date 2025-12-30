@@ -33,7 +33,7 @@ public class ParentNode implements ParentTextNode {
 
     @Override
     public final Component toComponent(ParserContext context, boolean removeBackslashes) {
-        var compact = context != null && context.get(ParserContext.Key.COMPACT_TEXT) != Boolean.FALSE;
+        var compact = context.get(ParserContext.Key.COMPACT_COMPONENT) != Boolean.FALSE;
         var oldShadow = context.get(ParserContext.Key.DEFAULT_SHADOW_STYLER);
 
         if (this instanceof DynamicShadowNode.Transformer transformer && transformer.hasShadowColor(context)) {

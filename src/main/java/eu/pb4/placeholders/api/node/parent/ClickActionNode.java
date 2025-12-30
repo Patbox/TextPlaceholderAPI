@@ -4,7 +4,7 @@ import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.ParserContext;
-import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
@@ -21,7 +21,7 @@ import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.dialog.Dialog;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.net.URI;
 import java.util.Optional;
@@ -79,10 +79,8 @@ public final class ClickActionNode extends SimpleStylingNode {
             case CUSTOM -> {
                 try {
                     HolderLookup.Provider wrapper;
-                    if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
-                        wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
-                    } else if (context.contains(PlaceholderContext.KEY)) {
-                        wrapper = context.getOrThrow(PlaceholderContext.KEY).server().registryAccess();
+                    if (context.contains(ParserContext.Key.HOLDER_LOOKUP)) {
+                        wrapper = context.getOrThrow(ParserContext.Key.HOLDER_LOOKUP);
                     } else {
                         wrapper = DEFAULT_WRAPPER;
                     }
@@ -101,10 +99,8 @@ public final class ClickActionNode extends SimpleStylingNode {
             }
             case SHOW_DIALOG -> {
                 HolderLookup.Provider wrapper;
-                if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
-                    wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
-                } else if (context.contains(PlaceholderContext.KEY)) {
-                    wrapper = context.getOrThrow(PlaceholderContext.KEY).server().registryAccess();
+                if (context.contains(ParserContext.Key.HOLDER_LOOKUP)) {
+                    wrapper = context.getOrThrow(ParserContext.Key.HOLDER_LOOKUP);
                 } else {
                     wrapper = DEFAULT_WRAPPER;
                 }

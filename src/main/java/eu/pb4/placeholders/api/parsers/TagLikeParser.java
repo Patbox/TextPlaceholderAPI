@@ -13,8 +13,7 @@ import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.providers.LenientFormat;
 import org.apache.commons.lang3.tuple.Pair;
-import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -32,7 +31,7 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
     public static final Format PLACEHOLDER_USER = Format.of("${", "}", "");
     private static final TextNode[] EMPTY = new TextNode[0];
 
-    public static TagLikeParser placeholder(Format format, ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter placeholders) {
+    public static <Ctx> TagLikeParser placeholder(Format format, ParserContext.Key<Ctx> contextKey, Placeholders.PlaceholderGetter<Ctx> placeholders) {
         return new SingleTagLikeParser(format, Provider.placeholder(contextKey, placeholders));
     }
 
@@ -118,7 +117,7 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
     }
 
     public interface Provider {
-        static Provider placeholder(ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter placeholders) {
+        static <Ctx> Provider placeholder(ParserContext.Key<Ctx> contextKey, Placeholders.PlaceholderGetter<Ctx> placeholders) {
             return new Provider() {
                 @Override
                 public boolean isValidTag(String tag, Context context) {
@@ -127,8 +126,7 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
 
                 @Override
                 public void handleTag(String id, String argument, Context context) {
-                    context.addNode(new PlaceholderNode(contextKey, id, placeholders,
-                            placeholders.isContextOptional(), argument != null && !argument.isEmpty() ? argument : null));
+                    context.addNode(new PlaceholderNode<>(contextKey, placeholders.getPlaceholderOrThrow(id).withParsedArgument(argument)));
                 }
             };
         }
@@ -136,7 +134,7 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
         static Provider placeholderText(Function<String, @Nullable Component> function) {
             return placeholder(x -> {
                 var y = function.apply(x);
-                return y != null ? new DirectTextNode(y) : null;
+                return y != null ? new DirectComponentNode(y) : null;
             });
         }
 

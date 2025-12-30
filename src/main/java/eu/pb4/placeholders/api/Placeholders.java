@@ -1,36 +1,28 @@
 package eu.pb4.placeholders.api;
 
 import com.google.common.collect.ImmutableMap;
-import eu.pb4.placeholders.api.node.TextNode;
-import eu.pb4.placeholders.api.node.parent.ParentNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.TagLikeParser;
+import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.impl.placeholder.builtin.PlayerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.ServerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.WorldPlaceholders;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 public final class Placeholders {
-    private static final HashMap<Identifier, PlaceholderHandler> PLACEHOLDERS = new HashMap<>();
-    public static final PlaceholderGetter DEFAULT_PLACEHOLDER_GETTER = new PlaceholderGetter() {
-        @Override
-        public PlaceholderHandler getPlaceholder(String placeholder) {
-            return PLACEHOLDERS.get(Identifier.tryParse(placeholder));
-        }
-
-        @Override
-        public boolean isContextOptional() {
-            return false;
-        }
-    };
-    public static final NodeParser DEFAULT_PLACEHOLDER_PARSER = TagLikeParser.placeholder(TagLikeParser.PLACEHOLDER, PlaceholderContext.KEY, DEFAULT_PLACEHOLDER_GETTER);
-    private static final List<PlaceholderListChangedCallback> CHANGED_CALLBACKS = new ArrayList<>();
+    private static final HashMap<Identifier, Placeholder<PlaceholderContext, ?>> COMMON_PLACEHOLDERS = new HashMap<>();
+    private static final HashMap<Identifier, Placeholder<ServerPlaceholderContext, ?>> SERVER_PLACEHOLDERS = new HashMap<>();
+    public static final PlaceholderGetter<ServerPlaceholderContext> SERVER_PLACEHOLDER_GETTER = placeholder -> getServerPlaceholder(Identifier.tryParse(placeholder));
+    public static final PlaceholderGetter<PlaceholderContext> COMMON_PLACEHOLDER_GETTER = placeholder -> getCommonPlaceholder(Identifier.tryParse(placeholder));
+    public static final NodeParser SERVER_PLACEHOLDER_PARSER = TagLikeParser.placeholder(TagLikeParser.PLACEHOLDER, ServerPlaceholderContext.SERVER_KEY, SERVER_PLACEHOLDER_GETTER);
+    public static final NodeParser COMMON_PLACEHOLDER_PARSER = TagLikeParser.placeholder(TagLikeParser.PLACEHOLDER, ServerPlaceholderContext.COMMON_KEY, COMMON_PLACEHOLDER_GETTER);
+    private static final List<PlaceholderListChangedCallback> SERVER_CHANGED_CALLBACKS = new ArrayList<>();
+    private static final List<PlaceholderListChangedCallback> COMMON_CHANGED_CALLBACKS = new ArrayList<>();
 
     static {
         PlayerPlaceholders.register();
@@ -43,98 +35,111 @@ public final class Placeholders {
      *
      * @return PlaceholderResult
      */
-    public static PlaceholderResult parsePlaceholder(Identifier identifier, String argument, PlaceholderContext context) {
-        if (PLACEHOLDERS.containsKey(identifier)) {
-            return PLACEHOLDERS.get(identifier).onPlaceholderRequest(context, argument);
+    public static PlaceholderResult parseServerPlaceholder(Identifier identifier, String argument, ServerPlaceholderContext context) {
+        var placeholder = getServerPlaceholder(identifier);
+        if (placeholder != null) {
+            return placeholder.onPlaceholderRequest(context, argument);
         } else {
             return PlaceholderResult.invalid("Placeholder doesn't exist!");
         }
     }
 
     /**
-     * Parses placeholders in nodes, without getting their final values
-     * Placeholders have format of {@code %namespace:placeholder argument%}
+     * Parses PlaceholderContext, can be used for parsing by hand
      *
-     * @return Text
+     * @return PlaceholderResult
      */
-    public static ParentNode parseNodes(TextNode node) {
-        return asSingleParent(DEFAULT_PLACEHOLDER_PARSER.parseNodes(node));
+    public static PlaceholderResult parseCommonPlaceholder(Identifier identifier, String argument, PlaceholderContext context) {
+        var placeholder = getCommonPlaceholder(identifier);
+        if (placeholder != null) {
+            return placeholder.onPlaceholderRequest(context, argument);
+        } else {
+            return PlaceholderResult.invalid("Placeholder doesn't exist!");
+        }
     }
 
-    public static ParentNode parseNodes(TextNode node, ParserContext.Key<PlaceholderContext> contextKey) {
-        return asSingleParent(TagLikeParser.placeholder(TagLikeParser.PLACEHOLDER, contextKey, DEFAULT_PLACEHOLDER_GETTER).parseNodes(node));
+    @Nullable
+    public static Placeholder<PlaceholderContext, ?> getCommonPlaceholder(Identifier identifier) {
+        return COMMON_PLACEHOLDERS.get(identifier);
     }
 
-    /**
-     * Parses placeholders in text
-     * Placeholders have format of {@code %namespace:placeholder argument%}
-     *
-     * @return Text
-     */
-    public static Component parseComponent(Component component, PlaceholderContext context) {
-        return parseNodes(TextNode.convert(component)).toComponent(ParserContext.of(PlaceholderContext.KEY, context));
-    }
-
-    public static Component parseComponent(TextNode textNode, PlaceholderContext context) {
-        return parseNodes(textNode).toComponent(ParserContext.of(PlaceholderContext.KEY, context));
+    @Nullable
+    public static Placeholder<ServerPlaceholderContext, ?> getServerPlaceholder(Identifier identifier) {
+        return SERVER_PLACEHOLDERS.get(identifier);
     }
 
     /**
      * Registers new placeholder for identifier
      */
-    public static void register(Identifier identifier, PlaceholderHandler handler) {
-        PLACEHOLDERS.put(identifier, handler);
-        for (var e : CHANGED_CALLBACKS) {
-            e.onPlaceholderListChange(identifier, false);
+    public static <T> void registerServer(Identifier identifier, Placeholder.Handler<ServerPlaceholderContext, String> handler) {
+        registerServer(identifier, ArgumentParser.STRING, handler);
+    }
+
+    public static <T> void registerServer(Identifier identifier, ArgumentParser<T> argumentParser, Placeholder.Handler<ServerPlaceholderContext, T> handler) {
+        registerServer(new Placeholder<>(identifier, argumentParser, handler));
+    }
+
+    public static void registerServer(Placeholder<ServerPlaceholderContext, ?> placeholder) {
+        SERVER_PLACEHOLDERS.put(placeholder.identifier(), placeholder);
+        for (var e : SERVER_CHANGED_CALLBACKS) {
+            e.onPlaceholderListChange(placeholder.identifier(), false);
         }
     }
 
     /**
-     * Removes placeholder
+     * Registers new placeholder for identifier
      */
-    public static void remove(Identifier identifier) {
-        if (PLACEHOLDERS.remove(identifier) != null) {
-            for (var e : CHANGED_CALLBACKS) {
-                e.onPlaceholderListChange(identifier, true);
-            }
+    public static <T> void registerCommon(Identifier identifier, Placeholder.Handler<PlaceholderContext, String> handler) {
+        registerCommon(identifier, ArgumentParser.STRING, handler);
+    }
+
+    public static <T> void registerCommon(Identifier identifier, ArgumentParser<T> argumentParser, Placeholder.Handler<PlaceholderContext, T> handler) {
+        registerCommon(new Placeholder<>(identifier, argumentParser, handler));
+    }
+
+    public static void registerCommon(Placeholder<PlaceholderContext, ?> placeholder) {
+        COMMON_PLACEHOLDERS.put(placeholder.identifier(), placeholder);
+        for (var e : COMMON_CHANGED_CALLBACKS) {
+            e.onPlaceholderListChange(placeholder.identifier(), false);
+        }
+
+        if (!SERVER_PLACEHOLDERS.containsKey(placeholder.identifier())) {
+            //noinspection unchecked
+            registerServer((Placeholder<ServerPlaceholderContext, ?>) (Object) placeholder);
         }
     }
 
-    public static ImmutableMap<Identifier, PlaceholderHandler> getPlaceholders() {
-        return ImmutableMap.copyOf(PLACEHOLDERS);
+    public static ImmutableMap<Identifier, Placeholder<PlaceholderContext, ?>> getCommonPlaceholders() {
+        return ImmutableMap.copyOf(COMMON_PLACEHOLDERS);
     }
 
-    public static void registerChangeEvent(PlaceholderListChangedCallback callback) {
-        CHANGED_CALLBACKS.add(callback);
+    public static ImmutableMap<Identifier, Placeholder<ServerPlaceholderContext, ?>> getServerPlaceholders() {
+        return ImmutableMap.copyOf(SERVER_PLACEHOLDERS);
     }
 
-    private static ParentNode asSingleParent(TextNode... textNodes) {
-        if (textNodes.length == 1 && textNodes[0] instanceof ParentNode) {
-            return (ParentNode) textNodes[0];
-        } else {
-            return new ParentNode(textNodes);
-        }
+    public static void registerServerChangeEvent(PlaceholderListChangedCallback callback) {
+        SERVER_CHANGED_CALLBACKS.add(callback);
+    }
+
+    public static void registerCommonChangeEvent(PlaceholderListChangedCallback callback) {
+        COMMON_CHANGED_CALLBACKS.add(callback);
     }
 
     public interface PlaceholderListChangedCallback {
         void onPlaceholderListChange(Identifier identifier, boolean removed);
     }
 
-    public interface PlaceholderGetter {
+    public interface PlaceholderGetter<Ctx> {
         @Nullable
-        PlaceholderHandler getPlaceholder(String placeholder);
-
-        @Nullable
-        default PlaceholderHandler getPlaceholder(String placeholder, ParserContext context) {
-            return getPlaceholder(placeholder);
-        }
-
-        default boolean isContextOptional() {
-            return false;
-        }
-
+        Placeholder<Ctx, ?> getPlaceholder(String placeholder);
         default boolean exists(String placeholder) {
             return this.getPlaceholder(placeholder) != null;
+        }
+
+        default Placeholder<Ctx, ?> getPlaceholderOrThrow(String id) {
+            var placeholder = getPlaceholder(id);
+            if (placeholder == null) throw new RuntimeException("Requested placeholder '" + id + "', but it doesn't exist!");
+            return placeholder;
         }
     }
 }

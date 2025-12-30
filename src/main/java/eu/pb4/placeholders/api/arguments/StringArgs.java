@@ -6,7 +6,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import eu.pb4.placeholders.impl.StringArgOps;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -31,10 +31,11 @@ public final class StringArgs {
         return args;
     }
 
-    public static StringArgs keyed(String input, char separator, char map) {
+    public static StringArgs keyed(@Nullable String input, char separator, char map) {
         return keyed(input, separator, map, true, SimpleArguments::isWrapCharacter);
     }
-    public static StringArgs keyed(String input, char separator, char map, boolean hasMaps, CharPredicate wrapCharacters) {
+    public static StringArgs keyed(@Nullable String input, char separator, char map, boolean hasMaps, CharPredicate wrapCharacters) {
+        if (input == null) return StringArgs.empty();
         var args = new StringArgs(input);
         keyDecomposition(input, 0, separator, map, wrapCharacters, hasMaps, (char) 0, (key, value) -> {
             if (key != null) {
@@ -45,10 +46,10 @@ public final class StringArgs {
         return args;
     }
 
-    public static StringArgs full(String input, char separator, char map) {
+    public static StringArgs full(@Nullable String input, char separator, char map) {
         return full(input, separator, map, true, SimpleArguments::isWrapCharacter);
     }
-    public static StringArgs full(String input, char separator, char map, boolean hasMaps, CharPredicate wrapCharacters) {
+    public static StringArgs full(@Nullable String input, char separator, char map, boolean hasMaps, CharPredicate wrapCharacters) {
         var args = new StringArgs(input);
         keyDecomposition(input, 0, separator, map, wrapCharacters, hasMaps, (char) 0, (key, value) -> {
             if (key != null) {

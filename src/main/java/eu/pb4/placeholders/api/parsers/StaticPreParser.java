@@ -1,13 +1,13 @@
 package eu.pb4.placeholders.api.parsers;
 
-import eu.pb4.placeholders.api.node.DirectTextNode;
+import eu.pb4.placeholders.api.node.DirectComponentNode;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.node.parent.ParentNode;
 
 import java.util.ArrayList;
 
 /**
- * Pre-parses TextNode into DirectTextNode with static vanilla Text for Nodes that aren't dynamic.
+ * Pre-parses TextNode into DirectComponentNode with static vanilla Text for Nodes that aren't dynamic.
  * If you want to use this, it should be a last step of parsing into a "template" ((dynamic) placeholders should also be parsed before this).
  */
 public record StaticPreParser() implements NodeParser {
@@ -20,7 +20,7 @@ public record StaticPreParser() implements NodeParser {
 
     public static TextNode parse(TextNode node) {
         if (!node.isDynamic()) {
-            return new DirectTextNode(node.toComponent());
+            return new DirectComponentNode(node.toComponent());
         }
 
         if (node instanceof ParentNode parentNode) {

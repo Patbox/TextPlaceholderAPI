@@ -3,6 +3,7 @@ package eu.pb4.placeholders.api.parsers;
 import eu.pb4.placeholders.api.*;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
+import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
 import java.util.*;
@@ -33,25 +34,46 @@ public class ParserBuilder {
     /**
      * Enables parsing of Global Placeholders (aka {@link Placeholders})
      */
-    public ParserBuilder globalPlaceholders() {
-        return add(Placeholders.DEFAULT_PLACEHOLDER_PARSER);
+    public ParserBuilder serverPlaceholders() {
+        return add(Placeholders.SERVER_PLACEHOLDER_PARSER);
     }
     /**
      * Enables parsing of Global Placeholders, but with a custom format
      */
-    public ParserBuilder globalPlaceholders(TagLikeParser.Format format) {
-        return customTags(format, TagLikeParser.Provider.placeholder(PlaceholderContext.KEY, Placeholders.DEFAULT_PLACEHOLDER_GETTER));
+    public ParserBuilder serverPlaceholders(TagLikeParser.Format format) {
+        return customTags(format, TagLikeParser.Provider.placeholder(ServerPlaceholderContext.SERVER_KEY, Placeholders.SERVER_PLACEHOLDER_GETTER));
     }
     /**
      * Enables parsing of Global Placeholder, but with a custom format and context source
      */
-    public ParserBuilder globalPlaceholders(TagLikeParser.Format format, ParserContext.Key<PlaceholderContext> contextKey) {
-        return customTags(format, TagLikeParser.Provider.placeholder(contextKey, Placeholders.DEFAULT_PLACEHOLDER_GETTER));
+    public ParserBuilder serverPlaceholders(TagLikeParser.Format format, ParserContext.Key<ServerPlaceholderContext> contextKey) {
+        return customTags(format, TagLikeParser.Provider.placeholder(contextKey, Placeholders.SERVER_PLACEHOLDER_GETTER));
     }
+
+    /**
+     * Enables parsing of Global Placeholders (aka {@link Placeholders})
+     */
+    public ParserBuilder commonPlaceholders() {
+        return add(Placeholders.COMMON_PLACEHOLDER_PARSER);
+    }
+    /**
+     * Enables parsing of Global Placeholders, but with a custom format
+     */
+    public ParserBuilder commonPlaceholders(TagLikeParser.Format format) {
+        return customTags(format, TagLikeParser.Provider.placeholder(PlaceholderContext.COMMON_KEY, Placeholders.COMMON_PLACEHOLDER_GETTER));
+    }
+    /**
+     * Enables parsing of Global Placeholder, but with a custom format and context source
+     */
+    public ParserBuilder commonPlaceholders(TagLikeParser.Format format, ParserContext.Key<PlaceholderContext> contextKey) {
+        return customTags(format, TagLikeParser.Provider.placeholder(contextKey, Placeholders.COMMON_PLACEHOLDER_GETTER));
+    }
+
+
     /**
      * Enables parsing of custom placeholder with a custom format and context source
      */
-    public ParserBuilder placeholders(TagLikeParser.Format format, ParserContext.Key<PlaceholderContext> contextKey, Placeholders.PlaceholderGetter getter) {
+    public <Ctx> ParserBuilder placeholders(TagLikeParser.Format format, ParserContext.Key<Ctx> contextKey, Placeholders.PlaceholderGetter<Ctx> getter) {
         return customTags(format, TagLikeParser.Provider.placeholder(contextKey, getter));
     }
     /**

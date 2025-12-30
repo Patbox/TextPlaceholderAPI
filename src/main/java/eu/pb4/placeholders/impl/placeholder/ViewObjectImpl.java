@@ -1,7 +1,7 @@
 package eu.pb4.placeholders.impl.placeholder;
 
-import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import net.minecraft.resources.Identifier;
 
-public record ViewObjectImpl(Identifier identifier) implements PlaceholderContext.ViewObject {
+public record ViewObjectImpl(Identifier identifier) implements PlaceholderContextImpl.ViewObject {
 }

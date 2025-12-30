@@ -1,31 +1,30 @@
 package eu.pb4.placeholders.api;
 
-import eu.pb4.placeholders.api.parsers.TagParser;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 
 public final class PlaceholderResult {
-    private final Component text;
+    private final Component component;
     private final boolean valid;
 
     private PlaceholderResult(Component text, String reason) {
         if (text != null) {
-            this.text = text;
+            this.component = text;
             this.valid = true;
         } else {
-            this.text = Component.literal("[" + (reason != null ? reason : "Invalid placeholder!") + "]").setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true));
+            this.component = Component.literal("[" + (reason != null ? reason : "Invalid placeholder!") + "]").setStyle(Style.EMPTY.withColor(ChatFormatting.GRAY).withItalic(true));
             this.valid = false;
         }
     }
 
     /**
-     * Returns text component from placeholder
+     * Returns component component from placeholder
      *
      * @return Text
      */
-    public Component text() {
-        return this.text;
+    public Component component() {
+        return this.component;
     }
 
     /**
@@ -60,8 +59,8 @@ public final class PlaceholderResult {
      *
      * @return PlaceholderResult
      */
-    public static PlaceholderResult value(Component text) {
-        return new PlaceholderResult(text, null);
+    public static PlaceholderResult value(Component component) {
+        return new PlaceholderResult(component, null);
     }
 
     /**
@@ -69,17 +68,8 @@ public final class PlaceholderResult {
      *
      * @return PlaceholderResult
      */
-    public static PlaceholderResult value(String text) {
-        return new PlaceholderResult(TagParser.DEFAULT.parseComponent(text, ParserContext.of()), null);
-    }
-
-    /**
-     * Create result for placeholder
-     *
-     * @return PlaceholderResult
-     */
-    public static PlaceholderResult value(String text, ParserContext context) {
-        return new PlaceholderResult(TagParser.DEFAULT.parseComponent(text,context), null);
+    public static PlaceholderResult value(String component) {
+        return new PlaceholderResult(Component.literal(component), null);
     }
 }
 

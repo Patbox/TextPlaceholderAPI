@@ -2,10 +2,10 @@ package eu.pb4.placeholders.api.node.parent;
 
 import com.mojang.serialization.DynamicOps;
 import eu.pb4.placeholders.api.ParserContext;
-import eu.pb4.placeholders.api.PlaceholderContext;
+import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -99,10 +99,8 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
             return new HoverEvent.ShowEntity(((EntityNodeContent) value).toVanilla(context.copyWithoutNodeContext()));
         } else if (action == Action.LAZY_ITEM_STACK) {
             HolderLookup.Provider wrapper;
-            if (context.contains(ParserContext.Key.WRAPPER_LOOKUP)) {
-                wrapper = context.getOrThrow(ParserContext.Key.WRAPPER_LOOKUP);
-            } else if (context.contains(PlaceholderContext.KEY)) {
-                wrapper = context.getOrThrow(PlaceholderContext.KEY).server().registryAccess();
+            if (context.contains(ParserContext.Key.HOLDER_LOOKUP)) {
+                wrapper = context.getOrThrow(ParserContext.Key.HOLDER_LOOKUP);
             } else {
                 return null;
             }
