@@ -20,7 +20,11 @@ public record DynamicPlayerHeadNode(TextNode name, boolean hat, Type type) imple
         }
 
         if (type == Type.NAME || type == Type.EITHER) {
-            return Component.object(new PlayerSprite(ResolvableProfile.createUnresolved(val), hat));
+            try {
+                return Component.object(new PlayerSprite(ResolvableProfile.createUnresolved(val), hat));
+            } catch (Throwable e) {
+                // ignore
+            }
         }
 
         return Component.object(new PlayerSprite(ResolvableProfile.createUnresolved(""), hat));

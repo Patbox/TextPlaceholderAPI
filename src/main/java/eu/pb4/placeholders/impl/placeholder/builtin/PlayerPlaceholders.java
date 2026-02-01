@@ -4,6 +4,10 @@ import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.impl.GeneralUtils;
+import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.math.ColorHelper;
+import net.minecraft.world.waypoint.ServerWaypoint;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
 import java.util.Locale;
@@ -527,6 +531,24 @@ public class PlayerPlaceholders {
                 return PlaceholderResult.value(String.format("%.0f", ctx.player().getFoodData().getSaturationLevel()));
             } else {
                 return PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(Identifier.of("player", "locator_color"), (ctx, arg) -> {
+            if (ctx.hasEntity() && ctx.entity() instanceof ServerWaypoint waypoint) {
+                var color = waypoint.getWaypointConfig().color.orElseGet(() -> ColorHelper.withBrightness(ColorHelper.withAlpha(255, ctx.entity().getUuid().hashCode()), 0.9F)) & 0xFFFFFF;
+                return PlaceholderResult.value(String.format(Locale.ROOT, "#%06X", color));
+            } else {
+                return arg != null ? PlaceholderResult.value(Text.of(arg)) : PlaceholderResult.invalid("No player!");
+            }
+        });
+
+        Placeholders.register(Identifier.of("player", "team_color"), (ctx, arg) -> {
+            if (ctx.hasEntity()) {
+                var team = ctx.entity().getScoreboardTeam();
+                return PlaceholderResult.value(team == null ? (arg != null ? Text.of(arg) : Text.of("white")) : Text.of(team.getColor().asString()));
+            } else {
+                return arg != null ? PlaceholderResult.value(Text.of(arg)) : PlaceholderResult.invalid("No player!");
             }
         });
 

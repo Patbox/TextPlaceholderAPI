@@ -54,6 +54,11 @@ Prior to 1.19, arguments were separated with a slash (`/`) instead of space.
 - `%player:biome%` (2.7.2+) - Biome at player's location
 - `%player:biome_raw%` (2.7.2+) - Raw biome id at player's location
 - `%player:head%` (2.8.0+) - Shows player's head texture.
+- `%player:locator_color%` (2.8.2+) - Show color of player locator (as hex color).
+- `%player:team_color%` (2.8.2+) - Show color of player's team (as legacy color).
+- `%player:team_name%` (2.8.0+) - Name/Id of the team.
+- `%player:team_displayname%` (2.8.0+) - Display name of the team.
+- `%player:team_displayname_formatted%` (2.8.0+) - Colored display name of the team.
 
 ### World
 
