@@ -21,7 +21,11 @@ public record DynamicPlayerHeadNode(TextNode name, boolean hat, Type type) imple
         }
 
         if (type == Type.NAME || type == Type.EITHER) {
-            return Text.object(new PlayerTextObjectContents(ProfileComponent.ofDynamic(val), hat));
+            try {
+                return Text.object(new PlayerTextObjectContents(ProfileComponent.ofDynamic(val), hat));
+            } catch (Throwable e) {
+                // ignore
+            }
         }
 
         return Text.object(new PlayerTextObjectContents(ProfileComponent.ofDynamic(""), hat));
