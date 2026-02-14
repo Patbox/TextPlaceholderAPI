@@ -18,7 +18,8 @@
   "entrypoints": {
     "main": [
       "eu.pb4.placeholderstest.TestMod"
-    ]
+    ],
+    "client": ["eu.pb4.placeholderstest.ClientTestMod"]
   },
 
   "depends": {

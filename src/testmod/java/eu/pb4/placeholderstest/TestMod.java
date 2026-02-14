@@ -40,7 +40,7 @@ public class TestMod implements ModInitializer {
                 Pair.of(NodeParser.merge(TagParser.SIMPLIFIED_TEXT_FORMAT, TagLikeParser.of(TagLikeParser.PLACEHOLDER,
                         TagLikeParser.Provider.placeholder(ServerPlaceholderContext.SERVER_KEY, Placeholders.SERVER_PLACEHOLDER_GETTER))), NodeParser.NOOP)
         )) {
-            player.displayClientMessage(Component.literal("Parser: " + pair), false);
+            player.sendSystemMessage(Component.literal("Parser: " + pair), false);
             long placeholderTimeTotal = 0;
             long contextTimeTotal = 0;
             long tagTimeTotal = 0;
@@ -72,8 +72,8 @@ public class TestMod implements ModInitializer {
                 long total = tagTimeTotal + placeholderTimeTotal + textTimeTotal + contextTimeTotal;
 
                 //player.sendMessage(Text.literal(toJsonString(output)), false);
-                player.displayClientMessage(ComponentUtils.updateForEntity(context.getSource(), output, context.getSource().getEntity(), 0), false);
-                player.displayClientMessage(Component.literal(
+                player.sendSystemMessage(ComponentUtils.updateForEntity(context.getSource(), output, context.getSource().getEntity(), 0), false);
+                player.sendSystemMessage(Component.literal(
                         "<FULL> Tag: " + ((tagTimeTotal / 1000) / 1000d) + " ms | " +
                                 "Context: " + ((contextTimeTotal / 1000) / 1000d) + " ms | " +
                                 "Placeholder: " + ((placeholderTimeTotal / 1000) / 1000d) + " ms | " +
@@ -81,7 +81,7 @@ public class TestMod implements ModInitializer {
                                 "All: " + ((total / 1000) / 1000d) + " ms"
                 ), false);
 
-                player.displayClientMessage(Component.literal(
+                player.sendSystemMessage(Component.literal(
                         "<SINGLE> Tag: " + ((tagTimeTotal / iter / 1000) / 1000d) + " ms | " +
                                 "Context: " + ((contextTimeTotal / iter / 1000) / 1000d) + " ms | " +
                                 "Placeholder: " + ((placeholderTimeTotal / iter / 1000) / 1000d) + " ms | " +
@@ -104,7 +104,7 @@ public class TestMod implements ModInitializer {
     private static int markqt(CommandContext<CommandSourceStack> context) {
         try {
             ServerPlayer player = context.getSource().getPlayer();
-            player.displayClientMessage(NodeParser.builder().markdown().quickText().build().parseComponent(context.getArgument("component", String.class), ParserContext.of()), false);
+            player.sendSystemMessage(NodeParser.builder().markdown().quickText().build().parseComponent(context.getArgument("component", String.class), ParserContext.of()), false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -140,9 +140,9 @@ public class TestMod implements ModInitializer {
             //Component text = placeholders.toComponent(ParserContext.of(ServerPlaceholderContext.SERVER_KEY, ServerPlaceholderContext.of(player)), true);
             var textTime = System.nanoTime() - time;
 
-            //player.displayClientMessage(Component.literal(toJsonString(text, context.getSource().registryAccess())), false);
-            //player.displayClientMessage(ComponentUtils.updateForEntity(context.getSource(), text, context.getSource().getEntity(), 0), false);
-            player.displayClientMessage(Component.literal(
+            //player.sendSystemMessage(Component.literal(toJsonString(text, context.getSource().registryAccess())), false);
+            //player.sendSystemMessage(ComponentUtils.updateForEntity(context.getSource(), text, context.getSource().getEntity(), 0), false);
+            player.sendSystemMessage(Component.literal(
                       "Tag: " + ((tagTime / 1000) / 1000d) + " ms | " +
                             "Placeholder: " + ((placeholderTime / 1000) / 1000d) + " ms | " +
                             "Text: " + ((textTime / 1000) / 1000d) + " ms | " +
@@ -164,8 +164,8 @@ public class TestMod implements ModInitializer {
                     .simplifiedTextFormat()
                     .build()
                     .parseComponent(form, ServerPlaceholderContext.of(player).asParserContext());
-            player.displayClientMessage(Component.literal(toJsonString(text2, context.getSource().registryAccess())), false);
-            player.displayClientMessage(text2, false);
+            player.sendSystemMessage(Component.literal(toJsonString(text2, context.getSource().registryAccess())), false);
+            player.sendSystemMessage(text2, false);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -178,11 +178,11 @@ public class TestMod implements ModInitializer {
             ParserContext parsingContext = ParserContext.of();
             parsingContext.with(ParserContext.Key.HOLDER_LOOKUP, player.registryAccess());     // You need to use this for Hover Item to work
             var form = context.getArgument("component", String.class);
-            player.displayClientMessage(Component.literal("------------------------------"), false);
-            player.displayClientMessage(Component.literal("Input.   | " + form), false);
-            player.displayClientMessage(Component.literal("STF-V2 | ").append(TagParser.SIMPLIFIED_TEXT_FORMAT.parseComponent(form, parsingContext)), false);
-            player.displayClientMessage(Component.literal("STF+QT | ").append(TagParser.QUICK_TEXT_WITH_STF.parseComponent(form, parsingContext)), false);
-            player.displayClientMessage(Component.literal("QT       | ").append(TagParser.QUICK_TEXT.parseComponent(form, parsingContext)), false);
+            player.sendSystemMessage(Component.literal("------------------------------"), false);
+            player.sendSystemMessage(Component.literal("Input.   | " + form), false);
+            player.sendSystemMessage(Component.literal("STF-V2 | ").append(TagParser.SIMPLIFIED_TEXT_FORMAT.parseComponent(form, parsingContext)), false);
+            player.sendSystemMessage(Component.literal("STF+QT | ").append(TagParser.QUICK_TEXT_WITH_STF.parseComponent(form, parsingContext)), false);
+            player.sendSystemMessage(Component.literal("QT       | ").append(TagParser.QUICK_TEXT.parseComponent(form, parsingContext)), false);
         } catch (Throwable e) {
             e.printStackTrace();
         }

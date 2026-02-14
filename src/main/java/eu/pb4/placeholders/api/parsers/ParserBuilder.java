@@ -1,8 +1,11 @@
 package eu.pb4.placeholders.api.parsers;
 
 import eu.pb4.placeholders.api.*;
+import eu.pb4.placeholders.api.client.ClientPlaceholderContext;
+import eu.pb4.placeholders.api.client.ClientPlaceholders;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
+import eu.pb4.placeholders.impl.LoaderUtil;
 import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
@@ -11,6 +14,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Allows you to create stacked parser in most "correct" and compatible way.
@@ -69,6 +73,21 @@ public class ParserBuilder {
         return customTags(format, TagLikeParser.Provider.placeholder(contextKey, Placeholders.COMMON_PLACEHOLDER_GETTER));
     }
 
+    @ApiStatus.Experimental
+    public ParserBuilder clientPlaceholders() {
+        if (LoaderUtil.IS_CLIENT) {
+            return add(ClientPlaceholders.CLIENT_PLACEHOLDER_PARSER);
+        }
+        throw new RuntimeException("This method only work in client environment!");
+    }
+
+    @ApiStatus.Experimental
+    public ParserBuilder clientPlaceholders(TagLikeParser.Format format) {
+        if (LoaderUtil.IS_CLIENT) {
+            return customTags(format, TagLikeParser.Provider.placeholder(ClientPlaceholderContext.CLIENT_KEY, ClientPlaceholders.CLIENT_PLACEHOLDER_GETTER));
+        }
+        throw new RuntimeException("This method only work in client environment!");
+    }
 
     /**
      * Enables parsing of custom placeholder with a custom format and context source

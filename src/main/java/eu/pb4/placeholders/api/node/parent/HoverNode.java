@@ -5,6 +5,7 @@ import eu.pb4.placeholders.api.ParserContext;
 import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;
+import net.minecraft.world.item.ItemStackTemplate;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Arrays;
@@ -161,13 +162,12 @@ public final class HoverNode<T, H> extends SimpleStylingNode {
     }
 
     public record LazyItemStackNodeContent<T>(Identifier identifier, int count, DynamicOps<T> ops, T componentMap) {
-        public ItemStack toVanilla(HolderLookup.Provider lookup) {
-            var stack = new ItemStack(lookup.lookupOrThrow(Registries.ITEM).getOrThrow(ResourceKey.create(Registries.ITEM, identifier)));
-            stack.setCount(count);
+        public ItemStackTemplate toVanilla(HolderLookup.Provider lookup) {
+            var patch = DataComponentPatch.EMPTY;
             if (componentMap != null) {
-                stack.applyComponentsAndValidate(DataComponentPatch.CODEC.decode(lookup.createSerializationContext(ops), componentMap).getOrThrow().getFirst());
+                patch = DataComponentPatch.CODEC.decode(lookup.createSerializationContext(ops), componentMap).getOrThrow().getFirst();
             }
-            return stack;
+            return new ItemStackTemplate(lookup.lookupOrThrow(Registries.ITEM).getOrThrow(ResourceKey.create(Registries.ITEM, identifier)), count, patch);
         }
 
         @Override

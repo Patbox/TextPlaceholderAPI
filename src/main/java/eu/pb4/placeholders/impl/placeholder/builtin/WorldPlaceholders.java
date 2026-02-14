@@ -23,7 +23,8 @@ public class WorldPlaceholders {
             }
             Level world = ctx.level();
 
-            long dayTime = (long) (world.getDayTime() * 3.6 / 60);
+            //noinspection DataFlowIssue
+            long dayTime = (long) (world.getDefaultClockTime() * 3.6 / 60);
 
             return PlaceholderResult.value(String.format("%02d:%02d", (dayTime / 60 + 6) % 24, dayTime % 60));
         });
@@ -34,7 +35,8 @@ public class WorldPlaceholders {
             }
             Level world = ctx.level();
 
-            long dayTime = (long) (world.getDayTime() * 3.6 / 60);
+            //noinspection DataFlowIssue
+            long dayTime = (long) (world.getDefaultClockTime() * 3.6 / 60);
             long x = (dayTime / 60 + 6) % 24;
             long y = x % 12;
             if (y == 0) {
@@ -49,7 +51,7 @@ public class WorldPlaceholders {
             }
             Level world = ctx.level();
 
-            return PlaceholderResult.value("" + world.getDayTime() / 24000);
+            return PlaceholderResult.value("" + world.getDefaultClockTime() / 24000);
         });
 
         Placeholders.registerCommon(Identifier.fromNamespaceAndPath("world", "id"), (ctx, arg) -> {

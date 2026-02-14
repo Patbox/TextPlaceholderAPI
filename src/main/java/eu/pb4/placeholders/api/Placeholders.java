@@ -1,8 +1,11 @@
 package eu.pb4.placeholders.api;
 
 import com.google.common.collect.ImmutableMap;
+import eu.pb4.placeholders.api.client.ClientPlaceholderContext;
+import eu.pb4.placeholders.api.client.ClientPlaceholders;
 import eu.pb4.placeholders.api.parsers.NodeParser;
 import eu.pb4.placeholders.api.parsers.TagLikeParser;
+import eu.pb4.placeholders.impl.LoaderUtil;
 import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.impl.placeholder.builtin.PlayerPlaceholders;
 import eu.pb4.placeholders.impl.placeholder.builtin.ServerPlaceholders;
@@ -106,6 +109,11 @@ public final class Placeholders {
         if (!SERVER_PLACEHOLDERS.containsKey(placeholder.identifier())) {
             //noinspection unchecked
             registerServer((Placeholder<ServerPlaceholderContext, ?>) (Object) placeholder);
+        }
+
+        if (LoaderUtil.IS_CLIENT) {
+            //noinspection unchecked
+            ClientPlaceholders.registerClient((Placeholder<ClientPlaceholderContext, ?>) (Object) placeholder);
         }
     }
 

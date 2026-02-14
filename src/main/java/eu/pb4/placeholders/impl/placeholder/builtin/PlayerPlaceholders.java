@@ -4,15 +4,7 @@ import eu.pb4.placeholders.api.PlaceholderResult;
 import eu.pb4.placeholders.api.Placeholders;
 import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.impl.GeneralUtils;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.ColorHelper;
-import net.minecraft.world.waypoint.ServerWaypoint;
-import org.apache.commons.lang3.time.DurationFormatUtils;
-
-import java.util.Locale;
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -24,12 +16,16 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.stats.StatType;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.ARGB;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.minecraft.world.waypoints.WaypointTransmitter;
+import org.apache.commons.lang3.time.DurationFormatUtils;
+
+import java.util.Locale;
 
 
 public class PlayerPlaceholders {
@@ -410,7 +406,8 @@ public class PlayerPlaceholders {
                     otherWorld = ctx.server().overworld();
                 }
 
-                double value = ctx.entity().getX() * DimensionType.getTeleportationScale(ctx.entity().level().dimensionType(), otherWorld.dimensionType());                String format = "%.2f";
+                double value = ctx.entity().getX() * DimensionType.getTeleportationScale(ctx.entity().level().dimensionType(), otherWorld.dimensionType());
+                String format = "%.2f";
 
                 if (arg != null) {
                     try {
@@ -442,7 +439,8 @@ public class PlayerPlaceholders {
                     otherWorld = ctx.server().overworld();
                 }
 
-                double value = ctx.entity().getY() * DimensionType.getTeleportationScale(ctx.entity().level().dimensionType(), otherWorld.dimensionType());                String format = "%.2f";
+                double value = ctx.entity().getY() * DimensionType.getTeleportationScale(ctx.entity().level().dimensionType(), otherWorld.dimensionType());
+                String format = "%.2f";
 
                 if (arg != null) {
                     try {
@@ -534,28 +532,28 @@ public class PlayerPlaceholders {
             }
         });
 
-        Placeholders.register(Identifier.of("player", "locator_color"), (ctx, arg) -> {
-            if (ctx.hasEntity() && ctx.entity() instanceof ServerWaypoint waypoint) {
-                var color = waypoint.getWaypointConfig().color.orElseGet(() -> ColorHelper.withBrightness(ColorHelper.withAlpha(255, ctx.entity().getUuid().hashCode()), 0.9F)) & 0xFFFFFF;
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("player", "locator_color"), (ctx, arg) -> {
+            if (ctx.hasEntity() && ctx.entity() instanceof WaypointTransmitter waypoint) {
+                var color = waypoint.waypointIcon().color.orElseGet(() -> ARGB.scaleRGB(ARGB.color(255, ctx.entity().getUUID().hashCode()), 0.9F)) & 0xFFFFFF;
                 return PlaceholderResult.value(String.format(Locale.ROOT, "#%06X", color));
             } else {
-                return arg != null ? PlaceholderResult.value(Text.of(arg)) : PlaceholderResult.invalid("No player!");
+                return arg != null ? PlaceholderResult.value(Component.literal(arg)) : PlaceholderResult.invalid("No player!");
             }
         });
 
-        Placeholders.register(Identifier.of("player", "team_color"), (ctx, arg) -> {
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("player", "team_color"), (ctx, arg) -> {
             if (ctx.hasEntity()) {
-                var team = ctx.entity().getScoreboardTeam();
-                return PlaceholderResult.value(team == null ? (arg != null ? Text.of(arg) : Text.of("white")) : Text.of(team.getColor().asString()));
+                var team = ctx.entity().getTeam();
+                return PlaceholderResult.value(team == null ? (arg != null ? Component.literal(arg) : Component.literal("white")) : Component.literal(team.getColor().getSerializedName()));
             } else {
-                return arg != null ? PlaceholderResult.value(Text.of(arg)) : PlaceholderResult.invalid("No player!");
+                return arg != null ? PlaceholderResult.value(Component.literal(arg)) : PlaceholderResult.invalid("No player!");
             }
         });
 
         Placeholders.registerCommon(Identifier.fromNamespaceAndPath("player", "team_name"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
                 var team = ctx.player().getTeam();
-                return PlaceholderResult.value(team==null ? Component.empty() : Component.nullToEmpty(team.getName()));
+                return PlaceholderResult.value(team == null ? Component.empty() : Component.nullToEmpty(team.getName()));
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -563,8 +561,8 @@ public class PlayerPlaceholders {
 
         Placeholders.registerCommon(Identifier.fromNamespaceAndPath("player", "team_displayname"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
-                var team = (PlayerTeam) ctx.player().getTeam();
-                return PlaceholderResult.value(team==null ? Component.empty() : team.getDisplayName());
+                var team = ctx.player().getTeam();
+                return PlaceholderResult.value(team == null ? Component.empty() : team.getDisplayName());
             } else {
                 return PlaceholderResult.invalid("No player!");
             }
@@ -572,8 +570,8 @@ public class PlayerPlaceholders {
 
         Placeholders.registerCommon(Identifier.fromNamespaceAndPath("player", "team_displayname_formatted"), (ctx, arg) -> {
             if (ctx.hasPlayer()) {
-                var team = (PlayerTeam) ctx.player().getTeam();
-                return PlaceholderResult.value(team==null ? Component.empty() : team.getFormattedDisplayName());
+                var team = ctx.player().getTeam();
+                return PlaceholderResult.value(team == null ? Component.empty() : team.getFormattedDisplayName());
             } else {
                 return PlaceholderResult.invalid("No player!");
             }

@@ -67,7 +67,7 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
         return this.serverPlayer() != null;
     }
 
-    ServerPlaceholderContext withView(PlaceholderContextImpl.ViewObject view);
+    ServerPlaceholderContext withView(ViewObject view);
 
     MinecraftServer server();
 
@@ -81,12 +81,12 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
 
     @Override
     default ParserContext asParserContext() {
-        return ParserContext.of(SERVER_KEY, this).with(ParserContext.Key.HOLDER_LOOKUP, this.holderLookup());
+        return ParserContext.of(SERVER_KEY, this).with(COMMON_KEY, this).with(ParserContext.Key.HOLDER_LOOKUP, this.holderLookup());
     }
 
     @Override
     default void addToContext(ParserContext context) {
-        context.with(SERVER_KEY, this);
+        context.with(SERVER_KEY, this).with(COMMON_KEY, this);
         context.withIfNotSet(ParserContext.Key.HOLDER_LOOKUP, this.holderLookup());
     }
 }
