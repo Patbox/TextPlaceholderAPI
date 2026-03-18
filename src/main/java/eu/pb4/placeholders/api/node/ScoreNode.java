@@ -2,14 +2,14 @@ package eu.pb4.placeholders.api.node;
 
 import com.mojang.datafixers.util.Either;
 import eu.pb4.placeholders.api.ParserContext;
-import net.minecraft.commands.arguments.selector.SelectorPattern;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.CompilableString;
 
-public record ScoreNode(Either<SelectorPattern, String> name, String objective) implements TextNode {
+public record ScoreNode(Either<CompilableString<EntitySelector>, String> name, String objective) implements TextNode {
 
     public ScoreNode(String name, String objective) {
-        this(SelectorPattern.parse(name).result()
-            .map(Either::<SelectorPattern, String>left).orElse(Either.right(name)), objective);
+        this(Either.right(name), objective);
     }
 
     @Override

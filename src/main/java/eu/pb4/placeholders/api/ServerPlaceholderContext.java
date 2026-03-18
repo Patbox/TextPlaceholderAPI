@@ -1,7 +1,7 @@
 package eu.pb4.placeholders.api;
 
 import com.mojang.authlib.GameProfile;
-import eu.pb4.placeholders.impl.PlaceholderContextImpl;
+import eu.pb4.placeholders.impl.ServerPlaceholderContextImpl;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -22,7 +22,7 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
     }
 
     static ServerPlaceholderContext of(MinecraftServer server, ViewObject view) {
-        return new PlaceholderContextImpl(server, server::createCommandSourceStack, null, null, null, null, view);
+        return new ServerPlaceholderContextImpl(server, server::createCommandSourceStack, null, null, null, null, view);
     }
 
     static ServerPlaceholderContext of(GameProfile profile, MinecraftServer server) {
@@ -31,7 +31,7 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
 
     static ServerPlaceholderContext of(GameProfile profile, MinecraftServer server, ViewObject view) {
         var name = profile.name() != null ? profile.name() : profile.id().toString();
-        return new PlaceholderContextImpl(server, () -> new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, server.overworld(), server.getProfilePermissions(new NameAndId(profile)), name, Component.literal(name), server, null), null, null, null, profile, view);
+        return new ServerPlaceholderContextImpl(server, () -> new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, server.overworld(), server.getProfilePermissions(new NameAndId(profile)), name, Component.literal(name), server, null), null, null, null, profile, view);
     }
 
     static ServerPlaceholderContext of(ServerPlayer player) {
@@ -39,7 +39,7 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
     }
 
     static ServerPlaceholderContext of(ServerPlayer player, ViewObject view) {
-        return new PlaceholderContextImpl(player.level().getServer(), player::createCommandSourceStack, player.level(), player, player, player.getGameProfile(), view);
+        return new ServerPlaceholderContextImpl(player.level().getServer(), player::createCommandSourceStack, player.level(), player, player, player.getGameProfile(), view);
     }
 
     static ServerPlaceholderContext of(CommandSourceStack source) {
@@ -47,7 +47,7 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
     }
 
     static ServerPlaceholderContext of(CommandSourceStack source, ViewObject view) {
-        return new PlaceholderContextImpl(source.getServer(), () -> source, source.getLevel(), source.getPlayer(), source.getEntity(), source.getPlayer() != null ? source.getPlayer().getGameProfile() : null, view);
+        return new ServerPlaceholderContextImpl(source.getServer(), () -> source, source.getLevel(), source.getPlayer(), source.getEntity(), source.getPlayer() != null ? source.getPlayer().getGameProfile() : null, view);
     }
 
     static ServerPlaceholderContext of(Entity entity) {
@@ -59,7 +59,7 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
             return of(player, view);
         } else {
             var world = (ServerLevel) entity.level();
-            return new PlaceholderContextImpl(world.getServer(), () -> entity.createCommandSourceStackForNameResolution(world), world, null, entity, null, view);
+            return new ServerPlaceholderContextImpl(world.getServer(), () -> entity.createCommandSourceStackForNameResolution(world), world, null, entity, null, view);
         }
     }
 

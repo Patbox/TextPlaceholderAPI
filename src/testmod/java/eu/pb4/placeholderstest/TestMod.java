@@ -19,6 +19,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.ResolutionContext;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 
@@ -72,7 +73,7 @@ public class TestMod implements ModInitializer {
                 long total = tagTimeTotal + placeholderTimeTotal + textTimeTotal + contextTimeTotal;
 
                 //player.sendMessage(Text.literal(toJsonString(output)), false);
-                player.sendSystemMessage(ComponentUtils.updateForEntity(context.getSource(), output, context.getSource().getEntity(), 0), false);
+                player.sendSystemMessage(ComponentUtils.resolve(ResolutionContext.create(context.getSource()), output), false);
                 player.sendSystemMessage(Component.literal(
                         "<FULL> Tag: " + ((tagTimeTotal / 1000) / 1000d) + " ms | " +
                                 "Context: " + ((contextTimeTotal / 1000) / 1000d) + " ms | " +

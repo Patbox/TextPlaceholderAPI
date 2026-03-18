@@ -1,25 +1,17 @@
 package eu.pb4.placeholders.api;
 
 import com.mojang.authlib.GameProfile;
-import eu.pb4.placeholders.impl.PlaceholderContextImpl;
+import eu.pb4.placeholders.impl.ServerPlaceholderContextImpl;
 import eu.pb4.placeholders.impl.placeholder.ViewObjectImpl;
-import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.players.NameAndId;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import org.intellij.lang.annotations.Flow;
-import org.jetbrains.annotations.Contract;
 import org.jspecify.annotations.Nullable;
-
-import javax.tools.Diagnostic;
 
 public interface PlaceholderContext {
     ParserContext.Key<PlaceholderContext> COMMON_KEY = ParserContext.Key.of("placeholder_context", PlaceholderContext.class);
@@ -56,7 +48,7 @@ public interface PlaceholderContext {
         return this.position() != null;
     }
 
-    PlaceholderContext withView(PlaceholderContextImpl.ViewObject view);
+    PlaceholderContext withView(PlaceholderContext.ViewObject view);
 
 
     default ParserContext asParserContext() {

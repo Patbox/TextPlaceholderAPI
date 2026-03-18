@@ -4,7 +4,6 @@ import com.google.gson.JsonParser;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.JsonOps;
 import eu.pb4.placeholders.api.ParserContext;
-import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.NodeParser;

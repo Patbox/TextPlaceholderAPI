@@ -6,7 +6,6 @@ import eu.pb4.placeholders.api.client.ClientPlaceholders;
 import eu.pb4.placeholders.api.node.TextNode;
 import eu.pb4.placeholders.api.parsers.tag.TagRegistry;
 import eu.pb4.placeholders.impl.LoaderUtil;
-import eu.pb4.placeholders.impl.PlaceholderContextImpl;
 import eu.pb4.placeholders.impl.textparser.MultiTagLikeParser;
 import eu.pb4.placeholders.impl.textparser.SingleTagLikeParser;
 import java.util.*;

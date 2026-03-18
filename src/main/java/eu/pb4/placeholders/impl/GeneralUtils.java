@@ -1,12 +1,20 @@
 package eu.pb4.placeholders.impl;
 
+import com.mojang.datafixers.util.Either;
 import eu.pb4.placeholders.api.node.*;
 import eu.pb4.placeholders.api.node.parent.*;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.*;
+import net.minecraft.network.chat.contents.data.BlockDataSource;
+import net.minecraft.network.chat.contents.data.EntityDataSource;
+import net.minecraft.network.chat.contents.data.StorageDataSource;
+import net.minecraft.network.chat.contents.objects.ObjectInfo;
+import net.minecraft.network.chat.contents.objects.PlayerSprite;
+import net.minecraft.util.CompilableString;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 import org.jetbrains.annotations.ApiStatus;
@@ -16,6 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -48,7 +57,9 @@ public class GeneralUtils {
     public static boolean isEmpty(Component text) {
         return (
                 text.getContents() == PlainTextContents.EMPTY
-                        || (text.getContents() instanceof PlainTextContents.LiteralContents(String text1) && text1.isEmpty())
+                        || (text.getContents() instanceof PlainTextContents.LiteralContents(
+                        String text1
+                ) && text1.isEmpty())
         ) && text.getSiblings().isEmpty();
     }
 
@@ -254,23 +265,33 @@ public class GeneralUtils {
 
             list.add(TranslatedNode.ofFallback(content.getKey(), content.getFallback(), args.toArray()));
         } else if (input.getContents() instanceof ScoreContents(
-                com.mojang.datafixers.util.Either<net.minecraft.commands.arguments.selector.SelectorPattern, String> name,
+                Either<CompilableString<EntitySelector>, String> name,
                 String objective
         )) {
             list.add(new ScoreNode(name, objective));
         } else if (input.getContents() instanceof KeybindContents content) {
             list.add(new KeybindNode(content.getName()));
         } else if (input.getContents() instanceof SelectorContents(
-                net.minecraft.commands.arguments.selector.SelectorPattern selector,
+                CompilableString<EntitySelector> selector,
                 java.util.Optional<Component> separator
         )) {
-            list.add(new SelectorNode(selector, separator.map(GeneralUtils::convertToNodes)));
+            list.add(new SelectorNode(TextNode.of(selector.source()), separator.map(GeneralUtils::convertToNodes)));
         } else if (input.getContents() instanceof NbtContents content) {
-            list.add(new NbtNode(content.getNbtPath(), content.isInterpreting(), content.getSeparator().map(GeneralUtils::convertToNodes), content.getDataSource()));
+            list.add(new NbtNode(switch (content.dataSource()) {
+                case BlockDataSource _ -> "block";
+                case EntityDataSource _ -> "entity";
+                case StorageDataSource _ -> "storage";
+                default -> "";
+            }, content.nbtPath().source(), (switch (content.dataSource()) {
+                case BlockDataSource x -> x.coordinates().source();
+                case EntityDataSource x -> x.selector().source();
+                case StorageDataSource x -> x.id();
+                default -> "";
+            }).toString(), content.interpreting(), content.plain(), content.separator().map(GeneralUtils::convertToNodes)));
         } else if (input.getContents() instanceof ObjectContents(
-                net.minecraft.network.chat.contents.objects.ObjectInfo contents
+                ObjectInfo contents, Optional<Component> fallback
         )) {
-            list.add(new ObjectNode(contents));
+            list.add(new ObjectNode(contents, fallback.map(GeneralUtils::convertToNodes)));
         }
 
         for (var child : input.getSiblings()) {
@@ -339,6 +360,10 @@ public class GeneralUtils {
         } else {
             return node;
         }
+    }
+
+    public static MutableComponent objectComponent(ObjectInfo objectInfo, Optional<Component> fallback) {
+        return fallback.isEmpty() ? Component.object(objectInfo) : Component.object(objectInfo, fallback.orElseThrow());
     }
 
     public record TextLengthPair(MutableComponent text, int length) {
