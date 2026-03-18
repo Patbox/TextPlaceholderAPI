@@ -146,7 +146,7 @@ if (System.getenv("MODRINTH")) {
 		uploadFile = jar // This links to a task that builds your mod jar and sets "uploadFile" to the mod jar.
 		gameVersions = [((String) project.minecraft_version)]
 		changelog = System.getenv("CHANGELOG")
-		loaders = ["fabric", "quilt"]
+		loaders = ["fabric"]
 	}
 
 	jar {
@@ -166,8 +166,7 @@ curseforge {
 			changelogType = "markdown"
 			addGameVersion((project.minecraft_version.contains("-") ? ((String) project.minecraft_version.split("-")[0] + "-snapshot") : project.minecraft_version))
 			addGameVersion "Fabric"
-			addGameVersion "Quilt"
-			mainArtifact(jar)
+			mainArtifact(jar.archiveFile)
 
 			afterEvaluate {
 				uploadTask.dependsOn("jar")
