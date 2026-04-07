@@ -14,9 +14,9 @@ You can create your own custom one by implementing `TextNode` interface.
 
 ===+ "Java"
 ```java
-public record DirectTextNode(Text text) implements TextNode {
+public record DirectTextNode(Component text) implements TextNode {
     @Override
-    public Text toText(ParserContext context, boolean removeBackslash) {
+    public Text toComponent(ParserContext context, boolean removeBackslash) {
         return this.text;
     }
 }
@@ -51,7 +51,7 @@ public final class ColorNode extends ParentNode {
     }
 
     @Override
-    protected Text applyFormatting(MutableText out, ParserContext context) {
+    protected Component applyFormatting(MutableComponent out, ParserContext context) {
         return out.setStyle(out.getStyle().withColor(this.color));
     }
 
@@ -87,8 +87,8 @@ For example:
 public class Example {
 
     // With player context
-    public static void exampleContext(ServerPlayerEntity player) {
-        NodeParser parser = NodeParser.merge(TextParserV1.DEFAULT, Placeholders.DEFAULT_PLACEHOLDER_GETTER);
+    public static void exampleContext(ServerPlayer player) {
+        NodeParser parser = NodeParser.builder().quickText().serverPlaceholders().build();
 
         TextNode output = parser.parseNode("<rb>Hello %player:name%");
         // or
@@ -96,13 +96,13 @@ public class Example {
         // or (only way before 2.0.0-beta.4)
         TextNode output = TextNode.asSingle(parser.parseNodes(TextNode.of("<rb>Hello %player:name%")));
 
-        Text text = output.toText(PlaceholderContext.of(player));
+        Text text = output.toComponent(ServerPlaceholderContext.of(player));
         // or
-        Text text = output.toText(PlaceholderContext.of(player).asParserContext());
+        Text text = output.toComponent(ServerPlaceholderContext.of(player).asParserContext());
         // or
-        Text text = output.toText(ParserContext.of().with(PlaceholderContext.KEY, PlaceholderContext.of(player)));
+        Text text = output.toComponent(ParserContext.of().with(PlaceholderContext.KEY, PlaceholderContext.of(player)));
         // or (only way before 2.0.0-beta.4)
-        Text text = output.toText(PlaceholderContext.of(player).asParserContext(), true);
+        Text text = output.toComponent(PlaceholderContext.of(player).asParserContext(), true);
     }
 
     // Without context
@@ -111,21 +111,21 @@ public class Example {
 
         TextNode output = parser.parseNode("<rb>Hello user!");
         
-        Text text = output.toText();
+        Text text = output.toComponent();
         // or
-        Text text = output.toText(ParserContext.of());
+        Text text = output.toComponent(ParserContext.of());
         // or (only way before 2.0.0-beta.4)
-        Text text = output.toText(ParserContext.of(), true);
+        Text text = output.toComponent(ParserContext.of(), true);
     }
 }
 ```
 
 Text Placeholder API comes with multiple builtin parsers:
 
-- TextParserV1 [(See more here!)](/dev/text-format) - Tag based parser for user input,
+- TagParser - Customizable parser for tag-like formats, including QuickText and Simplified Text Format,
+- TagLikeParser - Generic, configurable parser for tag-like format. Used for placeholder and as a backend of TagParser,
 - MarkdownLiteParserV1 - Minimalistic Markdown parser with only vanilla compatible formatting,
 - LegacyFormattingParser - Simple parser adding support for legacy (&) formatting,
-- PatternPlaceholderParser - Backend parser used by placeholder implementation. Added as NodeParser with 2.0.0-pre.4.
 
 ## Custom Node Parsers
 Implementing custom Node Parsers might be tricky. But the simplest one boils down to implementing NodeParser.

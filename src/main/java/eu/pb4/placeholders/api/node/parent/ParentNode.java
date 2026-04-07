@@ -32,7 +32,7 @@ public class ParentNode implements ParentTextNode {
     }
 
     @Override
-    public final Component toComponent(ParserContext context, boolean removeBackslashes) {
+    public Component toComponent(ParserContext context, boolean removeBackslashes) {
         var compact = context.get(ParserContext.Key.COMPACT_COMPONENT) != Boolean.FALSE;
         var oldShadow = context.get(ParserContext.Key.DEFAULT_SHADOW_STYLER);
 

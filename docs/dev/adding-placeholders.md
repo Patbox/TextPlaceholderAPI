@@ -1,43 +1,47 @@
 # Adding placeholders
 
 Creation of new placeholders is simple. You just need to import `eu.pb4.placeholders.api.Placeholders`
-and call static `register` method. You only need to provide 2 arguments:
-
+and call static `registerServer` or `registerCommon` method. Main difference of these two is which type of PlaceholderContext object you get
+(and if it can be used outside of server context).
+You only need to provide 2 arguments:
 - Identifier with your mod id as namespace and path as argument name (with one additional limitation being not allowed to use `/` in it).
 - A function (in form of lambda for example) that takes PlaceholderContext and nullable string argument, returns PlaceholderResult,
 
-Example
+You can additionally provide an argument parser, allowing you to handler argument values early.
+
+Example of common parser
 
 ===+ "Java"
 
     ```java
-    Placeholders.register(
-             Identifier.of("example", "placeholder"),
-             (ctx, arg) -> PlaceholderResult.value(Text.literal("Hello World!"))
+    Placeholders.registerCommon(
+             Identifier.fromNamespaceAndPath("example", "placeholder"),
+             (ctx, arg) -> PlaceholderResult.value(Component.literal("Hello World!"))
     );
     ```
 
 === "Kotlin"
 
     ```kotlin
-    Placeholders.register(Identifier("example", "placeholder")) { ctx, arg ->
-        PlaceholderResult.value(Text.literal("Hello World!"))
+    Placeholders.registerCommon(Identifier.fromNamespaceAndPath("example", "placeholder")) { ctx, arg ->
+        PlaceholderResult.value(Component.literal("Hello World!"))
     }
     ```
 
 ## Using the context
 
-`PlaceholderContext` object passed to placeholder contains allows retrieving the server, the `ServerCommandSource`, the source world (if
-exist), the source `ServerPlayerEntity` (if exist), the source `Entity` (if exists), and the source's `GameProfile` (if exists).
+`ServerPlaceholderContext` object passed to placeholder contains allows retrieving the server, the `ServerCommandSource`, the source world (if
+exist), the source `ServerPlayer` (if exist) and everything PlaceholderContext does.
+It extends the `PlaceholderContext`, which works on both server and client and provides the source `Entity` (if exists), the source `Player` (if exist), and the source's `GameProfile` (if exists).
 
-It also includes few methods for checking if they are present, such as `hasWorld()`, `hasPlayer()`, `hasGameProfile()`, and `hasEntity()`.
+It also includes few methods for checking if they are present, such as `hasLevel()`, `hasPlayer()`, `hasGameProfile()`, and `hasEntity()`.
 
 Here is example for a placeholder, which requires a player:
 
 ===+ "Java"
 
     ```java
-    Placeholders.register(Identifier.of("player", "displayname"), (ctx, arg) -> {
+    Placeholders.registerCommon(Identifier.of("player", "displayname"), (ctx, arg) -> {
         if (!ctx.hasPlayer())
             return PlaceholderResult.invalid("No player!");
 
@@ -48,7 +52,7 @@ Here is example for a placeholder, which requires a player:
 === "Kotlin"
 
     ```kotlin
-    Placeholders.register(Identifier("player", "displayname")) { ctx, args ->
+    Placeholders.registerCommon(Identifier("player", "displayname")) { ctx, args ->
         if (!ctx.hasPlayer())
             return PlaceholderResult.invalid("No player!")
 
@@ -65,7 +69,7 @@ Argument itself is a string, so you can parse it in any way.
 ===+ "Java"
 
     ```java
-    PlaceholderAPI.register(Identifier.of("server", "name_from_uuid"), (ctx, arg) -> {
+    PlaceholderAPI.registerServer(Identifier.fromNamespaceAndPath("server", "name_from_uuid"), (ctx, arg) -> {
         if (arg == null)
             return PlaceholderResult.invalid("No argument!");
 
@@ -79,7 +83,7 @@ Argument itself is a string, so you can parse it in any way.
 === "Kotlin"
 
     ```kotlin
-    PlaceholderAPI.register(Identifier("server", "name_from_uuid")) { ctx, arg ->
+    PlaceholderAPI.registerServer(Identifier.fromNamespaceAndPath("server", "name_from_uuid")) { ctx, arg ->
         if (arg == null)
             return PlaceholderResult.invalid("No argument!")
 
@@ -96,8 +100,7 @@ Placeholders need to return instance of PlaceholderResult. It can be created by 
 
 If it was successful:
 
-- `#!java PlaceholderResult.value(Text text)` - Creates a value with text
-- `#!java PlaceholderResult.value(String text)` - Creates a value from string, by parsing it with TextParser
+- `#!java PlaceholderResult.value(Component text)` - Creates a value with text
 
 If it was invalid (for example, no player or argument):
 
