@@ -1,3 +1,7 @@
+!!! warn inline end
+
+    Outdated page! The cointents of this page refer to older release and are no longer 100% correct.
+
 # Parsing placeholders
 
 There are few ways (and types) of placeholders you can parse with PlaceholderAPI.

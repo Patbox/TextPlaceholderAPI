@@ -59,6 +59,10 @@ public interface TextNode {
     }
 
     static TextNode[] array(TextNode... nodes) {
+        if (nodes.length == 1 && nodes[0].getClass() == ParentNode.class) {
+            return ((ParentNode) nodes[0]).getChildren();
+        }
+
         return nodes;
     }
 

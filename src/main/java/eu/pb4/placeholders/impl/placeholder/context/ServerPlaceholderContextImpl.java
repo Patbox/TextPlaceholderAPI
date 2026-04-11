@@ -1,4 +1,4 @@
-package eu.pb4.placeholders.impl;
+package eu.pb4.placeholders.impl.placeholder.context;
 
 import com.mojang.authlib.GameProfile;
 import eu.pb4.placeholders.api.PlaceholderContext;

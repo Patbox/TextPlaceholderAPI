@@ -17,8 +17,6 @@ nav:
             - dev/adding-placeholders.md
             - dev/parsing-placeholders.md
             - dev/text-nodes.md
-            - dev/text-format.md
-
 
 theme:
     name:    material

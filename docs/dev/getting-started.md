@@ -38,7 +38,7 @@ Then you just declare it as dependency!
     dependencies {
         // You will have other dependencies here too
         
-        modImplementation include("eu.pb4:placeholder-api:[VERSION]")
+        implementation include("eu.pb4:placeholder-api:[VERSION]")
     }
     ```
 
@@ -48,7 +48,7 @@ Then you just declare it as dependency!
     dependencies {
         // You will have other dependencies here too
 
-        modImplementation(include("eu.pb4:placeholder-api:[VERSION]"))
+        implementation(include("eu.pb4:placeholder-api:[VERSION]"))
     }
     ```
 
