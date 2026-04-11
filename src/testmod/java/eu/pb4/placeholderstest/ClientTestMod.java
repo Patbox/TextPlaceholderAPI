@@ -27,7 +27,8 @@ public class ClientTestMod implements ClientModInitializer {
                             <rb>Hello world!</>
                             You are %player:head% %player:name%
                             <gr yellow gold>Position: %player:pos_x% %player:pos_y% %player:pos_z% in %player:biome%</>
-                            Time: %world:time%
+                            Game Time: %world:time%
+                            Real Time: %server:time%
                             """, ClientPlaceholderContext.get().asParserContext());
 
             var t = MultiLineLabel.create(Minecraft.getInstance().font, parsed);

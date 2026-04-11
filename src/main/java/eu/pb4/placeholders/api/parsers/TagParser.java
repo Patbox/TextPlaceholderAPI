@@ -19,14 +19,16 @@ import java.util.function.Function;
 public final class TagParser implements NodeParser, TagLikeWrapper {
     private final TagRegistry registry;
     private final TagLikeParser parser;
-    public static final TagParser DEFAULT = new TagParser(TagLikeParser.TAGS, TagRegistry.DEFAULT, ModernProvider::new);
-    public static final TagParser DEFAULT_SAFE = new TagParser(TagLikeParser.TAGS, TagRegistry.SAFE, ModernProvider::new);
     public static final TagParser QUICK_TEXT = new TagParser(TagLikeParser.TAGS, TagRegistry.DEFAULT, ModernProvider::new);
     public static final TagParser QUICK_TEXT_SAFE = new TagParser(TagLikeParser.TAGS, TagRegistry.SAFE, ModernProvider::new);
     public static final TagParser QUICK_TEXT_WITH_STF = new TagParser(TagLikeParser.TAGS_LENIENT, TagRegistry.DEFAULT, LenientProvider::new);
     public static final TagParser QUICK_TEXT_WITH_STF_SAFE = new TagParser(TagLikeParser.TAGS_LENIENT, TagRegistry.SAFE, LenientProvider::new);
     public static final TagParser SIMPLIFIED_TEXT_FORMAT = new TagParser(TagLikeParser.TAGS_LEGACY, TagRegistry.DEFAULT, LegacyProvider::new);
     public static final TagParser SIMPLIFIED_TEXT_FORMAT_SAFE = new TagParser(TagLikeParser.TAGS_LEGACY, TagRegistry.SAFE, LegacyProvider::new);
+
+    public static final TagParser DEFAULT = QUICK_TEXT;
+    public static final TagParser DEFAULT_SAFE = QUICK_TEXT_SAFE;
+
     private final TagLikeParser.Format format;
     private final Function<TagRegistry, TagLikeParser.Provider> providerCreator;
 

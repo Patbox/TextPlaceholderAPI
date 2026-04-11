@@ -66,13 +66,13 @@ public class ServerPlaceholders {
         });
 
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "time"), (ctx, arg) -> {
-            SimpleDateFormat format = new SimpleDateFormat(arg != null ? arg : "HH:mm:ss");
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "time"), (ctx, arg) -> {
+            SimpleDateFormat format = new SimpleDateFormat(arg != null && !arg.isBlank() ? arg : "HH:mm:ss");
             return PlaceholderResult.value(format.format(new Date(System.currentTimeMillis())));
         });
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "time_new"), (ctx, arg) -> {
-            var args = arg == null ? StringArgs.empty() : StringArgs.full(arg, ' ', ':');
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "time_new"), (ctx, arg) -> {
+            var args = arg == null || arg.isBlank() ? StringArgs.empty() : StringArgs.full(arg, ' ', ':');
             var format = DateTimeFormatter.ofPattern(args.get("format", "HH:mm:ss"));
             var date = args.get("zone") != null ? LocalDateTime.now(ZoneId.of(args.get("zone", ""))) : LocalDateTime.now();
             return PlaceholderResult.value(format.format(date));
@@ -109,7 +109,7 @@ public class ServerPlaceholders {
             return PlaceholderResult.value(metadata.description());
         });
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "mod_version"), (ctx, arg) -> {
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "mod_version"), (ctx, arg) -> {
             if (arg != null) {
                 var container = FabricLoader.getInstance().getModContainer(arg);
 
@@ -120,7 +120,7 @@ public class ServerPlaceholders {
             return PlaceholderResult.invalid("Invalid argument");
         });
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "mod_name"), (ctx, arg) -> {
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "mod_name"), (ctx, arg) -> {
             if (arg != null) {
                 var container = FabricLoader.getInstance().getModContainer(arg);
 
@@ -135,11 +135,11 @@ public class ServerPlaceholders {
             return PlaceholderResult.value(Component.literal(ctx.server().getServerModName()));
         });
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "mod_count"), (ctx, arg) -> {
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "mod_count"), (ctx, arg) -> {
             return PlaceholderResult.value(Component.literal("" + FabricLoader.getInstance().getAllMods().size()));
         });
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "mod_description"), (ctx, arg) -> {
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "mod_description"), (ctx, arg) -> {
             if (arg != null) {
                 var container = FabricLoader.getInstance().getModContainer(arg);
 
@@ -152,7 +152,7 @@ public class ServerPlaceholders {
 
         Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "name"), (ctx, arg) -> PlaceholderResult.value(ctx.server().name()));
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "used_ram"), (ctx, arg) -> {
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "used_ram"), (ctx, arg) -> {
             MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
             MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
 
@@ -161,7 +161,7 @@ public class ServerPlaceholders {
                     : String.format("%d", heapUsage.getUsed() / 1048576));
         });
 
-        Placeholders.registerServer(Identifier.fromNamespaceAndPath("server", "max_ram"), (ctx, arg) -> {
+        Placeholders.registerCommon(Identifier.fromNamespaceAndPath("server", "max_ram"), (ctx, arg) -> {
             MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
             MemoryUsage heapUsage = memoryMXBean.getHeapMemoryUsage();
 

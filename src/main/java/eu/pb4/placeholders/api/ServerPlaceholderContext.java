@@ -1,7 +1,7 @@
 package eu.pb4.placeholders.api;
 
 import com.mojang.authlib.GameProfile;
-import eu.pb4.placeholders.impl.ServerPlaceholderContextImpl;
+import eu.pb4.placeholders.impl.placeholder.context.ServerPlaceholderContextImpl;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -23,6 +23,14 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
 
     static ServerPlaceholderContext of(MinecraftServer server, ViewObject view) {
         return new ServerPlaceholderContextImpl(server, server::createCommandSourceStack, null, null, null, null, view);
+    }
+
+    static ServerPlaceholderContext of(ServerLevel level) {
+        return of(level, ViewObject.DEFAULT);
+    }
+
+    static ServerPlaceholderContext of(ServerLevel level, ViewObject view) {
+        return new ServerPlaceholderContextImpl(level.getServer(), level.getServer()::createCommandSourceStack, level, null, null, null, view);
     }
 
     static ServerPlaceholderContext of(GameProfile profile, MinecraftServer server) {

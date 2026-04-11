@@ -35,8 +35,12 @@ import java.util.function.Function;
 public final class BuiltinTags {
     public static final TextColor DEFAULT_COLOR = TextColor.fromLegacyFormat(ChatFormatting.WHITE);
 
+    public static final Map<String, TextColor> COLOR_ALIASES = new HashMap<>();
+
     public static void register() {
-        Function<String, TextColor> extenderColorResolver;
+        var EMPTY_ID = Identifier.fromNamespaceAndPath("", "");
+
+        var extenderColorResolver = DynamicColorNode.extendedTextColorParse(COLOR_ALIASES::get);
         {
             Map<ChatFormatting, List<String>> aliases = new HashMap<>();
             aliases.put(ChatFormatting.GOLD, List.of("orange"));
@@ -45,8 +49,6 @@ public final class BuiltinTags {
             aliases.put(ChatFormatting.DARK_PURPLE, List.of("purple"));
             aliases.put(ChatFormatting.DARK_GRAY, List.of("dark_grey"));
 
-            var alias2format = new HashMap<String, TextColor>();
-
             for (ChatFormatting formatting : ChatFormatting.values()) {
                 if (formatting.isFormat()) {
                     continue;
@@ -54,7 +56,7 @@ public final class BuiltinTags {
                 var alias = aliases.getOrDefault(formatting, List.of());
 
                 for (var x : alias) {
-                    alias2format.put(x, TextColor.fromLegacyFormat(formatting));
+                    COLOR_ALIASES.put(x, TextColor.fromLegacyFormat(formatting));
                 }
 
                 TagRegistry.registerDefault(
@@ -65,7 +67,6 @@ public final class BuiltinTags {
                         )
                 );
             }
-            extenderColorResolver = DynamicColorNode.extendedTextColorParse(alias2format::get);
         }
 
         {
@@ -186,7 +187,9 @@ public final class BuiltinTags {
                                         }
                                     }
                                 }
-                                return new FontNode(nodes, Identifier.tryParse(val));
+                                var id = Identifier.tryParse(val);
+
+                                return new FontNode(nodes, id != null ? id : EMPTY_ID);
                             }
                     )
             );

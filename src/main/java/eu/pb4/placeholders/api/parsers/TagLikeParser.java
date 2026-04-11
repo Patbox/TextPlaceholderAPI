@@ -65,7 +65,8 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
         for (var entry : formatsAndProviders.entrySet()) {
             list.add(Pair.of(entry));
         }
-        return new MultiTagLikeParser(list.toArray(new Pair[0]));
+        //noinspection SuspiciousToArrayCall,unchecked
+        return new MultiTagLikeParser(list.toArray(Pair[]::new));
     }
 
     @Override
@@ -76,9 +77,9 @@ public abstract class TagLikeParser implements NodeParser, TagLikeWrapper {
     }
 
     private void parse(TextNode node, Context context) {
-        if (node instanceof LiteralNode literal) {
-            context.input = literal.value();
-            this.handleLiteral(literal.value(), context);
+        if (node instanceof LiteralNode(String value)) {
+            context.input = value;
+            this.handleLiteral(value, context);
         } else if (node instanceof TranslatedNode translatedNode) {
             context.addNode(translatedNode.transform(this));
         } else if (node instanceof ParentTextNode parent) {

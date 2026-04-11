@@ -1,6 +1,7 @@
 package eu.pb4.placeholders.impl.client;
 
 import com.mojang.authlib.GameProfile;
+import eu.pb4.placeholders.api.PlaceholderContext;
 import eu.pb4.placeholders.api.client.ClientPlaceholderContext;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -16,6 +17,10 @@ import org.jspecify.annotations.Nullable;
 
 @Environment(EnvType.CLIENT)
 public record ClientPlaceholderContextImpl(Minecraft minecraft, ViewObject view) implements ClientPlaceholderContext {
+    public static PlaceholderContext of(ViewObject view) {
+        return new ClientPlaceholderContextImpl(Minecraft.getInstance(), view);
+    }
+
     @Override
     public ClientPlaceholderContext withView(ViewObject view) {
         return new ClientPlaceholderContextImpl(this.minecraft, view);
