@@ -17,6 +17,7 @@ import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.StringArgOps;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.*;
@@ -50,18 +51,21 @@ public final class BuiltinTags {
             aliases.put(ChatFormatting.DARK_GRAY, List.of("dark_grey"));
 
             for (ChatFormatting formatting : ChatFormatting.values()) {
-                if (formatting.isFormat()) {
+                var color = TextColor.fromLegacyFormat(formatting);
+                if (formatting != ChatFormatting.RESET && color == null) {
                     continue;
                 }
                 var alias = aliases.getOrDefault(formatting, List.of());
 
                 for (var x : alias) {
-                    COLOR_ALIASES.put(x, TextColor.fromLegacyFormat(formatting));
+                    if (color != null) {
+                        COLOR_ALIASES.put(x, color);
+                    }
                 }
 
                 TagRegistry.registerDefault(
                         SimpleTags.color(
-                                formatting.getName(),
+                                formatting.name().toLowerCase(Locale.ROOT),
                                 alias,
                                 formatting
                         )
@@ -497,9 +501,11 @@ public final class BuiltinTags {
                                             case "show_entity", "entity" -> {
                                                 var entType = data.getNext("entity", "");
                                                 var uuid = data.getNext("uuid", Util.NIL_UUID.toString());
+                                                var entityId = Identifier.tryParse(entType);
+                                                var entityType = entityId != null && BuiltInRegistries.ENTITY_TYPE.containsKey(entityId) ? BuiltInRegistries.ENTITY_TYPE.getValue(entityId) : BuiltInRegistries.ENTITY_TYPE.getValue(Identifier.fromNamespaceAndPath("minecraft", "pig"));
 
                                                 return new HoverNode<>(nodes, HoverNode.Action.ENTITY_NODE,
-                                                        new HoverNode.EntityNodeContent(EntityType.byString(entType).orElse(EntityType.PIG),
+                                                    new HoverNode.EntityNodeContent(entityType,
                                                                 UUID.fromString(uuid),
                                                                 new ParentNode(parser.parseNode(data.get("name", 3, "")))
                                                         )

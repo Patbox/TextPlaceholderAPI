@@ -22,6 +22,7 @@ import net.minecraft.world.item.component.ResolvableProfile;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.ReadOnlyScoreInfo;
+import net.minecraft.world.scores.TeamColor;
 import net.minecraft.world.waypoints.WaypointTransmitter;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 
@@ -544,7 +545,7 @@ public class PlayerPlaceholders {
         Placeholders.registerCommon(Identifier.fromNamespaceAndPath("player", "team_color"), (ctx, arg) -> {
             if (ctx.hasEntity()) {
                 var team = ctx.entity().getTeam();
-                return PlaceholderResult.value(team == null ? (arg != null ? Component.literal(arg) : Component.literal("white")) : Component.literal(team.getColor().getSerializedName()));
+                return PlaceholderResult.value(team == null ? (arg != null ? Component.literal(arg) : Component.literal("white")) : Component.literal(team.getColor().map(TeamColor::getSerializedName).orElse("white")));
             } else {
                 return arg != null ? PlaceholderResult.value(Component.literal(arg)) : PlaceholderResult.invalid("No player!");
             }

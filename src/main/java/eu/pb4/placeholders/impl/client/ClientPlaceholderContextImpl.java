@@ -61,11 +61,11 @@ public record ClientPlaceholderContextImpl(Minecraft minecraft, ViewObject view)
 
     @Override
     public @Nullable BlockPos blockPosition() {
-        return this.minecraft.gameRenderer.getMainCamera().blockPosition();
+        return this.minecraft.gameRenderer.mainCamera().blockPosition();
     }
 
     @Override
     public @Nullable Vec3 position() {
-        return this.minecraft.gameRenderer.getMainCamera().position();
+        return this.minecraft.gameRenderer.mainCamera().position();
     }
 }

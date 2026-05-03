@@ -6,6 +6,7 @@ import java.util.Arrays;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 
 
 public final class FormattingNode extends SimpleStylingNode implements DynamicShadowNode.SimpleColoredTransformer {
@@ -41,9 +42,9 @@ public final class FormattingNode extends SimpleStylingNode implements DynamicSh
     @Override
     public int getDefaultShadowColor(Component out, float scale, float alpha, ParserContext context) {
         for (var form : formatting) {
-            if (form.isColor()) {
-                //noinspection DataFlowIssue
-                return DynamicShadowNode.modifiedColor(form.getColor(), scale, alpha);
+            var color = TextColor.fromLegacyFormat(form);
+            if (color != null) {
+                return DynamicShadowNode.modifiedColor(color.getValue(), scale, alpha);
             }
         }
         return -1;
@@ -52,7 +53,7 @@ public final class FormattingNode extends SimpleStylingNode implements DynamicSh
     @Override
     public boolean hasShadowColor(ParserContext context) {
         for (var form : formatting) {
-            if (form.isColor()) {
+            if (TextColor.fromLegacyFormat(form) != null) {
                 return true;
             }
         }
