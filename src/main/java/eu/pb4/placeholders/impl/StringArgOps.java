@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import eu.pb4.placeholders.api.arguments.SimpleArguments;
 import eu.pb4.placeholders.api.arguments.StringArgs;
 
 import java.util.stream.Stream;
@@ -36,6 +37,16 @@ public class StringArgOps implements DynamicOps<Either<String, StringArgs>> {
     @Override
     public Either<String, StringArgs> createNumeric(Number i) {
         return Either.left(i.toString());
+    }
+
+    @Override
+    public DataResult<Boolean> getBooleanValue(Either<String, StringArgs> stringStringArgsEither) {
+        return stringStringArgsEither.left().map(SimpleArguments::bool).map(DataResult::success).orElse(DataResult.error(() -> stringStringArgsEither + " is not a boolean value!"));
+    }
+
+    @Override
+    public Either<String, StringArgs> createBoolean(boolean b) {
+        return Either.left(String.valueOf(b));
     }
 
     @Override

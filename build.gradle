@@ -176,6 +176,8 @@ curseforge {
 			changelogType = "markdown"
 			addGameVersion((project.minecraft_version.contains("-") ? ((String) project.minecraft_version.split("-")[0] + "-snapshot") : project.minecraft_version))
 			addGameVersion "Fabric"
+			addGameVersion "Server"
+			addGameVersion "Client"
 
 			for (String a : project.mc_extra_supported.split(",")) {
 				if (!a.strip().isEmpty()) {

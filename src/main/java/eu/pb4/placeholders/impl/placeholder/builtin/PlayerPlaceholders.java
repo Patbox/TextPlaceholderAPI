@@ -544,7 +544,7 @@ public class PlayerPlaceholders {
         Placeholders.registerCommon(Identifier.fromNamespaceAndPath("player", "team_color"), (ctx, arg) -> {
             if (ctx.hasEntity()) {
                 var team = ctx.entity().getTeam();
-                return PlaceholderResult.value(team == null ? (arg != null ? Component.literal(arg) : Component.literal("white")) : Component.literal(team.getColor().getSerializedName()));
+                return PlaceholderResult.value(team == null && team.getColor().isPresent() ? (arg != null ? Component.literal(arg) : Component.literal("white")) : Component.literal(team.getColor().orElseThrow().getSerializedName()));
             } else {
                 return arg != null ? PlaceholderResult.value(Component.literal(arg)) : PlaceholderResult.invalid("No player!");
             }

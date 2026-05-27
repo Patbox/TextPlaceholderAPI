@@ -17,6 +17,7 @@ import eu.pb4.placeholders.api.parsers.tag.TextTag;
 import eu.pb4.placeholders.impl.GeneralUtils;
 import eu.pb4.placeholders.impl.StringArgOps;
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.*;
@@ -24,7 +25,7 @@ import net.minecraft.network.chat.contents.objects.AtlasSprite;
 import net.minecraft.network.chat.contents.objects.PlayerSprite;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Util;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.component.ResolvableProfile;
 import org.jetbrains.annotations.ApiStatus;
 
@@ -50,18 +51,20 @@ public final class BuiltinTags {
             aliases.put(ChatFormatting.DARK_GRAY, List.of("dark_grey"));
 
             for (ChatFormatting formatting : ChatFormatting.values()) {
-                if (formatting.isFormat()) {
+                // Todo, replace it by directly requesting from TextColor
+                var color = TextColor.fromLegacyFormat(formatting);
+                if (color == null) {
                     continue;
                 }
                 var alias = aliases.getOrDefault(formatting, List.of());
 
                 for (var x : alias) {
-                    COLOR_ALIASES.put(x, TextColor.fromLegacyFormat(formatting));
+                    COLOR_ALIASES.put(x, color);
                 }
 
                 TagRegistry.registerDefault(
                         SimpleTags.color(
-                                formatting.getName(),
+                                formatting.name().toLowerCase(Locale.ROOT),
                                 alias,
                                 formatting
                         )
@@ -495,11 +498,11 @@ public final class BuiltinTags {
                                                 );
                                             }
                                             case "show_entity", "entity" -> {
-                                                var entType = data.getNext("entity", "");
+                                                var entType = Identifier.tryParse(data.getNext("entity", ""));
                                                 var uuid = data.getNext("uuid", Util.NIL_UUID.toString());
 
                                                 return new HoverNode<>(nodes, HoverNode.Action.ENTITY_NODE,
-                                                        new HoverNode.EntityNodeContent(EntityType.byString(entType).orElse(EntityType.PIG),
+                                                        new HoverNode.EntityNodeContent(BuiltInRegistries.ENTITY_TYPE.getOptional(entType).orElse(EntityTypes.PIG),
                                                                 UUID.fromString(uuid),
                                                                 new ParentNode(parser.parseNode(data.get("name", 3, "")))
                                                         )
