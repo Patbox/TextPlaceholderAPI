@@ -39,7 +39,7 @@ public interface ServerPlaceholderContext extends PlaceholderContext {
 
     static ServerPlaceholderContext of(GameProfile profile, MinecraftServer server, ViewObject view) {
         var name = profile.name() != null ? profile.name() : profile.id().toString();
-        return new ServerPlaceholderContextImpl(server, () -> new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, server.overworld(), server.getProfilePermissions(new NameAndId(profile)), name, Component.literal(name), server, null), null, null, null, profile, view);
+        return new ServerPlaceholderContextImpl(server, () -> new CommandSourceStack(CommandSource.NULL, Vec3.ZERO, Vec2.ZERO, server.overworld(), server.getProfilePermissions(new NameAndId(profile)), Component.literal(name), server), null, null, null, profile, view);
     }
 
     static ServerPlaceholderContext of(ServerPlayer player) {
