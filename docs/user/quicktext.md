@@ -205,7 +205,7 @@ There 2 types of gradients:
 - `#!xml <hard_gradient [color 1] [color 2] ...>`/`#!xml <hgr [color 1] [color 2] ...>` - I can take multiple colors to move between them
   without mixing them.
 - `#!xml <rainbow [frequency] [saturation] [offset]>`/`<rainbow f:[frequency] s:[saturation] o:[offset]>`/`#!xml <rb [...]>` - It's simple rainbow gradient. All arguments are
-  optional (`#!xml <ranbow>` is still valid) and they take numbers between 0 and 1 (`0.3` for example)
+  optional (`#!xml <rainbow>` is still valid) and they take numbers between 0 and 1 (`0.3` for example)
 
 ### Clear
 
